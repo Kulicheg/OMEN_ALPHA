@@ -6,5 +6,5 @@ Memory Map
 3227H-322FH	Filler
 8000H-80FFH	256 bytes for system needs
 8100H-EFFFH	Basic Area (if basic loaded)
-EFFFH-FFFFH	Machine code area
+F000H-FFFFH	Machine code area
 
