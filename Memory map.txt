@@ -1,0 +1,10 @@
+;27.12.2019
+Memory Map
+0000H-1072H	Omen Monitor4
+1073H-107FH	Filler
+1080H-3226H	IMSAI 8K Basic
+3227H-322FH	Filler
+8000H-80FFH	256 bytes for system needs
+8100H-EFFFH	Basic Area (if basic loaded)
+EFFFH-FFFFH	Machine code area
+
