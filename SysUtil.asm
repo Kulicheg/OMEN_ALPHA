@@ -4,7 +4,7 @@
 8100H:      JMP     START 
 8110H:      JMP     CLEARSCR 
 8113H:      JMP     SETCURSOR
-8116H       JMP     CLEARMEM
+8116H:       JMP     CLEARMEM
 ; 
 ; 
 START:               
