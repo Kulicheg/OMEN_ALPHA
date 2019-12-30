@@ -3,7 +3,8 @@
 ; 
 8100H:      JMP     START 
 8110H:      JMP     CLEARSCR 
-8113H:      JMP     SETCURSOR 
+8113H:      JMP     SETCURSOR
+8116H       JMP     CLEARMEM
 ; 
 ; 
 START:               
@@ -123,8 +124,31 @@ HELLO2:
             RNZ      
             INX     H 
             JMP     HELLO2 
-; 
-; 
+
+
+CLEARMEM:               ;Clear memory from RAMSTART to RAMEND with 00h
+                        ;80E0H	RAMSTART(32992)
+	            ;80E2H	RAMEND (32994)
+            LHLD    32992
+CLEARMEM2:  MVI M,0
+            INX H
+            LDA 32994 
+            XRA H
+            JNZ CLEARMEM2
+            LDA 32995
+            XRA L
+            JNZ CLEARMEM2
+            RET
+            
+            
+            
+
+
+
+
+
+
+;
 ; 
 ; 
 HELLOSTR:   .ISTR   "Hello this cruel world!",0Dh,0Ah 
