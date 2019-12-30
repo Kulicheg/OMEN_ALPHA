@@ -140,7 +140,7 @@ CLEARMEM2:  MVI M,0
             XRA H
             JNZ CLEARMEM2
             
-            LDA 32994;		;RAMEND(L)
+            LDA 32994		;RAMEND(L)
             XRA L
             JNZ CLEARMEM2
             MVI M,0
