@@ -13,11 +13,18 @@ START:
             OUT     222 
 
             CALL    CLEARSCR 
+            
             MVI     A,20
             LXI     H,33010     ;cycle try PUSH POP
-            MOV     M,A         ;A
+            MOV     M,A
+            
 
-LOOP:       LXI     H,33009     ;X
+LOOP:       
+            
+            LXI     H,33010     ;cycle
+            MOV     A,M         ;A
+            
+            LXI     H,33009     ;X
             MOV     M,A         ;A
             LXI     H,33008     ;Y
             MOV     M,A         ;A
@@ -28,6 +35,9 @@ LOOP:       LXI     H,33009     ;X
             LXI     H,33010     ;cycle
             MOV     A,M         ;A
             DCR     A 
+            LXI     H,33010     ;cycle try PUSH POP
+            MOV     M,A
+            
             JNZ     LOOP 
 ; 
             RET
