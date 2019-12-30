@@ -5,6 +5,10 @@ Memory Map
 1080H-3226H	IMSAI 8K Basic
 3227H-322FH	Filler
 8000H-80FFH	256 bytes for system needs
+80E0H-80EFH	System variables
+	80E0H	RAMSTART
+	80E2H	RAMEND
+	
 80F0H-80FFH Area for Draw procedures
 	80F0H	X
 	80F1H	Y
