@@ -4,7 +4,7 @@
 8100H:      JMP     START 
 8110H:      JMP     CLEARSCR 
 8113H:      JMP     SETCURSOR
-8116H:       JMP     CLEARMEM
+8116H:      JMP     CLEARMEM
 ; 
 ; 
 START:               
@@ -128,7 +128,7 @@ HELLO2:
 
          
             
- CLEARMEM:               	;Clear memory from RAMSTART to RAMEND with 00h
+CLEARMEM:               	;Clear memory from RAMSTART to RAMEND with 00h
                         	;80E0H	RAMSTART(32992)
 	            		;80E2H	RAMEND (32994)
             
