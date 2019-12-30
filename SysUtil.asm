@@ -1,15 +1,23 @@
 ; 
             .ORG    8100H 
 ; 
-8100H:      JMP     START 
-8110H:      JMP     CLEARSCR 
-8113H:      JMP     SETCURSOR
-8116H:      JMP     CLEARMEM
+8100H:      CALL     START 
+			RET
+8110H:      CALL     CLEARSCR 
+			RET
+8113H:      CALL     SETCURSOR
+			RET
+8116H:      CALL     CLEARMEM
+			RET
 ; 
 ; 
 START:               
-; 
-; 
+
+			LHI 	X, 33792;		8400
+			SHLD 	32992;			RAMSTART
+			LHI 	X, 64512;		FC00		
+			SHLD 	32994;			RAMEND
+			
             MVI     A,21        ;ACIA init
             OUT     222 
 
@@ -127,12 +135,12 @@ TXTOUT:     CALL    WAITOUT
             
 CLEARMEM:               	;Clear memory from RAMSTART to RAMEND with 00h
                         	;80E0H	RAMSTART(32992)
-	            		;80E2H	RAMEND (32994)
+							;80E2H	RAMEND (32994)
             
-	    LHLD    32992	;RAMSTART
+	    LHLD    32992		;RAMSTART
 CLEARMEM2:  MVI M,0
             
-            LDA 32995;		;RAMEND(H)
+            LDA 32995		;RAMEND(H)
             INX H
             XRA H
             JNZ CLEARMEM2
