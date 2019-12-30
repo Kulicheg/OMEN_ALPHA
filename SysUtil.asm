@@ -126,22 +126,25 @@ HELLO2:
             JMP     HELLO2 
 
 
-CLEARMEM:               ;Clear memory from RAMSTART to RAMEND with 00h
-                        ;80E0H	RAMSTART(32992)
-	            ;80E2H	RAMEND (32994)
-            LHLD    32992
+         
+            
+ CLEARMEM:               	;Clear memory from RAMSTART to RAMEND with 00h
+                        	;80E0H	RAMSTART(32992)
+	            		;80E2H	RAMEND (32994)
+            
+	    LHLD    32992	;RAMSTART
 CLEARMEM2:  MVI M,0
+            
+            LDA 32995;		;RAMEND(H)
             INX H
-            LDA 32994 
             XRA H
             JNZ CLEARMEM2
-            LDA 32995
+            
+            LDA 32994;		;RAMEND(L)
             XRA L
             JNZ CLEARMEM2
-            RET
-            
-            
-            
+            MVI M,0
+            RET           
 
 
 
