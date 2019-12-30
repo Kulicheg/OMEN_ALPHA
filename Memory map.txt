@@ -5,6 +5,17 @@ Memory Map
 1080H-3226H	IMSAI 8K Basic
 3227H-322FH	Filler
 8000H-80FFH	256 bytes for system needs
+80F0H-80FFH Area for Draw procedures
+	80F0H	X
+	80F1H	Y
+	80F2H	W
+	80F3H	H
+	80F4H	FC
+	80F5H	BC
+	80F6H	char
+	
+	
+	
 8100H-EFFFH	Basic Area (if basic loaded)
 F000H-FFFFH	Machine code area
 
