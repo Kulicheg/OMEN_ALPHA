@@ -31,7 +31,8 @@ LOOP:
             MOV     M,A         ;A
             CALL    SETCURSOR 
 
-            CALL    HELLO 
+            LXI     H,HELLOSTR 
+	    CALL    TXTOUT
 ; 
             LXI     H,33010     ;cycle
             MOV     A,M         ;A
@@ -111,11 +112,7 @@ CLEARSCR2:
 ; 
 ; 
 ; 
-HELLO:               
-            LXI     H,HELLOSTR 
-; 
-HELLO2:              
-            CALL    WAITOUT 
+TXTOUT:     CALL    WAITOUT 
             MOV     A,M 
             ANI     7Fh 
             OUT     223 
@@ -123,7 +120,7 @@ HELLO2:
             ANI     80h 
             RNZ      
             INX     H 
-            JMP     HELLO2 
+            JMP     TXTOUT 
 
 
          
