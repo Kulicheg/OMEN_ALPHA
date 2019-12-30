@@ -9,26 +9,29 @@
 START:               
 ; 
 ; 
-            MVI     A,21 ;ACIA init
+            MVI     A,21        ;ACIA init
             OUT     222 
-; 
-; 
+
             CALL    CLEARSCR 
-; 
-LOOP:       MVI     A,20 
-            LXI     H,33009 ;X
-;MVI 	M, 10		;10
-            MOV     M,A ;A
-            LXI     H,33008 ;Y
-;MVI 	M, A		;5
-            MOV     M,A ;A
+            MVI     A,20
+            LXI     H,33010     ;cycle try PUSH POP
+            MOV     M,A         ;A
+
+LOOP:       LXI     H,33009     ;X
+            MOV     M,A         ;A
+            LXI     H,33008     ;Y
+            MOV     M,A         ;A
             CALL    SETCURSOR 
+
             CALL    HELLO 
 ; 
+            LXI     H,33010     ;cycle
+            MOV     A,M         ;A
             DCR     A 
             JNZ     LOOP 
 ; 
-            RET      
+            RET
+            
 ; 
 ; 
 ; 
