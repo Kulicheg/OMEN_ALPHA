@@ -25,7 +25,9 @@ START:
             LXI     H,33014 ;Save CHAR
             MVI     M,46 
 LOOP:                
-            CALL    RECTDRAW 
+            CALL    RECTDRAW
+            
+            CALL HOMESCR
             RET      
 ; 
 SETCURSOR:           
@@ -71,6 +73,12 @@ WAITOUT:    IN      222
             RET      
 ; 
 ; 
+
+HOMESCR: 
+            LXI     H,HOMESTR 
+            CALL    TXTOUT
+            RET
+
 CLEARSCR:            
             LXI     H,CLSSTR 
 ; 
@@ -128,7 +136,7 @@ COLUMNS:    CALL    WAITOUT
             DCR     C 
             RZ       
             LXI     H,33009
-            DCR M
+            INR     M
             CALL    SETCURSOR 
             LXI     H,33010 ;Load W
             MOV     B,M 
@@ -164,12 +172,13 @@ CLEARMEM2:  MVI     M,0
 ; 
 ; 
 ; 
-HELLOSTR:   .ISTR   "Hello this cruel world!",0Dh,0Ah 
+HELLOSTR:       .ISTR   "Hello this cruel world!",0Dh,0Ah 
 ; 
-CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H" ;,0Ah
+CLSSTR:         .ISTR   1Bh,"[2J",1Bh,"[H" ;,0Ah
 ; 
-SETCURSORSTR: .ISTR 1Bh,"[00;00H" ;,0Ah ;
+SETCURSORSTR:   .ISTR   1Bh,"[00;00H" ;,0Ah ;
 ; 
+HOMESTR:        .ISTR   1Bh,"[H"
 ; 
 ; 
 ; 
