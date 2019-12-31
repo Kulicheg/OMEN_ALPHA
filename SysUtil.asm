@@ -1,55 +1,32 @@
             .ORG    8100H 
 ; 
 START:               
- 
+; 
             LXI     H,33792 ;		    8400
-            SHLD    32992   ;			RAMSTART
+            SHLD    32992 ;			RAMSTART
             LXI     H,64512 ;		    FC00		
-            SHLD    32994   ;			RAMEND
- 
-            CALL    CLEARMEM
+            SHLD    32994 ;			RAMEND
+; 
+            CALL    CLEARMEM 
 ; 
             MVI     A,21 ;ACIA init
             OUT     222 
 ; 
             CALL    CLEARSCR 
 ; 
-            MVI     A,24 
-            LXI     H,33006 ;BACKUP A
-            MOV     M,A 
-
-            LXI     H,33014 ;Save CHAR
-            MVI     A,46 
-            MOV     M,A 
- 
-LOOP:                
-; 
-            LXI     H,33006 ;RESTORE A
-            MOV     A,M ;A
+            LXI     H,33008 ;Save X
+            MVI     M,10 
+            LXI     H,33009 ;Save Y
+            MVI     M,5 
             LXI     H,33010 ;Save W
-            MOV     M,A 
-            LXI     H,33008 ;Save Y
-            MOV     M,A 
-            LXI     H,33009 ;Save X
-            MOV     M,A
-            
-; 
-; 
+            MVI     M,10 
+            LXI     H,33011 ;Save H
+            MVI     M,5 
+            LXI     H,33014 ;Save CHAR
+            MVI     M,46 
+LOOP:                
             CALL    RECTDRAW 
-; 
-            LXI     H,33006 ;RESTORE A
-            MOV     A,M ;A
-            DCR     A 
-            LXI     H,33006 ;BACKUP A
-            MOV     M,A 
-            JNZ     LOOP 
-; 
             RET      
-; 
-; 
-; 
-; 
-; 
 ; 
 SETCURSOR:           
 ; 
@@ -127,28 +104,35 @@ TXTOUT:     CALL    WAITOUT
 ; 
 ; 
 RECTDRAW:            ;Draws rectangle
-	                        ;Y(33008)
-                            ;80F1H	X(33009)
-                            ;80F2H	W(33010)
-                            ;80F3H	H
-                            ;80F4H	FC
-                            ;80F5H	BC
-                            ;80F6H	char(33014)
+;Y(33008)
+;80F0H	X(33008)
+;80F1H	Y(33009)
+;80F2H	W(33010)
+;80F3H	H(33011)
+;80F4H	FC
+;80F5H	BC
+;80F6H	char(33014)
 ; 
             CALL    SETCURSOR 
             LXI     H,33010 ;Load W
             MOV     B,M 
+            LXI     H,33011 ;Load H
+            MOV     C,M 
 ; 
 COLUMNS:    CALL    WAITOUT 
-            LXI     H,33014 ;Load char
+            LXI     H,33014 ;Load char 2do speedup
             MOV     A,M 
             OUT     223 
             DCR     B 
             JNZ     COLUMNS 
-            RET      
-; 
-; 
-; 
+            DCR     C 
+            RZ       
+            LXI     H,33009
+            DCR M
+            CALL    SETCURSOR 
+            LXI     H,33010 ;Load W
+            MOV     B,M 
+            JMP     COLUMNS 
 ; 
 ; 
 ; 
@@ -343,5 +327,6 @@ CNHL:
 ; 
 ; 
 ; 
-
+; 
+; 
 
