@@ -1,57 +1,51 @@
-; 
             .ORG    8100H 
 ; 
-8100H:      CALL     START 
-			RET
-8110H:      CALL     CLEARSCR 
-			RET
-8113H:      CALL     SETCURSOR
-			RET
-8116H:      CALL     CLEARMEM
-			RET
-; 
-; 
 START:               
-
-			LHI 	X, 33792;		8400
-			SHLD 	32992;			RAMSTART
-			LHI 	X, 64512;		FC00		
-			SHLD 	32994;			RAMEND
-			
-            MVI     A,21        ;ACIA init
-            OUT     222 
-
-            CALL    CLEARSCR 
-            
-            MVI     A,20
-            LXI     H,33010     ;cycle try PUSH POP
-            MOV     M,A
-            
-
-LOOP:       
-            
-            LXI     H,33010     ;cycle
-            MOV     A,M         ;A
-            
-            LXI     H,33009     ;X
-            MOV     M,A         ;A
-            LXI     H,33008     ;Y
-            MOV     M,A         ;A
-            CALL    SETCURSOR 
-
-            LXI     H,HELLOSTR 
-	    CALL    TXTOUT
+ 
+            LXI     H,33792 ;		    8400
+            SHLD    32992   ;			RAMSTART
+            LXI     H,64512 ;		    FC00		
+            SHLD    32994   ;			RAMEND
+ 
+            CALL    CLEARMEM
 ; 
-            LXI     H,33010     ;cycle
-            MOV     A,M         ;A
-            DCR     A 
-            LXI     H,33010     ;cycle try PUSH POP
+            MVI     A,21 ;ACIA init
+            OUT     222 
+; 
+            CALL    CLEARSCR 
+; 
+            MVI     A,24 
+            LXI     H,33006 ;BACKUP A
+            MOV     M,A 
+
+            LXI     H,33014 ;Save CHAR
+            MVI     A,46 
+            MOV     M,A 
+ 
+LOOP:                
+; 
+            LXI     H,33006 ;RESTORE A
+            MOV     A,M ;A
+            LXI     H,33010 ;Save W
+            MOV     M,A 
+            LXI     H,33008 ;Save Y
+            MOV     M,A 
+            LXI     H,33009 ;Save X
             MOV     M,A
             
+; 
+; 
+            CALL    RECTDRAW 
+; 
+            LXI     H,33006 ;RESTORE A
+            MOV     A,M ;A
+            DCR     A 
+            LXI     H,33006 ;BACKUP A
+            MOV     M,A 
             JNZ     LOOP 
 ; 
-            RET
-            
+            RET      
+; 
 ; 
 ; 
 ; 
@@ -129,41 +123,68 @@ TXTOUT:     CALL    WAITOUT
             RNZ      
             INX     H 
             JMP     TXTOUT 
-
-
-         
-            
-CLEARMEM:               	;Clear memory from RAMSTART to RAMEND with 00h
-                        	;80E0H	RAMSTART(32992)
-							;80E2H	RAMEND (32994)
-            
-	    LHLD    32992		;RAMSTART
-CLEARMEM2:  MVI M,0
-            
-            LDA 32995		;RAMEND(H)
-            INX H
-            XRA H
-            JNZ CLEARMEM2
-            
-            LDA 32994		;RAMEND(L)
-            XRA L
-            JNZ CLEARMEM2
-            MVI M,0
-            RET           
-
-
-
-
-
-
-;
+; 
+; 
+; 
+RECTDRAW:            ;Draws rectangle
+	                        ;Y(33008)
+                            ;80F1H	X(33009)
+                            ;80F2H	W(33010)
+                            ;80F3H	H
+                            ;80F4H	FC
+                            ;80F5H	BC
+                            ;80F6H	char(33014)
+; 
+            CALL    SETCURSOR 
+            LXI     H,33010 ;Load W
+            MOV     B,M 
+; 
+COLUMNS:    CALL    WAITOUT 
+            LXI     H,33014 ;Load char
+            MOV     A,M 
+            OUT     223 
+            DCR     B 
+            JNZ     COLUMNS 
+            RET      
+; 
+; 
+; 
+; 
+; 
+; 
+            RET      
+; 
+CLEARMEM:            ;Clear memory from RAMSTART to RAMEND with 00h
+;80E0H	RAMSTART(32992)
+;80E2H	RAMEND (32994)
+; 
+            LHLD    32992 ;RAMSTART
+CLEARMEM2:  MVI     M,0 
+; 
+            LDA     32995 ;RAMEND(H)
+            INX     H 
+            XRA     H 
+            JNZ     CLEARMEM2 
+; 
+            LDA     32994 ;RAMEND(L)
+            XRA     L 
+            JNZ     CLEARMEM2 
+            MVI     M,0 
+            RET      
+; 
+; 
+; 
+; 
+; 
+; 
+; 
 ; 
 ; 
 HELLOSTR:   .ISTR   "Hello this cruel world!",0Dh,0Ah 
 ; 
-CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H" ;,0Ah 
+CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H" ;,0Ah
 ; 
-SETCURSORSTR: .ISTR 1Bh,"[00;00H" ;,0Ah ; 
+SETCURSORSTR: .ISTR 1Bh,"[00;00H" ;,0Ah ;
 ; 
 ; 
 ; 
@@ -321,4 +342,6 @@ CNHL:
 ; 
 ; 
 ; 
+; 
+
 
