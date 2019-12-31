@@ -25,9 +25,37 @@ START:
             LXI     H,33014 ;Save CHAR
             MVI     M,46 
 LOOP:                
-            CALL    RECTDRAW
             
-            CALL HOMESCR
+            LXI     H,33008 ;Save X
+            MVI     M,1 
+            LXI     H,33009 ;Save Y
+            MVI     M,1 
+            LXI     H,33010 ;Save W
+            MVI     M,80 
+            LXI     H,33011 ;Save H
+            MVI     M,25 
+            LXI     H,33014 ;Save CHAR
+            MVI     M,46             
+            CALL RECTDRAW 
+            
+LXI     H,33008 ;Save X
+            MVI     M,1 
+            LXI     H,33009 ;Save Y
+            MVI     M,1 
+            LXI     H,33010 ;Save W
+            MVI     M,80 
+            LXI     H,33011 ;Save H
+            MVI     M,25 
+            LXI     H,33014 ;Save CHAR
+            MVI     M,32             
+            CALL RECTDRAW
+            
+            JMP LOOP
+            
+            
+            
+            
+           ; CALL    HOMESCR
             RET      
 ; 
 SETCURSOR:           
