@@ -5,18 +5,19 @@ Memory Map
 1080H-3226H	IMSAI 8K Basic
 3227H-322FH	Filler
 8000H-80FFH	256 bytes for system needs
+8080H-80DFFH	Strings for ROM Extension
+
 80E0H-80EFH	System variables
 	80E0H	RAMSTART
 	80E2H	RAMEND
-	
 80F0H-80FFH Area for Draw procedures
-	80F0H	X
-	80F1H	Y
-	80F2H	W
-	80F3H	H
-	80F4H	FC
-	80F5H	BC
-	80F6H	char
+XPOS        EQU     80F0H 
+YPOS        EQU     80F1H
+WPOS        EQU     80F2H 
+HPOS        EQU     80F3H
+ATTR        EQU     80F4H
+ATTR2       EQU     80F5H ; Unused reserved for attrib2
+FILLCHR     EQU     80F6H 
 	
 	
 	
