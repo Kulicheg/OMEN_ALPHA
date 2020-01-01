@@ -7,7 +7,7 @@ START:
             LXI     H,64512 ;		    FC00		
             SHLD    32994 ;			RAMEND
 ; 
-;            CALL    CLEARMEM 
+;            CALL    CLEARMEM
 ; 
             MVI     A,21 ;ACIA init
             OUT     222 
@@ -16,7 +16,7 @@ START:
 ; 
 
 LOOP:                
-            
+
             LXI     H,33008 ;Save X
             MVI     M,1 
             LXI     H,33009 ;Save Y
@@ -25,13 +25,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,32 
             LXI     H,33012 ;Save FC
             MVI     M,40 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,6 
             LXI     H,33009 ;Save Y
@@ -40,13 +40,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,48 
             LXI     H,33012 ;Save FC
             MVI     M,41 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,11 
             LXI     H,33009 ;Save Y
@@ -55,13 +55,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,49 
             LXI     H,33012 ;Save FC
             MVI     M,42 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,16 
             LXI     H,33009 ;Save Y
@@ -70,13 +70,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,50 
             LXI     H,33012 ;Save FC
             MVI     M,43 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,21 
             LXI     H,33009 ;Save Y
@@ -85,13 +85,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,51 
             LXI     H,33012 ;Save FC
             MVI     M,44 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,26 
             LXI     H,33009 ;Save Y
@@ -100,13 +100,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,52 
             LXI     H,33012 ;Save FC
             MVI     M,45 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,31 
             LXI     H,33009 ;Save Y
@@ -115,13 +115,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,53 
             LXI     H,33012 ;Save FC
             MVI     M,46 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,36 
             LXI     H,33009 ;Save Y
@@ -130,21 +130,19 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,54 
             LXI     H,33012 ;Save FC
             MVI     M,47 
-            CALL    SETATTRIB
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
 
 
-            
-            LXI     H,33012 ;Save FC
-            MVI     M,1 
-            CALL    SETATTRIB           
-           
 
-           
+
+
+
+
             LXI     H,33008 ;Save X
             MVI     M,41 
             LXI     H,33009 ;Save Y
@@ -153,13 +151,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,48 
             LXI     H,33012 ;Save FC
-            MVI     M,40 
-            CALL    SETATTRIB
+            MVI     M,30 
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,46 
             LXI     H,33009 ;Save Y
@@ -171,10 +169,10 @@ LOOP:
             LXI     H,33012 ;Save CHAR
             MVI     M,49 
             LXI     H,33012 ;Save FC
-            MVI     M,41 
-            CALL    SETATTRIB
+            MVI     M,31 
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,51 
             LXI     H,33009 ;Save Y
@@ -183,13 +181,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,50 
             LXI     H,33012 ;Save FC
-            MVI     M,42 
-            CALL    SETATTRIB
+            MVI     M,32 
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,56 
             LXI     H,33009 ;Save Y
@@ -198,13 +196,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,51 
             LXI     H,33012 ;Save FC
-            MVI     M,43 
-            CALL    SETATTRIB
+            MVI     M,33 
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,61 
             LXI     H,33009 ;Save Y
@@ -213,13 +211,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,52 
             LXI     H,33012 ;Save FC
-            MVI     M,44 
-            CALL    SETATTRIB
+            MVI     M,34 
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,66 
             LXI     H,33009 ;Save Y
@@ -228,13 +226,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,53 
             LXI     H,33012 ;Save FC
-            MVI     M,45 
-            CALL    SETATTRIB
+            MVI     M,35 
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,71 
             LXI     H,33009 ;Save Y
@@ -243,13 +241,13 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,54 
             LXI     H,33012 ;Save FC
-            MVI     M,46 
-            CALL    SETATTRIB
+            MVI     M,36 
+            CALL    SETATTRIB 
             CALL    RECTDRAW 
-            
+
             LXI     H,33008 ;Save X
             MVI     M,76 
             LXI     H,33009 ;Save Y
@@ -258,21 +256,21 @@ LOOP:
             MVI     M,5 
             LXI     H,33011 ;Save H
             MVI     M,24 
-            LXI     H,33012 ;Save CHAR
+            LXI     H,33014 ;Save CHAR
             MVI     M,55 
             LXI     H,33012 ;Save FC
-            MVI     M,47 
-            CALL    SETATTRIB
-            CALL    RECTDRAW         
-        
-        
-        
-        
-           
-            
-            
-            
-            CALL    HOMESCR
+            MVI     M,37 
+            CALL    SETATTRIB 
+            CALL    RECTDRAW 
+
+
+
+
+
+
+
+
+            CALL    HOMESCR 
             RET      
 ; 
 SETCURSOR:           
@@ -319,16 +317,30 @@ WAITOUT:    IN      222
 ; 
 ; 
 
-HOMESCR: 
+HOMESCR:             
             LXI     H,HOMESTR 
-            CALL    TXTOUT
-            RET
+            CALL    TXTOUT 
+            RET      
 
 CLEARSCR:            
             LXI     H,CLSSTR 
 ; 
-            CALL    TXTOUT
-            RET
+            CALL    TXTOUT 
+
+            LXI     H,33008 ;Save X
+            MVI     M,1 
+            LXI     H,33009 ;Save Y
+            MVI     M,1 
+            LXI     H,33010 ;Save W
+            MVI     M,80 
+            LXI     H,33011 ;Save H
+            MVI     M,25 
+            LXI     H,33014 ;Save CHAR
+            MVI     M,32 
+            CALL    RECTDRAW 
+
+
+            RET      
 ; 
 ; 
 ; 
@@ -363,18 +375,18 @@ RECTDRAW:            ;Draws rectangle
             LXI     H,33010 ;Load W
             MOV     B,M 
             LXI     H,33011 ;Load H
-            MOV     C,M
-                 
+            MOV     C,M 
+
 ; 
 COLUMNS:    CALL    WAITOUT 
-            LDA     33014 ;
+            LDA     33014 ; 
             OUT     223 
             DCR     B 
             JNZ     COLUMNS 
             DCR     C 
             RZ       
-            LXI     H,33009
-            INR     M
+            LXI     H,33009 
+            INR     M 
             CALL    SETCURSOR 
             LXI     H,33010 ;Load W
             MOV     B,M 
@@ -389,7 +401,7 @@ COLUMNS:    CALL    WAITOUT
 ;5	Blink
 ;7	Reverse
 ;8	Hidden
-;
+; 
 ;	Foreground Colours
 ;30	Black
 ;31	Red
@@ -410,7 +422,7 @@ COLUMNS:    CALL    WAITOUT
 ;46	Cyan
 ;47	White
 
-SETATTRIB:
+SETATTRIB:           
 
             LXI     H,SETATTRIBSTR + 2 
             XCHG     ; DE<->HL
@@ -421,9 +433,9 @@ SETATTRIB:
             CALL    IWASC 
 
 
-            LXI     H,SETATTRIBSTR
-            CALL TXTOUT
-            RET
+            LXI     H,SETATTRIBSTR 
+            CALL    TXTOUT 
+            RET      
 
 
 
@@ -465,15 +477,15 @@ CLEARMEM2:  MVI     M,0
 ; 
 ; 
 ; 
-HELLOSTR:       .ISTR   "Hello this cruel world!",0Dh,0Ah 
+HELLOSTR:   .ISTR   "Hello this cruel world!",0Dh,0Ah 
 ; 
-CLSSTR:         .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;1m"
+CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;1m" 
 ; 
-SETCURSORSTR:   .ISTR   1Bh,"[00;00H"
-;
-SETATTRIBSTR:   .ISTR   1Bh,"[00m"
+SETCURSORSTR: .ISTR 1Bh,"[00;00H" 
 ; 
-HOMESTR:        .ISTR   1Bh,"[H"
+SETATTRIBSTR: .ISTR 1Bh,"[00m" 
+; 
+HOMESTR:    .ISTR   1Bh,"[H" 
 ; 
 ; 
 ; 
@@ -633,4 +645,6 @@ CNHL:
 ; 
 ; 
 ; 
+
+
 
