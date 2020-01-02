@@ -8,13 +8,14 @@ HPOS        EQU     80F3H ;H(HPOS)
 ATTR        EQU     80F4H ;FC(ATTR)
 ATTR2       EQU     80F5H ; -UU BC(33013)
 FILLCHR     EQU     80F6H ;char(FILLCHR)
+TMP2B       EQU     80FEH ;temp USE WITH CAUTION + 80FFH
 ; 
 START:               
 ; 
-            LXI     H,33792 ;		    8400
-            SHLD    32992 ;			RAMSTART
-            LXI     H,64512 ;		    FC00		
-            SHLD    32994 ;			RAMEND
+            LXI     H,33792         ;8400
+            SHLD    32992           ;RAMSTART
+            LXI     H,64512         ;FC00		
+            SHLD    32994           ;RAMEND
 ; 
 ;            CALL    CLEARMEM
 ; 
@@ -109,173 +110,8 @@ LOOP:
             MVI     M,44 
             CALL    SETATTRIB 
             CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,26 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,52 
-            LXI     H,ATTR ;Save FC
-            MVI     M,45 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,31 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,53 
-            LXI     H,ATTR ;Save FC
-            MVI     M,46 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,36 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,54 
-            LXI     H,ATTR ;Save FC
-            MVI     M,47 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,41 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,48 
-            LXI     H,ATTR ;Save FC
-            MVI     M,30 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,46 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,ATTR ;Save CHAR
-            MVI     M,49 
-            LXI     H,ATTR ;Save FC
-            MVI     M,31 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,51 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,50 
-            LXI     H,ATTR ;Save FC
-            MVI     M,32 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,56 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,51 
-            LXI     H,ATTR ;Save FC
-            MVI     M,33 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,61 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,52 
-            LXI     H,ATTR ;Save FC
-            MVI     M,34 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,66 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,53 
-            LXI     H,ATTR ;Save FC
-            MVI     M,35 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,71 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,54 
-            LXI     H,ATTR ;Save FC
-            MVI     M,36 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,76 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,55 
-            LXI     H,ATTR ;Save FC
-            MVI     M,37 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-            CALL    CLEARSCR
-            CALL    HELLO
+            
+            CALL    DRAWWINDOW
             RET      
 
 
@@ -353,9 +189,17 @@ RECTDRAW:            ;Draws rectangle
 ;80F4H	FC(ATTR)
 ;80F5H	BC(33013)
 ;80F6H	char(FILLCHR)
+;80F7H  TEMP
+;80F8H  TEMP
 ; 
-; 
-            CALL    SETCURSOR 
+            
+            CALL    SETCURSOR
+            CALL    SETATTRIB
+            
+            LXI     H,YPOS
+            MOV     A,M 
+            STA    TMP2B
+            
             LXI     H,WPOS ;Load W
             MOV     B,M 
             LXI     H,HPOS ;Load H
@@ -367,14 +211,18 @@ COLUMNS:    CALL    WAITOUT
             DCR     B 
             JNZ     COLUMNS 
             DCR     C 
-            RZ       
-            LXI     H,YPOS 
+            JZ      COLUMNS2       
+            LXI     H,YPOS
             INR     M 
             CALL    SETCURSOR 
             LXI     H,WPOS ;Load W
             MOV     B,M 
             JMP     COLUMNS 
-; 
+COLUMNS2:
+            LXI     H,TMP2B
+            MOV     A,M 
+            STA    YPOS
+            RET
 ; 
 ; 
 ;0	Reset all attributes
@@ -418,7 +266,10 @@ SETATTRIB:
             CALL    TXTOUT 
             RET      
 ; 
-; 
+DEFATTRIB:           
+            LXI     H,DEFATTRIBSTR 
+            CALL    TXTOUT 
+            RET   
 ; 
 CLEARMEM:            ;Clear memory from RAMSTART to RAMEND with 00h
 ;80E0H	RAMSTART(32992)
@@ -439,19 +290,22 @@ CLEARMEM2:  MVI     M,0
 ;
 ; .ISTR adds 80h  automaticaly 
 ;--------------CONST STRINGS Stored in ROM-------------- 
-HELLOSTR:    .ISTR   "Kulich System Extension 1.0 2020(c)",0Dh,0Ah
-HELLOSTR1:   .ISTR   "--------------------------------------------",0Dh,0Ah
-HELLOSTR2:   .ISTR   "SETCURSOR sets cursor at XPOS, YPOS",0Dh,0Ah
-HELLOSTR3:   .ISTR   "HOMESCR puts cursor at home position",0Dh,0Ah
-HELLOSTR4:   .ISTR   "CLEARSCR and drops all attribs to G/B",0Dh,0Ah
-HELLOSTR5:   .ISTR   "TXTOUT Prints text from HL",0Dh,0Ah
-HELLOSTR6:   .ISTR   "RECTDRAW Draw rectangle X,Y,H,W,A,C",0Dh,0Ah
-HELLOSTR7:   .ISTR   "SETATTRIB print VT100 color attribs",0Dh,0Ah
-HELLOSTR8:   .ISTR   "CLEARMEM from '80E0H' to '80E2H'",0Dh,0Ah
+;HELLOSTR:    .ISTR   "Kulich System Extension 1.0 2020(c)",0Dh,0Ah
+;HELLOSTR1:   .ISTR   "--------------------------------------------",0Dh,0Ah
+;HELLOSTR2:   .ISTR   "SETCURSOR sets cursor at XPOS, YPOS",0Dh,0Ah
+;HELLOSTR3:   .ISTR   "HOMESCR   puts cursor at home position",0Dh,0Ah
+;HELLOSTR4:   .ISTR   "CLEARSCR  and drops all attribs to G/B",0Dh,0Ah
+;HELLOSTR5:   .ISTR   "TXTOUT    Prints text from HL",0Dh,0Ah
+;HELLOSTR6:   .ISTR   "RECTDRAW  Draw rectangle X,Y,H,W,A,C",0Dh,0Ah
+;HELLOSTR7:   .ISTR   "SETATTRIB Print VT100 color attribs",0Dh,0Ah
+;HELLOSTR8:   .ISTR   "CLEARMEM  from '80E0H' to '80E2H'",0Dh,0Ah
+;HELLOSTR9:   .ISTR   "--------------------------------------------",0Dh,0Ah
 ;
 HOMESTR:    .ISTR   1Bh,"[H" 
 ; 
 CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;1m"
+;
+DEFATTRIBSTR:     .ISTR   1Bh,"[40;32;1m"
 ;
 ;--------------CHANGABLE STRINGS Stored in RAM-------------- 
 ; 
@@ -461,37 +315,86 @@ SETATTRIBSTR: .ISTR 1Bh,"[00m"
 ; 
 
 
-HELLO:
+;HELLO:
+;
+;            CALL    CLEARSCR
+;            CALL    HOMESCR
+;            LXI     H,HELLOSTR 
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR1
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR2
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR3
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR4
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR5
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR6
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR7
+;            CALL    TXTOUT
+;            LXI     H,HELLOSTR8
+;            CALL    TXTOUT 
+;            LXI     H,HELLOSTR9
+;            CALL    TXTOUT
+;            RET
 
-            LXI     H,HELLOSTR 
-            CALL    TXTOUT 
-            LXI     H,HELLOSTR1
-            CALL    TXTOUT 
-            LXI     H,HELLOSTR2
-            CALL    TXTOUT 
-            LXI     H,HELLOSTR3
-            CALL    TXTOUT 
-            LXI     H,HELLOSTR4
-            CALL    TXTOUT 
-            LXI     H,HELLOSTR5
-            CALL    TXTOUT 
-            LXI     H,HELLOSTR6
-            CALL    TXTOUT 
-            LXI     H,HELLOSTR7
-            CALL    TXTOUT
-            LXI     H,HELLOSTR8
-            CALL    TXTOUT 
+
+DRAWWINDOW:
+;(HL - data adress)
+;XPOS YPOS WPOS HPOS ATTR CHR
+;TITLE STRING
+;BODY TEXT
+;*********************
+;*       TITLE       *+
+;*                   *+
+;*                   *+
+;*                   *+
+;*       [OK]        *+
+;*********************+
+; +++++++++++++++++++++
+
+            LXI H , 40000 ; debug
+            MOV A, M
+            STA XPOS
+            INX H
+            MOV A, M
+            STA YPOS
+            INX H
+            MOV A, M
+            STA WPOS
+            INX H
+            MOV A, M
+            STA HPOS
+            INX H
+            MOV A, M
+            STA ATTR
+            INX H
+            MOV A, M
+            STA FILLCHR
+
+            CALL RECTDRAW
+            
+            LXI H, HPOS
+            MOV B, M
+            PUSH B
+            MVI A, 1
+            STA HPOS
+            MVI A, 41 ; TODO INVERSION OF  COLOR
+            STA ATTR
+            CALL RECTDRAW
+            POP B
+            MOV A,B
+            STA HPOS            
+            CALL DEFATTRIB
+            CALL HOMESCR
             RET
 
+    
 
-
-
-
-
-
-
-
-; 
+ 
 ; 
 ; 
 ; 
