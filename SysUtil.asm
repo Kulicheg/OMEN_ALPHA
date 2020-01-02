@@ -111,6 +111,8 @@ LOOP:
             CALL    SETATTRIB 
             CALL    RECTDRAW 
 
+            
+            LXI     H,40000 ; debug
             CALL    DRAWWINDOW 
             RET      
 
@@ -358,7 +360,6 @@ DRAWWINDOW:
 ;*********************+
 ; +++++++++++++++++++++
 
-            LXI     H,40000 ; debug
             MOV     A,M 
             STA     XPOS 
             INX     H 
