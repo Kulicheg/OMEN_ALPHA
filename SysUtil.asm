@@ -6,12 +6,14 @@ YPOS        EQU     80F1H ;Y(YPOS)
 WPOS        EQU     80F2H ;W(WPOS)
 HPOS        EQU     80F3H ;H(HPOS)
 ATTR        EQU     80F4H ;FC(ATTR)
-ATTR2       EQU     80F5H ; -UU BC(33013)
+ATTR2       EQU     80F5H ;BC(33013)
 FILLCHR     EQU     80F6H ;char(FILLCHR)
 TMP2B       EQU     80FEH ;temp USE WITH CAUTION + 80FFH
 ; 
 START:               
-; 
+;
+
+
             LXI     H,33792 ;		    8400
             SHLD    32992 ;			RAMSTART
             LXI     H,64512 ;		    FC00		
@@ -22,15 +24,13 @@ START:
             MVI     A,21 ;ACIA init
             OUT     222 
 
-
-            LXI     H,ATTR 
-            MVI     M,32 
-            CALL    SETATTRIB 
             LXI     H,ATTR 
             MVI     M,40 
+            LXI     H,ATTR2 
+            MVI     M,1 
+            
+            
             CALL    SETATTRIB 
-
-
             CALL    CLEARSCR 
 ; 
 ; 
@@ -48,7 +48,6 @@ LOOP:
             MVI     M,32 
             LXI     H,ATTR ;Save FC
             MVI     M,40 
-            CALL    SETATTRIB 
             CALL    RECTDRAW 
 ; 
             LXI     H,XPOS ;Save X
@@ -111,7 +110,7 @@ LOOP:
             CALL    SETATTRIB 
             CALL    RECTDRAW 
 
-            
+
             LXI     H,40000 ; debug
             CALL    DRAWWINDOW 
             RET      
@@ -199,9 +198,8 @@ RECTDRAW:            ;Draws rectangle
             CALL    SETATTRIB 
 
             LXI     H,YPOS 
-            MOV     A,M 
-            STA     TMP2B 
-
+            MOV     B,M 
+            PUSH    B 
             LXI     H,WPOS ;Load W
             MOV     B,M 
             LXI     H,HPOS ;Load H
@@ -221,8 +219,8 @@ COLUMNS:    CALL    WAITOUT
             MOV     B,M 
             JMP     COLUMNS 
 COLUMNS2:            
-            LXI     H,TMP2B 
-            MOV     A,M 
+            POP     B 
+            MOV     A,B 
             STA     YPOS 
             RET      
 ; 
@@ -260,6 +258,13 @@ SETATTRIB:
             LXI     H,SETATTRIBSTR + 2 
             XCHG     ; DE<->HL
             LHLD    ATTR ;80F0->HL FC
+            MVI     A,2 
+            MVI     H,0 
+            CALL    IWASC 
+            
+            LXI     H,SETATTRIBSTR + 5 
+            XCHG     ; DE<->HL
+            LHLD    ATTR2 ;80F0->HL BC
             MVI     A,2 
             MVI     H,0 
             CALL    IWASC 
@@ -310,12 +315,13 @@ CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;1m"
 DEFATTRIBSTR: .ISTR 1Bh,"[40;32;1m" 
 
 DUMMYSTR:   .ISTR   "      DUMMY PLUG" 
+DUMMYSTR2:  .ISTR   "This is test string for  window. Kulich Extension ROM version 0.1.                    Testing [123] [    ] [X]" 
 ; 
 ;--------------CHANGABLE STRINGS Stored in RAM--------------
 ; 
 SETCURSORSTR: .ISTR 1Bh,"[00;00H" 
 ; 
-SETATTRIBSTR: .ISTR 1Bh,"[00m" 
+SETATTRIBSTR: .ISTR 1Bh,"[00;00m" 
 ; 
 
 
@@ -352,13 +358,13 @@ DRAWWINDOW:
 ;TITLE STRING
 ;BODY TEXT
 ;*********************
-;*       TITLE       *+
-;*                   *+
-;*                   *+
-;*                   *+
-;*       [OK]        *+
-;*********************+
-; +++++++++++++++++++++
+;*       TITLE       *
+;*                   *
+;*                   *
+;*                   *
+;*       [OK]        *
+;*********************
+
 
             MOV     A,M 
             STA     XPOS 
@@ -380,8 +386,12 @@ DRAWWINDOW:
 
             CALL    RECTDRAW 
 
+
+;---TITLE------------------------------------------
             LXI     H,HPOS 
-            MOV     B,M 
+            MOV     B,M
+            LXI     H,ATTR 
+            MOV     C,M 
             PUSH    B 
             MVI     A,1 
             STA     HPOS 
@@ -390,19 +400,86 @@ DRAWWINDOW:
             CALL    RECTDRAW 
             POP     B 
             MOV     A,B 
-            STA     HPOS 
+            STA     HPOS
+            MOV     A,C 
+            STA     ATTR
             CALL    SETCURSOR 
             LXI     H,DUMMYSTR 
             CALL    TXTOUT 
+            CALL    SETATTRIB
+
+;---BODY--------------------------------------------
+            
+            
+            LXI     H,ATTR2
+            MVI     M, 30
+
+            LDA     XPOS 
+            MOV     B,A 
+            LDA     YPOS 
+            MOV     C,A 
+            PUSH    B 
+            LDA     HPOS 
+            MOV     B,A 
+            LDA     ATTR 
+            MOV     C,A 
+            PUSH    B 
+
+            LXI     H,ATTR2
+            MVI     M, 30
+            CALL SETATTRIB
+            
+            
+            LXI     H,DUMMYSTR2
+
+DRAWWINDOW2:
+            
+            PUSH    H
+            
+            LXI     H,YPOS 
+            INR     M               ;down to  body
+            CALL    SETCURSOR
+            
+            LXI     H,WPOS
+            MOV     E,M 
+            
+            POP     H
+DRAWWINDOW3:  
+            CALL    WAITOUT 
+            MOV     A,M 
+            ANI     7Fh ;drop 8th bit
+            OUT     223 
+            MOV     A,M 
+            ANI     80h 
+            JNZ     DRAWWINDOW4 
+            INX     H 
+            DCR     E 
+            JNZ     DRAWWINDOW3 
+            PUSH    H
+            LXI     H,WPOS 
+            MOV     E,M 
+            POP     H
+            JMP     DRAWWINDOW2
+
+
+DRAWWINDOW4:         
+;----------------------------------------------------
+            POP     B 
+            MOV     A,C 
+            STA     ATTR 
+            MOV     A,B 
+            STA     HPOS ; RESTORING COORDS
+            POP     B 
+            MOV     A,C 
+            STA     YPOS 
+            MOV     A,B 
+            STA     XPOS 
+
 
             CALL    DEFATTRIB 
             CALL    HOMESCR 
             RET      
 
-
-
-
-; 
 ; 
 ; 
 ;**************************************
@@ -552,4 +629,7 @@ CNHL:
             INX     H 
             POP     PSW 
             RET      
+
+
+
 
