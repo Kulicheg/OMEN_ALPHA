@@ -76,6 +76,8 @@ LOOP:
             LXI     H,FILLCHR ;Save CHAR
             MVI     M,49 
             LXI     H,ATTR ;Save FC
+            MVI     M,42
+            LXI     H,ATTR2 ;Save FC
             MVI     M,42 
             CALL    SETATTRIB 
             CALL    RECTDRAW 
@@ -109,8 +111,11 @@ LOOP:
             MVI     M,44 
             CALL    SETATTRIB 
             CALL    RECTDRAW 
-
-
+            CALL    SETATTRIB
+            
+            LXI     H,ATTR2 ;Save FC
+            MVI     M,1 
+            
             LXI     H,ABOUT ; debug
             CALL    DRAWWINDOW 
             RET      
@@ -311,7 +316,7 @@ CLEARMEM2:  MVI     M,0
 ; 
 HOMESTR:    .ISTR   1Bh,"[H" 
 ; 
-CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;1m" 
+CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;0m" 
 ; 
 DEFATTRIBSTR: .ISTR 1Bh,"[40;32;1m" 
 
@@ -365,7 +370,7 @@ DB "DEFATTR   Quick reset to G/B w/o MEM         "
 DB "DRAWWINDOW  Draws window like this           "
 
 DB "80F0H XPOS 80F1H YPOS 80F2H WPOS 80F3H HPOS  "
-DB "80F4H ATTR 80F5H ATTR2 80F6H FILLCHR         "
+DB "80F4H ATTR 80F5H ATTR2 80F6H FILLCHR   "
 DB 255
 DRAWWINDOW:          
 ;(HL - data adress)
