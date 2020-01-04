@@ -5,8 +5,8 @@ XPOS        EQU     80F0H ;X(XPOS)
 YPOS        EQU     80F1H ;Y(YPOS)
 WPOS        EQU     80F2H ;W(WPOS)
 HPOS        EQU     80F3H ;H(HPOS)
-ATTR        EQU     80F4H ;FC(ATTR)
-ATTR2       EQU     80F5H ;BC(33013)
+ATTR        EQU     80F4H ;BC(ATTR)
+ATTR2       EQU     80F5H ;FC(33013)
 FILLCHR     EQU     80F6H ;char(FILLCHR)
 TMP2B       EQU     80FEH ;temp USE WITH CAUTION + 80FFH
 ; 
@@ -111,7 +111,7 @@ LOOP:
             CALL    RECTDRAW 
 
 
-            LXI     H,40000 ; debug
+            LXI     H,ABOUT ; debug
             CALL    DRAWWINDOW 
             RET      
 
@@ -187,8 +187,8 @@ RECTDRAW:            ;Draws rectangle
 ;80F1H	Y(YPOS)
 ;80F2H	W(WPOS)
 ;80F3H	H(HPOS)
-;80F4H	FC(ATTR)
-;80F5H	BC(33013)
+;80F4H	1C(ATTR)
+;80F5H	2C(ATTR2)
 ;80F6H	char(FILLCHR)
 ;80F7H  TEMP
 ;80F8H  TEMP
@@ -306,6 +306,7 @@ CLEARMEM2:  MVI     M,0
 ;HELLOSTR6:   .ISTR   "RECTDRAW  Draw rectangle X,Y,H,W,A,C",0Dh,0Ah
 ;HELLOSTR7:   .ISTR   "SETATTRIB Print VT100 color attribs",0Dh,0Ah
 ;HELLOSTR8:   .ISTR   "CLEARMEM  from '80E0H' to '80E2H'",0Dh,0Ah
+;HELLOSTR8:   .ISTR   "DEFATTR  Quick reset to G/B w/o changin MEM",0Dh,0Ah
 ;HELLOSTR9:   .ISTR   "--------------------------------------------",0Dh,0Ah
 ; 
 HOMESTR:    .ISTR   1Bh,"[H" 
@@ -314,8 +315,7 @@ CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;1m"
 ; 
 DEFATTRIBSTR: .ISTR 1Bh,"[40;32;1m" 
 
-DUMMYSTR:   .ISTR   "      DUMMY PLUG" 
-DUMMYSTR2:  .ISTR   "This is test string for  window. Kulich Extension ROM version 0.1.                    Testing [123] [    ] [X]" 
+DUMMYSTR:   .ISTR   "               ABOUT" 
 ; 
 ;--------------CHANGABLE STRINGS Stored in RAM--------------
 ; 
@@ -327,8 +327,8 @@ SETATTRIBSTR: .ISTR 1Bh,"[00;00m"
 
 ;HELLO:
 ; 
-;            CALL    CLEARSCR
-;            CALL    HOMESCR
+            CALL    CLEARSCR
+            CALL    HOMESCR
 ;            LXI     H,HELLOSTR
 ;            CALL    TXTOUT
 ;            LXI     H,HELLOSTR1
@@ -350,11 +350,26 @@ SETATTRIBSTR: .ISTR 1Bh,"[00;00m"
 ;            LXI     H,HELLOSTR9
 ;            CALL    TXTOUT
 ;            RET
+ABOUT:  DB  17,06,45,12,47,30,32
+DB "      Kulich System Extension 0.1 2020      ",255
+;   1---------------------+---------------------4 5
+ABODY:
+DB "CLEARSCR  and drops all attribs to G/B       "
+DB "HOMESCR   puts cursor at home position       "
+DB "SETCURSOR sets cursor at XPOS, YPOS          "
+DB "TXTOUT    Prints text from adress @ HL       "
+DB "SETATTRIB Print 2 VT100 color attribs        "
+DB "RECTDRAW  Draw rectangle X,Y,H,W,A,C         "
+DB "CLEARMEM  from '80E0H' to '80E2H'            "
+DB "DEFATTR   Quick reset to G/B w/o MEM         "
+DB "DRAWWINDOW  Draws window like this           "
 
-
+DB "80F0H XPOS 80F1H YPOS 80F2H WPOS 80F3H HPOS  "
+DB "80F4H ATTR 80F5H ATTR2 80F6H FILLCHR         "
+DB 255
 DRAWWINDOW:          
 ;(HL - data adress)
-;XPOS YPOS WPOS HPOS ATTR CHR
+;XPOS YPOS WPOS HPOS ATTR ATTR2 CHR
 ;TITLE STRING
 ;BODY TEXT
 ;*********************
@@ -379,7 +394,10 @@ DRAWWINDOW:
             STA     HPOS 
             INX     H 
             MOV     A,M 
-            STA     ATTR 
+            STA     ATTR
+            INX     H 
+            MOV     A,M 
+            STA     ATTR2
             INX     H 
             MOV     A,M 
             STA     FILLCHR 
@@ -404,7 +422,7 @@ DRAWWINDOW:
             MOV     A,C 
             STA     ATTR
             CALL    SETCURSOR 
-            LXI     H,DUMMYSTR 
+            LXI     H,ABOUT + 7 
             CALL    TXTOUT 
             CALL    SETATTRIB
 
@@ -430,7 +448,7 @@ DRAWWINDOW:
             CALL SETATTRIB
             
             
-            LXI     H,DUMMYSTR2
+            LXI     H,ABODY
 
 DRAWWINDOW2:
             
@@ -629,7 +647,6 @@ CNHL:
             INX     H 
             POP     PSW 
             RET      
-
 
 
 
