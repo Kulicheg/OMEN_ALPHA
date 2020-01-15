@@ -1,80 +1,199 @@
 #include <Arduino.h>
 /*DDRD = B11111110;  // sets Arduino pins 1 to 7 as outputs, pin 0 as input
-DDRD = DDRD | B11111100;  // this is safer as it sets pins 2 to 7 as outputs without changing the value of pins 0 & 1, which are RX & TX
-PORTD = B10101000; // sets digital pins 7,5,3 HIGH 
-DDRD - The Port D Data Direction Register - read/write
-PORTD - The Port D Data Register - read/write
-PIND - The Port D Input Pins Register - read only
-Большинство контроллеров Arduino умеют обрабатывать до двух внешних прерываний, пронумерованных так: 0 (на цифровом порту 2) и 1 (на цифровом порту 3).
-Arduino Mega обрабатывает дополнительно еще четыра прерывания: 2 (порт 21), 3 (порт 20), 4 (порт 19) и 5 (порт 18).
+  DDRD = DDRD | B11111100;  // this is safer as it sets pins 2 to 7 as outputs without changing the value of pins 0 & 1, which are RX & TX
+  PORTD = B10101000; // sets digital pins 7,5,3 HIGH
+  DDRD - The Port D Data Direction Register - read/write
+  PORTD - The Port D Data Register - read/write
+  PIND - The Port D Input Pins Register - read only
+  Большинство контроллеров Arduino умеют обрабатывать до двух внешних прерываний, пронумерованных так: 0 (на цифровом порту 2) и 1 (на цифровом порту 3).
+  Arduino Mega обрабатывает дополнительно еще четыра прерывания: 2 (порт 21), 3 (порт 20), 4 (порт 19) и 5 (порт 18).
 
 
 */
 
 
 /*
-Тестовая геометрия 
-размер сектора  128 байт
-секторов        4
-дорожек         2
-итого 1024 байта
+  Тестовая геометрия
+  размер сектора  128 байт
+  секторов        4
+  дорожек         2
+  итого 1024 байта
+*/
+
+
+/*
+  Пакет содержит 8 бит
+  0   Синхро, каждое изменение это новый пакет на шине
+  1 Комманда
+  2 Комманда
+  3 Комманда
+  4 Данные
+  5 Данные
+  6 Данные
+  7 Данные
+
+  Комманды:
+
+  00  000 Чтение  READ    ;36: Read a sector
+  01  001 Домой   HOME    ;21: Move disc head to track 0
+  02  010 Выбор   SELDSK  ;24: Select disc drive
+  03  011 Сектор  SETSEC  ;30: Set sector number
+  04  100 Трек    SETTRK  ;27: Set track number
+  05  101 Чтение 2
+  06  110 Запись 2
+  07  111 Запись  WRITE   ;39: Write a sector
+
+
+
+
+
+
 */
 
 volatile byte databits;
 volatile bool state = false;
+volatile byte command;
+volatile byte data4;
 
 byte sectorSize = 128;
 byte sectors = 4;
 byte tracks = 4;
 const long int diskSize = 1024; //sectors * tracks * sectorSize;
 
-
+byte curSector = 0;
+byte curTrack = 0;
+byte curDrive = 0;
 
 
 
 
 void getData()
 {
-DDRB = B00000000;
-DDRD = B00000000;
+  DDRB = B00000000;
+  DDRD = B00000000;
 
-byte portb = PINB;
-portb = portb  << 2;
+  byte portb = PINB;
+  portb = portb  << 2;
 
-Serial.print ("portb:");
-Serial.println (portb, BIN);
+  Serial.print ("portb:");
+  Serial.println (portb, BIN);
 
-byte portd = PIND;
-portd = portd >> 3; 
+  byte portd = PIND;
+  portd = portd >> 3;
 
-Serial.print ("portd:");
-Serial.println (portd, BIN);
+  Serial.print ("portd:");
+  Serial.println (portd, BIN);
 
-databits = portb | portd;
-Serial.print ("databits:");
-Serial.println (databits, BIN);
-state = true;
+  databits = portb | portd;
+
+  Serial.print ("databits:");
+  Serial.println (databits, BIN);
+
+  command = (databits & B00001110) >> 1;
+  data4   = (databits & B11110000) >> 4;
+
+  Serial.print ("command:");
+  Serial.print (command, BIN);
+
+  Serial.print ("/");
+  Serial.print (command);
+
+  Serial.print ("data4:");
+  Serial.print (data4, BIN);
+  state = true;
 }
 
 
 
 
 void setup() {
-  
-Serial.begin (115200);
 
-attachInterrupt(1, getData, CHANGE);
+  Serial.begin (115200);
+
+  attachInterrupt(1, getData, CHANGE);
 
 }
 
-void loop() 
+void loop()
 
 {
-if (state)
-{
-  Serial.println (databits);
-  state = false;
-}
+  if (state)
+  {
+    Serial.println (databits);
+    state = false;
+
+
+
+
+
+    switch (command)
+
+    {
+      case 00:      //Read a sector
+      Serial.print ("Reading sector:");
+      Serial.print (curSector);
+      Serial.print (" sector / Track:");
+      Serial.println (curTrack);
+        break;
+
+      case 01:      //Move disc head to track 0
+      Serial.println ("Going home.");
+      curSector = 0;
+      curTrack  = 0;
+
+        break;
+
+      case 02:      //Select disc drive
+      curDrive = data4;
+
+      Serial.print ("Drive selected:");
+      Serial.println (data4);
+
+      // TO DO Сделать выбор файла согласно букве, и придумать статусные ответы.
+        break;
+
+      case 03:      //Set sector number
+      curSector = data4;
+
+      Serial.print ("curSector:");
+      Serial.println (curSector);
+
+      // TODO  больше 16 
+        break;
+
+      case 04:      //Set track number
+      curTrack = data4;
+      
+      
+      Serial.print ("curTrack:");
+      Serial.println (curTrack);
+      
+    
+      // TODO  больше 16 
+
+        break;
+              // Read 2
+      case 05:
+
+        break;
+
+      case 06:      // Write 2
+
+        break;
+
+      case 07:      //Write a sector
+
+        break;
+
+
+
+
+
+    }
+
+
+
+  }
 
 }
 
