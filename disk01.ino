@@ -1,3 +1,4 @@
+#include <Arduino.h>
 /*DDRD = B11111110;  // sets Arduino pins 1 to 7 as outputs, pin 0 as input
 DDRD = DDRD | B11111100;  // this is safer as it sets pins 2 to 7 as outputs without changing the value of pins 0 & 1, which are RX & TX
 PORTD = B10101000; // sets digital pins 7,5,3 HIGH 
@@ -20,6 +21,7 @@ Arduino Mega обрабатывает дополнительно еще четы
 */
 
 volatile byte databits;
+volatile bool state = false;
 
 byte sectorSize = 128;
 byte sectors = 4;
@@ -29,13 +31,29 @@ const long int diskSize = 1024; //sectors * tracks * sectorSize;
 
 
 
+
+
 void getData()
 {
 DDRB = B00000000;
 DDRD = B00000000;
-byte portb = PINB << 2;
-byte portd = PIND >> 6;
+
+byte portb = PINB;
+portb = portb  << 2;
+
+Serial.print ("portb:");
+Serial.println (portb, BIN);
+
+byte portd = PIND;
+portd = portd >> 3; 
+
+Serial.print ("portd:");
+Serial.println (portd, BIN);
+
 databits = portb | portd;
+Serial.print ("databits:");
+Serial.println (databits, BIN);
+state = true;
 }
 
 
@@ -49,10 +67,14 @@ attachInterrupt(1, getData, CHANGE);
 
 }
 
-void loop() {
-  
+void loop() 
 
-Serial.print (databits);
+{
+if (state)
+{
+  Serial.println (databits);
+  state = false;
+}
 
 }
 
