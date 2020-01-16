@@ -183,6 +183,11 @@ void loop()
 
       case 07:      //Write a sector
 
+      Serial.print ("Writting sector:");
+      Serial.print (curSector);
+      Serial.print (" sector / Track:");
+      Serial.println (curTrack);
+
         break;
 
 
