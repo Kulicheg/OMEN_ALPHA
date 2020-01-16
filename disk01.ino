@@ -156,13 +156,6 @@ void HOME()
 
 void READ()
 {
-  Serial.println ("");
-  Serial.print  ("Track:");
-  Serial.print (curTrack);
-  Serial.print ("  Sector:");
-  Serial.println (curSector);
-
-
   long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
 
   int sixteen = 0;
@@ -173,9 +166,21 @@ void READ()
   Serial.print ("   SECTOR:");
   Serial.println (curSector);
   Serial.println ("");
+
+
+
+
   for (byte q = 0; q < sectorSize; q++)
   {
     sector[q] = disk[startByte + q];
+
+
+
+    if (sector[q] < 0x10)
+    {
+      Serial.print("0");
+    }
+
     Serial.print (sector[q], HEX);
     Serial.print (" ");
     sixteen++;
@@ -184,7 +189,6 @@ void READ()
       sixteen = 0;
       Serial.println ("");
     }
-
   }
 
 }
