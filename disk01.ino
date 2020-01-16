@@ -58,7 +58,7 @@ volatile byte command;
 volatile byte data4H, data4L, data8;
 
 byte sectorSize = 128;
-byte sectors = 4;
+byte sectors = 2;
 byte tracks = 4;
 const long int diskSize = 1024; //sectors * tracks * sectorSize;
 
@@ -156,10 +156,37 @@ void HOME()
 
 void READ()
 {
-  Serial.print ("Reading sector:");
-  Serial.print (curSector);
-  Serial.print (" sector / Track:");
-  Serial.println (curTrack);
+  Serial.println ("");
+  Serial.print  ("Track:");
+  Serial.print (curTrack);
+  Serial.print ("  Sector:");
+  Serial.println (curSector);
+
+
+  long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
+
+  int sixteen = 0;
+  Serial.println ("");
+  Serial.println ("");
+  Serial.print ("TRACK:");
+  Serial.print (curTrack);
+  Serial.print ("   SECTOR:");
+  Serial.println (curSector);
+  Serial.println ("");
+  for (byte q = 0; q < sectorSize; q++)
+  {
+    sector[q] = disk[startByte + q];
+    Serial.print (sector[q], HEX);
+    Serial.print (" ");
+    sixteen++;
+    if (sixteen == 16)
+    {
+      sixteen = 0;
+      Serial.println ("");
+    }
+
+  }
+
 }
 
 void SETSEC()
@@ -240,6 +267,21 @@ void setup() {
   Serial.begin (115200);
 
   attachInterrupt(1, getData, CHANGE);
+
+
+  for ( int tr = 0; tr < tracks; tr++)
+  {
+
+    for ( int sect = 0; sect < sectors ; sect++)
+    {
+      curSector = sect;
+      curTrack  = tr;
+      READ();
+    }
+  }
+
+
+
 
 }
 
