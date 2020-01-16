@@ -1,4 +1,6 @@
-#include <Arduino.h>
+//#include <Arduino.h>
+
+
 /*DDRD = B11111110;  // sets Arduino pins 1 to 7 as outputs, pin 0 as input
   DDRD = DDRD | B11111100;  // this is safer as it sets pins 2 to 7 as outputs without changing the value of pins 0 & 1, which are RX & TX
   PORTD = B10101000; // sets digital pins 7,5,3 HIGH
@@ -53,7 +55,7 @@
 volatile byte databits;
 volatile bool state = false;
 volatile byte command;
-volatile byte data4;
+volatile byte data4H, data4L, data8;
 
 byte sectorSize = 128;
 byte sectors = 4;
@@ -64,143 +66,7 @@ byte curSector = 0;
 byte curTrack = 0;
 byte curDrive = 0;
 
-
-
-
-void getData()
-{
-  DDRB = B00000000;
-  DDRD = B00000000;
-
-  byte portb = PINB;
-  portb = portb  << 2;
-
-  Serial.print ("portb:");
-  Serial.println (portb, BIN);
-
-  byte portd = PIND;
-  portd = portd >> 3;
-
-  Serial.print ("portd:");
-  Serial.println (portd, BIN);
-
-  databits = portb | portd;
-
-  Serial.print ("databits:");
-  Serial.println (databits, BIN);
-
-  command = (databits & B00001110) >> 1;
-  data4   = (databits & B11110000) >> 4;
-
-  Serial.print ("command:");
-  Serial.print (command, BIN);
-
-  Serial.print ("/");
-  Serial.print (command);
-
-  Serial.print ("data4:");
-  Serial.print (data4, BIN);
-  state = true;
-}
-
-
-
-
-void setup() {
-
-  Serial.begin (115200);
-
-  attachInterrupt(1, getData, CHANGE);
-
-}
-
-void loop()
-
-{
-  if (state)
-  {
-    Serial.println (databits);
-    state = false;
-
-
-
-
-
-    switch (command)
-
-    {
-      case 00:      //Read a sector
-      Serial.print ("Reading sector:");
-      Serial.print (curSector);
-      Serial.print (" sector / Track:");
-      Serial.println (curTrack);
-        break;
-
-      case 01:      //Move disc head to track 0
-      Serial.println ("Going home.");
-      curSector = 0;
-      curTrack  = 0;
-
-        break;
-
-      case 02:      //Select disc drive
-      curDrive = data4;
-
-      Serial.print ("Drive selected:");
-      Serial.println (data4);
-
-      // TO DO Сделать выбор файла согласно букве, и придумать статусные ответы.
-        break;
-
-      case 03:      //Set sector number
-      curSector = data4;
-
-      Serial.print ("curSector:");
-      Serial.println (curSector);
-
-      // TODO  больше 16 
-        break;
-
-      case 04:      //Set track number
-      curTrack = data4;
-      
-      
-      Serial.print ("curTrack:");
-      Serial.println (curTrack);
-      
-    
-      // TODO  больше 16 
-
-        break;
-              // Read 2
-      case 05:
-
-        break;
-
-      case 06:      // Write 2
-
-        break;
-
-      case 07:      //Write a sector
-
-      Serial.print ("Writting sector:");
-      Serial.print (curSector);
-      Serial.print (" sector / Track:");
-      Serial.println (curTrack);
-
-        break;
-
-
-
-
-
-    }
-
-
-
-  }
-
-}
+byte sector[128];
 
 byte disk [diskSize] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -239,6 +105,9 @@ byte disk [diskSize] = {
   0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03,
   0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03,
 
+
+
+
   0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04,
   0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04,
   0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04,
@@ -275,3 +144,140 @@ byte disk [diskSize] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
+
+
+void HOME()
+{
+  Serial.println ("Going home.");
+  curSector = 0;
+  curTrack  = 0;
+  // TO DO Сделать выбор файла согласно букве, и придумать статусные ответы.
+}
+
+void READ()
+{
+  Serial.print ("Reading sector:");
+  Serial.print (curSector);
+  Serial.print (" sector / Track:");
+  Serial.println (curTrack);
+}
+
+void SETSEC()
+{
+  curSector = data4L;
+
+  Serial.print ("curSector:");
+  Serial.println (curSector);
+
+  // TODO  больше 16
+}
+
+void SETTRK()
+{
+  curTrack = data4L;
+  Serial.print ("curTrack:");
+  Serial.println (curTrack);
+  // TODO  больше 16
+}
+
+
+
+void SELDSK()
+{
+  curDrive = data4L;
+  Serial.print ("Drive selected:");
+  Serial.println (data4L);
+}
+
+void WRITE()
+{
+  Serial.print ("Writting sector:");
+  Serial.print (curSector);
+  Serial.print (" sector / Track:");
+  Serial.println (curTrack);
+}
+
+
+
+void getData()
+{
+  DDRB = B00000000;
+  DDRD = B00000000;
+
+  byte portb = PINB;
+  portb = portb  << 2;
+
+  byte portd = PIND;
+  portd = portd >> 3;
+
+  databits = portb | portd;
+
+  command = (databits & B00001110) >> 1;
+  data4L   = (databits & B11110000) >> 4;
+
+  Serial.print ("portb:");
+  Serial.println (portb, BIN);
+  Serial.print ("portd:");
+  Serial.println (portd, BIN);
+  Serial.print ("command:");
+  Serial.print (command, BIN);
+  Serial.print ("databits:");
+  Serial.println (databits, BIN);
+
+  Serial.print ("/");
+  Serial.print (command);
+
+  Serial.print ("data4L:");
+  Serial.print (data4L, BIN);
+  state = true;
+}
+
+
+
+
+void setup() {
+
+  Serial.begin (115200);
+
+  attachInterrupt(1, getData, CHANGE);
+
+}
+
+void loop()
+
+{
+  if (state)
+  {
+    Serial.println (databits);
+    state = false;
+
+
+    switch (command)
+    {
+      case 00:      //Read a sector
+        READ();
+        break;
+      case 01:      //Move disc head to track 0
+        HOME();
+        break;
+      case 02:      //Select disc drive
+        SELDSK();
+        break;
+      case 03:      //Set sector number
+        SETSEC();
+        break;
+
+      case 04:      //Set track number
+        SETTRK();
+        break;
+      case 05:
+        break;
+      case 06:
+        break;
+      case 07:      //Write a sector
+        WRITE();
+        break;
+    }
+  }
+}
+
