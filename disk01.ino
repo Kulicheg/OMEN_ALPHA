@@ -55,7 +55,7 @@
 volatile byte databits;
 volatile bool state = false;
 volatile byte command;
-volatile byte data4H, data4L, data8;
+volatile byte  data4, data4H, data4L, data8;
 
 byte sectorSize = 128;
 byte sectors = 2;
@@ -145,14 +145,20 @@ byte disk [diskSize] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-
+//****************************************************************************************
 void HOME()
 {
+  Serial.println ("");
   Serial.println ("Going home.");
+  Serial.print (data4H,HEX);
+  Serial.print (" ");
+  Serial.println (data4L,HEX);
+  
   curSector = 0;
   curTrack  = 0;
   // TO DO Сделать выбор файла согласно букве, и придумать статусные ответы.
 }
+//****************************************************************************************
 
 void READ()
 {
@@ -166,8 +172,6 @@ void READ()
   Serial.print ("   SECTOR:");
   Serial.println (curSector);
   Serial.println ("");
-
-
 
 
   for (byte q = 0; q < sectorSize; q++)
@@ -206,7 +210,7 @@ void SETSEC()
 void SETTRK()
 {
   curTrack = data4L;
-  Serial.print ("curTrack:");
+  Serial.print ("SETTRK curTrack:");
   Serial.println (curTrack);
   // TODO  больше 16
 }
@@ -245,21 +249,6 @@ void getData()
 
   command = (databits & B00001110) >> 1;
   data4L   = (databits & B11110000) >> 4;
-
-  Serial.print ("portb:");
-  Serial.println (portb, BIN);
-  Serial.print ("portd:");
-  Serial.println (portd, BIN);
-  Serial.print ("command:");
-  Serial.print (command, BIN);
-  Serial.print ("databits:");
-  Serial.println (databits, BIN);
-
-  Serial.print ("/");
-  Serial.print (command);
-
-  Serial.print ("data4L:");
-  Serial.print (data4L, BIN);
   state = true;
 }
 
@@ -270,7 +259,7 @@ void setup() {
 
   Serial.begin (115200);
 
-  attachInterrupt(1, getData, CHANGE);
+  attachInterrupt(1, getData, RISING);
 
 
   for ( int tr = 0; tr < tracks; tr++)
@@ -280,12 +269,9 @@ void setup() {
     {
       curSector = sect;
       curTrack  = tr;
-      READ();
+     // READ();
     }
   }
-
-
-
 
 }
 
@@ -294,10 +280,10 @@ void loop()
 {
   if (state)
   {
-    Serial.println (databits);
+    Serial.println ("");
+    Serial.print ("databits:");
+    Serial.println (databits, BIN);
     state = false;
-
-
     switch (command)
     {
       case 00:      //Read a sector
