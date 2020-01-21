@@ -12,7 +12,7 @@ TMP2B       EQU     80FEH ;temp USE WITH CAUTION + 80FFH
 ; 
 START:               
 ;
-
+            CALL ACIAINIT
 
             LXI     H,33792 ;		    8400
             SHLD    32992 ;			RAMSTART
@@ -21,8 +21,6 @@ START:
 ; 
 ;            CALL    CLEARMEM
 ; 
-            MVI     A,21 ;ACIA init
-            OUT     222 
 
             LXI     H,ATTR 
             MVI     M,40 
@@ -49,6 +47,8 @@ LOOP:
             LXI     H,ATTR ;Save FC
             MVI     M,40 
             CALL    RECTDRAW 
+            
+            CALL    BYTEIN
 ; 
             LXI     H,XPOS ;Save X
             MVI     M,6 
@@ -64,6 +64,8 @@ LOOP:
             MVI     M,41 
             CALL    SETATTRIB 
             CALL    RECTDRAW 
+            
+            CALL    BYTEIN
 ; 
             LXI     H,XPOS ;Save X
             MVI     M,11 
@@ -81,6 +83,8 @@ LOOP:
             MVI     M,42 
             CALL    SETATTRIB 
             CALL    RECTDRAW 
+            
+            CALL    BYTEIN
 ; 
             LXI     H,XPOS ;Save X
             MVI     M,16 
@@ -96,6 +100,8 @@ LOOP:
             MVI     M,43 
             CALL    SETATTRIB 
             CALL    RECTDRAW 
+            
+            CALL    BYTEIN
 ; 
             LXI     H,XPOS ;Save X
             MVI     M,21 
@@ -113,6 +119,8 @@ LOOP:
             CALL    RECTDRAW 
             CALL    SETATTRIB
             
+            CALL    BYTEIN
+            
             LXI     H,ATTR2 ;Save FC
             MVI     M,1 
             
@@ -121,7 +129,24 @@ LOOP:
             RET      
 
 
+ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
+            OUT     0DEh 
+            RET
 
+WAITIN:     IN      0DEh 
+            ANI     01 
+            JZ      WAITIN 
+            RET      
+
+BYTEIN:     
+            CALL    WAITIN 
+            IN     0DFh 
+            RET
+            
+
+BYTEOUT:    CALL    WAITOUT 
+            OUT     0DFh 
+            RET
 
 
 
