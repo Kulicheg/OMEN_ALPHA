@@ -45,12 +45,92 @@ CHARSET:    CALL    BYTEOUT
             CALL WAITIN
             
             
-            CALL RECTDRAW
+             LXI     H,XPOS ;Save X
+            MVI     M,1 
+            LXI     H,YPOS ;Save Y
+            MVI     M,1 
+            LXI     H,WPOS ;Save W
+            MVI     M,5 
+            LXI     H,HPOS ;Save H
+            MVI     M,24 
+            LXI     H,FILLCHR ;Save CHAR
+            MVI     M,32 
+            LXI     H,ATTR ;Save FC
+            MVI     M,40 
+            CALL    RECTDRAW 
             
+            CALL    BYTEIN
+; 
+            LXI     H,XPOS ;Save X
+            MVI     M,6 
+            LXI     H,YPOS ;Save Y
+            MVI     M,1 
+            LXI     H,WPOS ;Save W
+            MVI     M,5 
+            LXI     H,HPOS ;Save H
+            MVI     M,24 
+            LXI     H,FILLCHR ;Save CHAR
+            MVI     M,48 
+            LXI     H,ATTR ;Save FC
+            MVI     M,41 
+            CALL    SETATTRIB 
+            CALL    RECTDRAW 
             
+            CALL    BYTEIN
+; 
+            LXI     H,XPOS ;Save X
+            MVI     M,11 
+            LXI     H,YPOS ;Save Y
+            MVI     M,1 
+            LXI     H,WPOS ;Save W
+            MVI     M,5 
+            LXI     H,HPOS ;Save H
+            MVI     M,24 
+            LXI     H,FILLCHR ;Save CHAR
+            MVI     M,49 
+            LXI     H,ATTR ;Save FC
+            MVI     M,42
+            LXI     H,ATTR2 ;Save FC
+            MVI     M,42 
+            CALL    SETATTRIB 
+            CALL    RECTDRAW 
             
+            CALL    BYTEIN
+; 
+            LXI     H,XPOS ;Save X
+            MVI     M,16 
+            LXI     H,YPOS ;Save Y
+            MVI     M,1 
+            LXI     H,WPOS ;Save W
+            MVI     M,5 
+            LXI     H,HPOS ;Save H
+            MVI     M,24 
+            LXI     H,FILLCHR ;Save CHAR
+            MVI     M,50 
+            LXI     H,ATTR ;Save FC
+            MVI     M,43 
+            CALL    SETATTRIB 
+            CALL    RECTDRAW 
             
-            
+            CALL    BYTEIN
+; 
+            LXI     H,XPOS ;Save X
+            MVI     M,21 
+            LXI     H,YPOS ;Save Y
+            MVI     M,1 
+            LXI     H,WPOS ;Save W
+            MVI     M,5 
+            LXI     H,HPOS ;Save H
+            MVI     M,24 
+            LXI     H,FILLCHR ;Save CHAR
+            MVI     M,51 
+            LXI     H,ATTR ;Save FC
+            MVI     M,44 
+            CALL    SETATTRIB 
+            CALL    RECTDRAW 
+
+            CALL    BYTEIN
+            CALL    CLEARSCR
             RET      
 
 
