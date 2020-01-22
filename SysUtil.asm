@@ -26,14 +26,8 @@ START:
             MVI     M,40 
             LXI     H,ATTR2 
             MVI     M,1 
-            
-            
-            ;CALL    SETATTRIB 
-            ;CALL    CLEARSCR 
 ; 
-; 
-LOOP:                
-            CALL    SETATTRIB
+LOOP:       CALL    SETATTRIB
             CALL    CLEARSCR 
             LXI     H,XPOS ;Save X
             MVI     M,40 
@@ -43,15 +37,20 @@ LOOP:
             
             MVI     C, 46
             CALL    BYTEOUT
-
-
             MVI     C,  20
-CHARSET:    
-            CALL    BYTEOUT
+CHARSET:    CALL    BYTEOUT
             INR     C
             SUI     7Fh        
             JNZ     CHARSET
             CALL WAITIN
+            
+            
+            CALL RECTDRAW
+            
+            
+            
+            
+            
             RET      
 
 
@@ -151,7 +150,7 @@ RECTDRAW:            ;Draws rectangle
 ; 
 
             CALL    SETCURSOR 
-            ;CALL    SETATTRIB 
+            CALL    SETATTRIB 
 
             LXI     H,YPOS 
             MOV     B,M 
