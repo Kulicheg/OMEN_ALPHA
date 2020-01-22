@@ -33,14 +33,25 @@ START:
 ; 
 ; 
 LOOP:                
-; 
+            CALL    SETATTRIB
+            CALL    CLEARSCR 
             LXI     H,XPOS ;Save X
             MVI     M,40 
             LXI     H,YPOS ;Save Y
             MVI     M,12 
             CALL    SETCURSOR
+            
+            MVI     C, 46
             CALL    BYTEOUT
 
+
+            MVI     C,  20
+CHARSET:    
+            CALL    BYTEOUT
+            INR     C
+            SUI     7Fh        
+            JNZ     CHARSET
+            CALL WAITIN
             RET      
 
 
@@ -60,15 +71,11 @@ BYTEIN:
             
 
 BYTEOUT:    
-            
-            CALL    WAITOUT
-            ;MOV     A, C
-            MVI     A, "*"
+                            ; ВХОД C  - Байт для вывода
+            CALL    WAITOUT ; Выход A - Отправленный байт
+            MOV     A, C
             OUT     0DFh 
             RET
-
-
-
 
 ; 
 SETCURSOR:           
@@ -96,8 +103,11 @@ SETCURSOR:
             POP     H
             RET      
 ; 
-WAITOUT:    IN      222 
-            ANI     02 
+WAITOUT:    
+
+
+            IN      0DEh 
+            ANI     02h 
             JZ      WAITOUT 
             RET      
 ; 
@@ -107,23 +117,14 @@ HOMESCR:
             CALL    TXTOUT 
             RET      
 ; 
-CLEARSCR:            
-            LXI     H,XPOS 
-            MVI     M,1 
-            LXI     H,YPOS 
-            MVI     M,1 
-            LXI     H,WPOS 
-            MVI     M,80 
-            LXI     H,HPOS 
-            MVI     M,25 
-            LXI     H,FILLCHR 
-            MVI     M,32 
-            CALL    RECTDRAW 
+
+
+
+CLEARSCR:
 
             LXI     H,CLSSTR 
             CALL    TXTOUT 
-            RET      
-
+            RET
 
 ; 
 TXTOUT:     CALL    WAITOUT 
@@ -266,7 +267,9 @@ CLEARMEM2:  MVI     M,0
 ; 
 HOMESTR:    .ISTR   1Bh,"[H" 
 ; 
-CLSSTR:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;0m" 
+CLSSTR:     .ISTR   1Bh,"c"
+;
+CLSSTR2:     .ISTR   1Bh,"[2J",1Bh,"[H",1Bh,"[40;32;0m" 
 ; 
 DEFATTRIBSTR: .ISTR 1Bh,"[40;32;1m" 
 
@@ -318,7 +321,9 @@ DB "RECTDRAW  Draw rectangle X,Y,H,W,A,C         "
 DB "CLEARMEM  from '80E0H' to '80E2H'            "
 DB "DEFATTR   Quick reset to G/B w/o MEM         "
 DB "DRAWWINDOW  Draws window like this           "
-
+DB "WAITIN    Wait for any key                   "
+DB "BYTEIN    Read byte from console with wait   "
+DB "BYTEOUT   Print byte from C                  "
 DB "80F0H XPOS 80F1H YPOS 80F2H WPOS 80F3H HPOS  "
 DB "80F4H ATTR 80F5H ATTR2 80F6H FILLCHR   "
 DB 255
