@@ -28,104 +28,19 @@ START:
             MVI     M,1 
             
             
-            CALL    SETATTRIB 
-            CALL    CLEARSCR 
+            ;CALL    SETATTRIB 
+            ;CALL    CLEARSCR 
 ; 
 ; 
 LOOP:                
 ; 
             LXI     H,XPOS ;Save X
-            MVI     M,1 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,32 
-            LXI     H,ATTR ;Save FC
             MVI     M,40 
-            CALL    RECTDRAW 
-            
-            CALL    BYTEIN
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,6 
             LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,48 
-            LXI     H,ATTR ;Save FC
-            MVI     M,41 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-            
-            CALL    BYTEIN
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,11 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,49 
-            LXI     H,ATTR ;Save FC
-            MVI     M,42
-            LXI     H,ATTR2 ;Save FC
-            MVI     M,42 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-            
-            CALL    BYTEIN
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,16 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,50 
-            LXI     H,ATTR ;Save FC
-            MVI     M,43 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-            
-            CALL    BYTEIN
-; 
-            LXI     H,XPOS ;Save X
-            MVI     M,21 
-            LXI     H,YPOS ;Save Y
-            MVI     M,1 
-            LXI     H,WPOS ;Save W
-            MVI     M,5 
-            LXI     H,HPOS ;Save H
-            MVI     M,24 
-            LXI     H,FILLCHR ;Save CHAR
-            MVI     M,51 
-            LXI     H,ATTR ;Save FC
-            MVI     M,44 
-            CALL    SETATTRIB 
-            CALL    RECTDRAW 
-            CALL    SETATTRIB
-            
-            CALL    BYTEIN
-            
-            LXI     H,ATTR2 ;Save FC
-            MVI     M,1 
-            
-            LXI     H,ABOUT ; debug
-            CALL    DRAWWINDOW 
+            MVI     M,12 
+            CALL    SETCURSOR
+            CALL    BYTEOUT
+
             RET      
 
 
@@ -144,7 +59,11 @@ BYTEIN:
             RET
             
 
-BYTEOUT:    CALL    WAITOUT 
+BYTEOUT:    
+            
+            CALL    WAITOUT
+            ;MOV     A, C
+            MVI     A, "*"
             OUT     0DFh 
             RET
 
@@ -153,6 +72,9 @@ BYTEOUT:    CALL    WAITOUT
 
 ; 
 SETCURSOR:           
+            
+            PUSH    H
+            PUSH    D
             LXI     H,SETCURSORSTR + 2 
             XCHG     ; DE<->HL
             LHLD    YPOS ;80F0->HL Y
@@ -169,6 +91,9 @@ SETCURSOR:
 ; 
             LXI     H,SETCURSORSTR 
             CALL    TXTOUT 
+            
+            POP     D
+            POP     H
             RET      
 ; 
 WAITOUT:    IN      222 
@@ -225,7 +150,7 @@ RECTDRAW:            ;Draws rectangle
 ; 
 
             CALL    SETCURSOR 
-            CALL    SETATTRIB 
+            ;CALL    SETATTRIB 
 
             LXI     H,YPOS 
             MOV     B,M 
@@ -454,7 +379,7 @@ DRAWWINDOW:
             CALL    SETCURSOR 
             LXI     H,ABOUT + 7 
             CALL    TXTOUT 
-            CALL    SETATTRIB
+            ;CALL    SETATTRIB
 
 ;---BODY--------------------------------------------
             
@@ -487,10 +412,8 @@ DRAWWINDOW2:
             LXI     H,YPOS 
             INR     M               ;down to  body
             CALL    SETCURSOR
-            
             LXI     H,WPOS
             MOV     E,M 
-            
             POP     H
 DRAWWINDOW3:  
             CALL    WAITOUT 
