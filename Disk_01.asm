@@ -34,7 +34,7 @@ INT75   EQU     803Ch
             CALL    INITOUT
             CALL    ACIAINIT
             MVI     B,81H 
-            CALL    HOME 
+            CALL    RECBYTE 
             
             POP     H
             POP     D
@@ -66,6 +66,7 @@ SECTORDONE:
 
 RECINTLOW:                            ;  Сюда мы попадаем  если сработало прерывание
             MOV     A, M
+            ANA     A
             JNZ     RECINTHIGH    
             IN      00
             MOV     M, A
@@ -87,7 +88,7 @@ RECINTHIGH:
             MVI     A,0F0h ; 11110000
             ANA     B 
             MOV     B, A
-            ANA     C
+            ORA     C
             MOV     M, A
             INX     H
             MVI     M, 00h
