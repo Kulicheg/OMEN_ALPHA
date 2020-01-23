@@ -23,7 +23,7 @@ DMA     EQU     8080h
 INT75   EQU     803Ch
 
             .ORG    INT75
-            JMP     RECINT          ; Прыжок по прерыванию 7.5
+            JMP     RECINTLOW          ; Прыжок по прерыванию 7.5
 
             .ORG    9000H 
             
@@ -32,6 +32,7 @@ INT75   EQU     803Ch
             PUSH    D
             PUSH    H
             CALL    INITOUT
+            CALL    ACIAINIT
             MVI     B,81H 
             CALL    HOME 
             
@@ -47,13 +48,17 @@ RECBYTE:
            
             LXI     H, DMA
             MVI     M, 00h
-            
+            MVI     D, 80h            
+
+
+CYCLE:
             EI                     ; Разрешаем прерывания
-            MVI     A,18h          ; Включаем INT 7.5
-            SIM
+            MVI     A,18h          ; 
+            SIM                    ; Включаем INT 7.5
+    
+            JMP     CYCLE
             
-            
-            
+SECTORDONE:            
             RET
             
 
@@ -83,7 +88,10 @@ RECINTHIGH:
             MOV     B, A
             ANA     C
             MOV     M, A
-
+            INX     H
+            MVI     M, 00h
+            DCR     D
+            JZ      SECTORDONE
             RET
 
 
@@ -155,4 +163,21 @@ LOOP2:      NOP
             JNZ     LOOP2 
             RET
 
+BYTEOUT:    
+                            ; ВХОД C  - Байт для вывода
+            CALL    WAITOUT ; Выход A - Отправленный байт
+            MOV     A, C
+            OUT     0DFh 
+            RET
+            
+WAITOUT:    
 
+
+            IN      0DEh 
+            ANI     02h 
+            JZ      WAITOUT 
+            RET      
+
+ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
+            OUT     0DEh 
+            RET
