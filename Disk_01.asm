@@ -59,6 +59,7 @@ CYCLE:
             JMP     CYCLE
             
 SECTORDONE:            
+            DI
             RET
             
 
