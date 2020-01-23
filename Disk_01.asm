@@ -19,47 +19,94 @@
 ;  06  110 Запись 2
 ;  07  111 Запись  WRITE   ;39: Write a sector
 
+DMA     EQU     8080h     
+INT75   EQU     803Ch
+
+            .ORG    INT75
+            JMP     RECINT          ; Прыжок по прерыванию 7.5
+
             .ORG    9000H 
-DMA EQU  8080h            
             
-            CALL INIT
-START: 
-        CALL HOME
+            PUSH    PSW
+            PUSH    B
+            PUSH    D
+            PUSH    H
+            CALL    INITOUT
+            MVI     B,81H 
+            CALL    HOME 
+            
+            POP     H
+            POP     D
+            POP     B
+            POP     PSW
+            JMP     00D0h            ; warm start of monitor
 
-            RET      
+RECBYTE:
+            
+            CALL  INITOUT
+           
+            LXI     H, DMA
+            MVI     M, 00h
+            
+            EI                     ; Разрешаем прерывания
+            MVI     A,18h          ; Включаем INT 7.5
+            SIM
+            
+            
+            
+            RET
+            
 
 
-INIT:                
-            MVI     A, 80H 
+RECINTLOW:                            ;  Сюда мы попадаем  если сработало прерывание
+            MOV     A, M
+            JNZ     RECINTHIGH    
+            IN      00
+            MOV     M, A
+            RET
+    
+RECINTHIGH:
+
+            MOV     C, M
+            MVI     A,0F0h ; 11110000
+            ANA     C
+            RRC
+            RRC
+            RRC
+            RRC
+            MOV     C, A
+            
+            IN      00
+            MOV     B, A
+            MVI     A,0F0h ; 11110000
+            ANA     B 
+            MOV     B, A
+            ANA     C
+            MOV     M, A
+
+            RET
+
+
+
+
+
+
+INITOUT:                
+            MVI     A,80H 
             OUT     07H 
-            MVI     A, 00H 
+            MVI     A,0H 
             OUT     00H 
             RET      
+            
+INITIN:                
+            MVI     A,90h 
+            OUT     07h 
+            MVI     A,0h 
+            OUT     00h 
+            RET                  
 
-
-
-                            
-READ:           
-                                ; на выходе мы имеем сектор записанный в память по адресу условного DMA
-            MVI     B, 00h      ; B - данные которые мы хотим отправить накопителю  перед чтением
-            MVI     D, 00h      ; D - комманда  чтения (000)
-            CALL    SENDCMD     ; Отправляем накопителю желание считать сектор
-            MVI     E, 7Fh      ; счетчик длины сектора (127)
-            LXI     H, DMA      ; Адрес куда будем сохранять сектор
-RCVBYTE:
-            IN      00h         ; Отправив комманду на чтение текущего сектора переходим в ожидание данных
-            JZ      RCVBYTE     ; Крутим цикл пока в порт не поступят данные, архитектурой задано  что между циклами в порт записан 0
-            MOV     M, A        ; Сохраняем в память принятый байт.
-            INX     H           ; HL + 1
-            DCR     E           ; D  - 1
-            JNZ     RCVBYTE     ; Пока счетчик не обнулился продолжаем принимать байты
-            MVI     A, 00h      ; OK
-            RET                 ; Возврат
-
-
-
-SENDCMD:            ; B - данные
-                    ; D - комманда               
+;                          B - данные
+HOME:                
             MOV     C,B ; в BC у нас 2 копии данных В-h C-l
 
             MVI     A,0F0h ; 11110000
@@ -73,23 +120,21 @@ SENDCMD:            ; B - данные
             RLC      
             MOV     C,A 
 
-            MOV     A,D     ; комманда
-            RLC             ; Сдвигаем комманду на место
+            MVI     A,02h   ; 0000 001 0 HOME
             ORA     B       ; Добавляем к половинкам код комманды.
             MOV     B,A
-            MOV     A,D     ; комманда
-            RLC             ; Сдвигаем комманду на место
-            ORA     C       ; Добавляем к половинкам код комманды.
+            MVI     A,02h   ; 0000 001 0 HOME
+            ORA     C       ; 
             MOV     C,A
 
-SENDBYTE:                    ; BC содержит половинки, код комманды и 0 в младшем бите
+SENDBYTE:                   ; BC содержит половинки, код комманды и 0 в младшем бите
 
             MOV     A,C 
-            INR     A       ; Поднимаем младший бит  чтобы диск проснулся
+            INR     A       ; Поднимаем младший бит
             OUT     00h     ; Выводим  младшую половину в порт
             CALL    LOOP
             MVI     A,00h 
-            OUT     00h ; обнуляем порт 
+            OUT     00h ; обнуляем порт выше нужна будет пауза 100%
             CALL    LOOP
            
             MOV     A,B 
@@ -97,30 +142,17 @@ SENDBYTE:                    ; BC содержит половинки, код к
             OUT     00h     ; Выводим  старшую половину в порт для для совместимости 
             CALL    LOOP    ; даже комманды без данных передаем в 2 такта
             MVI     A,00h  
-            OUT     00h     ; обнуляем порт
+            OUT     00h     ; обнуляем порт выше нужна будет пауза 100%
             CALL    LOOP
-            RET
-            
-
-HOME:
-
-            MVI     D, 02H    ; D - комманда HOME               
-            MVi     B, 0ABh   ; B - неиспользуеммые данные
-            CALL    SENDCMD    
-            RET
-
 
 
 LOOP:
-            MVI     D,50h ;delay a little
+            MVI     D,16h ;delay a little
 LOOP2:      NOP
-            NOP
-            NOP
-            NOP
-            NOP
-            NOP
             NOP
             NOP
             DCR     D ;decrement counter
             JNZ     LOOP2 
             RET
+
+
