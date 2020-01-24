@@ -35,11 +35,18 @@ INT75   EQU     803Ch
             MVI     B,81H 
             CALL    RECBYTE 
             
+            MVI     C, 64
+            CALL    BYTEOUT
+            
+            
             POP     H
             POP     D
             POP     B
             POP     PSW
-            JMP     00D0h            ; warm start of monitor
+            
+            
+            
+            JMP     00D8h            ; warm start of monitor
 
 
 RECBYTE:
@@ -53,7 +60,7 @@ RECBYTE:
 
             LXI     H, DMA
             MVI     M, 00h
-            MVI     D, 80h            
+            MVI     D, 7Fh            
 
             EI                     ; Разрешаем прерывания
             MVI     A,18h          ; 
@@ -65,7 +72,10 @@ CYCLE:
 SECTORDONE:            
            
             DI
-            RET
+            MVI     C, 65
+            CALL    BYTEOUT
+            
+            JMP     00D8H ; WARM BOOT MONITOR
             
 
 
@@ -80,6 +90,8 @@ RECINTLOW:                            ;  Сюда мы попадаем  есл�
             MVI     A,18h          ; 
             SIM                    ; Включаем INT 7.5
             
+            MVI     C, 46
+            CALL    BYTEOUT
             RET
     
 RECINTHIGH:
@@ -103,6 +115,9 @@ RECINTHIGH:
             
             INX     H
             MVI     M, 00h
+            
+            MVI     C, 47
+            CALL    BYTEOUT
             DCR     D
             JZ      SECTORDONE 
     
