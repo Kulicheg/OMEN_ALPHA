@@ -33,12 +33,9 @@ INT75   EQU     803Ch
             CALL    INITOUT
             CALL    ACIAINIT
             MVI     B,81H 
-            CALL    RECBYTE 
-            
-            MVI     C, 64
-            CALL    BYTEOUT
-            
-            
+            CALL    READSECTOR 
+
+EXIT:            
             POP     H
             POP     D
             POP     B
@@ -46,10 +43,10 @@ INT75   EQU     803Ch
             
             
             
-            JMP     00D8h            ; warm start of monitor
+            JMP     0000h            ; warm start of monitor
 
 
-RECBYTE:
+READSECTOR:
             
             CALL  INITOUT
            
@@ -60,7 +57,7 @@ RECBYTE:
 
             LXI     H, DMA
             MVI     M, 00h
-            MVI     D, 7Fh            
+            MVI     D, 80h            
 
             EI                     ; Разрешаем прерывания
             MVI     A,18h          ; 
@@ -72,11 +69,12 @@ CYCLE:
 SECTORDONE:            
            
             DI
-            MVI     C, 65
+            
+            MVI     A, 0 
+            OUT     00h
+            MVI     C, 64
             CALL    BYTEOUT
-            
-            JMP     00D8H ; WARM BOOT MONITOR
-            
+            RET        
 
 
 RECINTLOW:                            ;  Сюда мы попадаем  если сработало прерывание
@@ -89,9 +87,6 @@ RECINTLOW:                            ;  Сюда мы попадаем  есл�
             EI                     ; Разрешаем прерывания
             MVI     A,18h          ; 
             SIM                    ; Включаем INT 7.5
-            
-            MVI     C, 46
-            CALL    BYTEOUT
             RET
     
 RECINTHIGH:
@@ -115,12 +110,8 @@ RECINTHIGH:
             
             INX     H
             MVI     M, 00h
-            
-            MVI     C, 47
-            CALL    BYTEOUT
             DCR     D
             JZ      SECTORDONE 
-    
             EI
             MVI     A,18h
             SIM 
@@ -128,10 +119,10 @@ RECINTHIGH:
             RET
 
 INITOUT:                
-            MVI     A,80H 
+            MVI     A, 80h
             OUT     07H 
-            MVI     A,0H 
-            OUT     00H 
+            MVI     A, 0h 
+            OUT     00h 
             RET      
             
 INITIN:                
