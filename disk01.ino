@@ -178,12 +178,7 @@ void putData(byte dataSend, byte commandSend)
  byte highPart, lowPart;
  
   DDRB = B11111111;
-  DDRD = DDRD | B11111100;  // this is safer as it sets pins 2 to 7 as outputs without changing the value of pins 0 & 1, which are RX & TX
-  
-delay (1);
-
-  PORTD = 0;        //очищаем порт 
-  PORTB = 0;
+  DDRD = DDRD | B11111100; 
   
   highPart =  dataSend & B11110000;
   lowPart  = (dataSend & B00001111) << 4;
@@ -191,58 +186,33 @@ delay (1);
   highPart = highPart | commandSend;
   lowPart  = lowPart  | commandSend;
   
-    
   byte PD = lowPart << 4; 
   byte PB = lowPart >> 2;
 
+;delay (6);
 
+PORTD = 0;        //очищаем порт 
+PORTB = 0;
 
-PORTD = PD;           // 0,1 bits
+//******************* RIGHT *****************************
+PORTD = PD;           // 0,1 bits   
 PORTB = PB;           // 2-7 bits
+PORTD = PORTD | B00001000;               // Синхрофлаг подняли
 
-/*
-Serial.print("lowPart=");
-Serial.print(lowPart, BIN);
-Serial.print(" PD=");
-Serial.print(PD, BIN);
-Serial.print(" PB:");
-Serial.println(PB, BIN);
-*/
+//*******************************************************
 
-
-PORTD = PORTD + 8;              // Синхрофлаг подняли
-delay (1);
-
+delay (6);
 
 PORTB = 0;                     // Очищаем порт
 PORTD = 0;
 
-delay (1);
-
-
+//********************** LEFT ***************************
 PD = highPart << 4;
 PB = highPart >> 2;
 
-PORTD = PD;                 // 0,1 bits
-PORTB = PB;            // 2-7 bits
-
-/*
-Serial.print("highPart=");
-Serial.print(highPart, BIN);
-Serial.print(" PD=");
-Serial.print(PD, BIN);
-Serial.print(" PB:");
-Serial.println(PB, BIN);
-*/
-
-PORTD = PORTD + 8;              // Синхрофлаг подняли
-
-delay (1);
-
-PORTB = 0;                     // Очищаем порт
-PORTD = 0;
-
-delay (1);
+PORTD = PD;                 // 0,1 bits 
+PORTB = PB;                 // 2-7 bits
+PORTD = PORTD | B00001000;               // Синхрофлаг подняли
 }
 
 //****************************************************************************************
@@ -263,7 +233,7 @@ void READ()
 {
 
 detachInterrupt(1);
-
+  delay (4);
   long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
 
   int sixteen = 0;
