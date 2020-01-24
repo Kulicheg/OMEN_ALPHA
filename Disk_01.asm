@@ -55,15 +55,15 @@ RECBYTE:
             MVI     M, 00h
             MVI     D, 80h            
 
-
-CYCLE:
             EI                     ; Разрешаем прерывания
             MVI     A,18h          ; 
-            SIM                    ; Включаем INT 7.5
-    
+            SIM                    ; Разрешаем прерывания
+CYCLE:
+          
             JMP     CYCLE
             
 SECTORDONE:            
+           
             DI
             RET
             
@@ -75,9 +75,11 @@ RECINTLOW:                            ;  Сюда мы попадаем  есл�
             JNZ     RECINTHIGH    
             IN      00
             MOV     M, A
+
+            EI                     ; Разрешаем прерывания
+            MVI     A,18h          ; 
+            SIM                    ; Включаем INT 7.5
             
-            MVI     C, 46
-            CALL BYTEOUT
             RET
     
 RECINTHIGH:
@@ -98,14 +100,16 @@ RECINTHIGH:
             MOV     B, A
             ORA     C
             MOV     M, A
-
+            
             INX     H
             MVI     M, 00h
             DCR     D
-            
-                        MVI     C, 47
-            CALL BYTEOUT
-            JZ      SECTORDONE
+            JZ      SECTORDONE 
+    
+            EI
+            MVI     A,18h
+            SIM 
+
             RET
 
 INITOUT:                
