@@ -139,6 +139,37 @@ byte disk[diskSize] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 
+void getData()
+{
+ Serial.print ("*");
+  DDRB = B00000000;
+  DDRD = B00000000;
+
+  byte portb = PINB;
+  portb = portb << 2;
+
+  byte portd = PIND;
+  portd = portd >> 3;
+
+  databits = portb | portd;
+
+  command = (databits & B00001110) >> 1;
+  data4 = (databits & B11110000) >> 4;
+
+
+  if (state == 1)
+  {
+    data4H = data4;
+    state = 2;
+  }
+  if (state == 0)
+  {
+    data4L = data4;
+    state = 1;
+  }
+}
+
+
 
 
 void putData(byte dataSend, byte commandSend)
@@ -149,36 +180,69 @@ void putData(byte dataSend, byte commandSend)
   DDRB = B11111111;
   DDRD = DDRD | B11111100;  // this is safer as it sets pins 2 to 7 as outputs without changing the value of pins 0 & 1, which are RX & TX
   
+delay (1);
+
   PORTD = 0;        //очищаем порт 
   PORTB = 0;
   
   highPart =  dataSend & B11110000;
-  lowPart  = (dataSend & B00001111) <<4;
+  lowPart  = (dataSend & B00001111) << 4;
   commandSend = commandSend << 1;
   highPart = highPart | commandSend;
   lowPart  = lowPart  | commandSend;
+  
+    
+  byte PD = lowPart << 4; 
+  byte PB = lowPart >> 2;
 
-PORTD = lowPart >> 1;           // 0,1 bits
-PORTB = lowPart >> 2;           // 2-7 bits
 
-PORTD = PORTD + 1;              // Синхрофлаг подняли
+
+PORTD = PD;           // 0,1 bits
+PORTB = PB;           // 2-7 bits
+
+/*
+Serial.print("lowPart=");
+Serial.print(lowPart, BIN);
+Serial.print(" PD=");
+Serial.print(PD, BIN);
+Serial.print(" PB:");
+Serial.println(PB, BIN);
+*/
+
+
+PORTD = PORTD + 8;              // Синхрофлаг подняли
+delay (1);
+
+
+PORTB = 0;                     // Очищаем порт
+PORTD = 0;
+
+delay (1);
+
+
+PD = highPart << 4;
+PB = highPart >> 2;
+
+PORTD = PD;                 // 0,1 bits
+PORTB = PB;            // 2-7 bits
+
+/*
+Serial.print("highPart=");
+Serial.print(highPart, BIN);
+Serial.print(" PD=");
+Serial.print(PD, BIN);
+Serial.print(" PB:");
+Serial.println(PB, BIN);
+*/
+
+PORTD = PORTD + 8;              // Синхрофлаг подняли
 
 delay (1);
 
 PORTB = 0;                     // Очищаем порт
 PORTD = 0;
 
-
-PORTD = highPart >> 1;           // 0,1 bits
-PORTB = highPart >> 2;           // 2-7 bits
-
-PORTD = PORTD + 1;              // Синхрофлаг подняли
-
 delay (1);
-
-PORTB = 0;                     // Очищаем порт
-PORTD = 0;
-
 }
 
 //****************************************************************************************
@@ -197,6 +261,9 @@ void HOME()
 
 void READ()
 {
+
+detachInterrupt(1);
+
   long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
 
   int sixteen = 0;
@@ -229,6 +296,7 @@ void READ()
       Serial.println("");
     }
   }
+attachInterrupt(1, getData, RISING);
 }
 
 //*******************************************************************************
@@ -270,41 +338,14 @@ void empty()
 {}
 
 
-void getData()
-{
- Serial.print ("*");
-  DDRB = B00000000;
-  DDRD = B00000000;
 
-  byte portb = PINB;
-  portb = portb << 2;
-
-  byte portd = PIND;
-  portd = portd >> 3;
-
-  databits = portb | portd;
-
-  command = (databits & B00001110) >> 1;
-  data4 = (databits & B11110000) >> 4;
-
-  if (state == 1)
-  {
-    data4H = data4;
-    state = 2;
-  }
-  if (state == 0)
-  {
-    data4L = data4;
-    state = 1;
-  }
-}
 
 //*****************************************************************************
 void setup()
 {
 
-  Serial.begin(115200);
 
+Serial.begin(115200);
 Serial.println ("Drive booting");
 
 attachInterrupt(1, getData, RISING);
@@ -351,4 +392,3 @@ void loop()
     }
   }
 }
-
