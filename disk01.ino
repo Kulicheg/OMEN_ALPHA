@@ -73,7 +73,7 @@ byte disk[diskSize] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24,
-    0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x23,
+    0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xAA, 0x23,
 
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x01, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF, 0xFF, 0xFF, 0x01,
@@ -138,10 +138,9 @@ byte disk[diskSize] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-
 void getData()
 {
- Serial.print ("*");
+  Serial.print("*");
   DDRB = B00000000;
   DDRD = B00000000;
 
@@ -156,7 +155,6 @@ void getData()
   command = (databits & B00001110) >> 1;
   data4 = (databits & B11110000) >> 4;
 
-
   if (state == 1)
   {
     data4H = data4;
@@ -169,50 +167,49 @@ void getData()
   }
 }
 
-
-
-
 void putData(byte dataSend, byte commandSend)
 {
- 
- byte highPart, lowPart;
- 
+
+  byte highPart, lowPart;
+
   DDRB = B11111111;
-  DDRD = DDRD | B11111100; 
-  
-  highPart =  dataSend & B11110000;
-  lowPart  = (dataSend & B00001111) << 4;
+  DDRD = DDRD | B11111100;
+
+  highPart = dataSend & B11110000;
+  lowPart = (dataSend & B00001111) << 4;
   commandSend = commandSend << 1;
   highPart = highPart | commandSend;
-  lowPart  = lowPart  | commandSend;
-  
-  byte PD = lowPart << 4; 
+  lowPart = lowPart | commandSend;
+
+  byte PD = lowPart << 4;
   byte PB = lowPart >> 2;
 
-;delay (6);
+  ;
+  delay(1);
 
-PORTD = 0;        //очищаем порт 
-PORTB = 0;
+  PORTD = 0; //очищаем порт
+  PORTB = 0;
 
-//******************* RIGHT *****************************
-PORTD = PD;           // 0,1 bits   
-PORTB = PB;           // 2-7 bits
-PORTD = PORTD | B00001000;               // Синхрофлаг подняли
+  //******************* RIGHT *****************************
+  PORTD = PD;                // 0,1 bits
+  PORTB = PB;                // 2-7 bits
+  PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
-//*******************************************************
+  //*******************************************************
 
-delay (6);
+  ;
+  delay(1);
 
-PORTB = 0;                     // Очищаем порт
-PORTD = 0;
+  PORTB = 0; // Очищаем порт
+  PORTD = 0;
 
-//********************** LEFT ***************************
-PD = highPart << 4;
-PB = highPart >> 2;
+  //********************** LEFT ***************************
+  PD = highPart << 4;
+  PB = highPart >> 2;
 
-PORTD = PD;                 // 0,1 bits 
-PORTB = PB;                 // 2-7 bits
-PORTD = PORTD | B00001000;               // Синхрофлаг подняли
+  PORTD = PD;                // 0,1 bits
+  PORTB = PB;                // 2-7 bits
+  PORTD = PORTD | B00001000; // Синхрофлаг подняли
 }
 
 //****************************************************************************************
@@ -232,23 +229,22 @@ void HOME()
 void READ()
 {
 
-detachInterrupt(1);
-  delay (4);
+  detachInterrupt(1);
+
+  delay(5);
+
   long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
 
-  int sixteen = 0;
-  Serial.println("");
-  Serial.println("");
+  //int sixteen = 0;
   Serial.print("TRACK:");
   Serial.print(curTrack);
-  Serial.print("   SECTOR:");
+  Serial.print(" SECTOR:");
   Serial.println(curSector);
-  Serial.println("");
 
   for (byte q = 0; q < sectorSize; q++)
   {
     sector[q] = disk[startByte + q];
-
+    /*
     if (sector[q] < 0x10)
     {
       Serial.print("0");
@@ -258,15 +254,19 @@ detachInterrupt(1);
     Serial.print(" ");
     sixteen++;
 
-    putData(sector[q], 000);
-
-    if (sixteen == 16)
+        if (sixteen == 16)
     {
       sixteen = 0;
       Serial.println("");
     }
+*/
+    putData(sector[q], 000);
   }
-attachInterrupt(1, getData, RISING);
+  putData(sector[sectorSize - 1], 000);
+
+  delay(5);
+  Serial.println("Read O.K.");
+  attachInterrupt(1, getData, RISING);
 }
 
 //*******************************************************************************
@@ -305,27 +305,24 @@ void WRITE()
 }
 
 void empty()
-{}
-
-
-
+{
+}
 
 //*****************************************************************************
 void setup()
 {
 
+  Serial.begin(115200);
+  Serial.println("Drive booting");
 
-Serial.begin(115200);
-Serial.println ("Drive booting");
+  attachInterrupt(1, getData, RISING);
 
-attachInterrupt(1, getData, RISING);
-
-Serial.println ("Initialisation done.");
+  Serial.println("Initialisation done.");
 }
 
 void loop()
 {
-  
+
   if (state != 0)
   {
     if (state == 2)
