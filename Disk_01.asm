@@ -33,7 +33,7 @@ INT75   EQU     803Ch
             CALL    INITOUT
             CALL    ACIAINIT
             MVI     B,81H 
-            CALL    READSECTOR 
+            CALL    WRITESECTOR 
 
 EXIT:            
             POP     H
@@ -45,7 +45,31 @@ EXIT:
             
             JMP     0000h            ; warm start of monitor
 
+;****************************************************************************************
 
+WRITESECTOR:
+; Адрес начала сектора в DMA
+; Попробуем весь сектор передать как  128 SENDCMD.
+; B - данные
+; D - комманда 
+
+            LXI     H, DMA      ; Старт DMA
+            MVI     D, 07h      ; Комманда записи
+            MVI     E, 80h      ; размер сектора
+NEXTBYTE:
+            MVI     D, 07h      ; Комманда записи
+            MOV     B, M        ; Берем из памяти байт
+            CALL    SENDCMD     ; Отправляем байт
+            INX     H           ; Увеличиваем адрес
+            DCR     E           ; Уменьшаем счетчик байт
+            JNZ     NEXTBYTE    ; Если не последний шлем далее
+            RET
+
+
+
+
+
+;***************************************************************************************
 READSECTOR:
             
             CALL  INITOUT
