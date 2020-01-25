@@ -53,6 +53,7 @@ volatile byte databits;
 volatile byte state;
 volatile byte command;
 volatile byte data4, data4H, data4L, data8;
+byte wrPend, byteCount;
 
 byte sectorSize = 128;
 byte sectors = 2;
@@ -167,6 +168,8 @@ void getData()
   }
 }
 
+//**********************************************************************************************
+
 void putData(byte dataSend, byte commandSend)
 {
 
@@ -213,6 +216,30 @@ void putData(byte dataSend, byte commandSend)
 }
 
 //****************************************************************************************
+
+void printSector()
+{
+  int sixteen = 0;
+  Serial.println("");
+  for (byte q = 0; q < sectorSize; q++)
+  {
+    if (sector[q] < 0x10)
+    {
+      Serial.print("0");
+    }
+
+    Serial.print(sector[q], HEX);
+    Serial.print(" ");
+    sixteen++;
+
+    if (sixteen == 16)
+    {
+      sixteen = 0;
+      Serial.println("");
+    }
+  }
+}
+
 void HOME()
 {
   Serial.println("");
@@ -298,10 +325,37 @@ void SELDSK()
 
 void WRITE()
 {
-  Serial.print("Writting sector:");
-  Serial.print(curSector);
-  Serial.print(" sector / Track:");
-  Serial.println(curTrack);
+
+  long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
+
+  if (wrPend == false)
+  {
+    Serial.print("Writting sector:");
+    Serial.print(curSector);
+    Serial.print(" sector / Track:");
+    Serial.println(curTrack);
+
+    disk[startByte] = data8;
+    sector[byteCount] = data8;
+    wrPend = true;
+    byteCount = 0;
+    return;
+  }
+
+  byteCount++;
+
+  if (byteCount < sectorSize)
+  {
+    disk[startByte + byteCount] = data8;
+    sector[byteCount] = data8;
+
+    if (byteCount == sectorSize - 1)
+    {
+      wrPend = false;
+      printSector();
+    }
+    return;
+  }
 }
 
 void empty()
