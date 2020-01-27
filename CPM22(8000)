@@ -4097,8 +4097,7 @@ READ:                ;perform read operation (usually this is similar to write
 ;	so we will allow space to set up read command, then use
 ;	common code in write)
             
-                        CALL  INITOUT
-           
+            CALL  INITOUT
             MVI     B, 00h      ; B - данные которые мы хотим отправить накопителю  перед чтением
             MVI     D, 00h      ; D - комманда  чтения (000)
             CALL    SENDCMD     ; Отправляем накопителю желание считать сектор
@@ -4125,6 +4124,8 @@ SECTORDONE:
 
 
 RECINTLOW:                            ;  Сюда мы попадаем  если сработало прерывание
+           
+            CALL    INITIN
             MOV     A, M
             ANA     A
             JNZ     RECINTHIGH    
@@ -4137,7 +4138,7 @@ RECINTLOW:                            ;  Сюда мы попадаем  есл�
             RET
     
 RECINTHIGH:
-
+            CALL    INITIN
             MOV     C, M
             MVI     A,0F0h ; 11110000
             ANA     C
@@ -4172,6 +4173,7 @@ WRITE:               ;perform a write operation
 ; B - данные
 ; D - комманда 
 
+            CALL    INITOUT
             LHLD    DMAAD      ; Старт DMA
             MVI     D, 07h      ; Комманда записи
             MVI     E, 80h      ; размер сектора
@@ -4241,10 +4243,12 @@ SENDBYTE:                    ; BC содержит половинки, код к
             MVI     A,00h  
             OUT     00h     ; обнуляем порт
             CALL    LOOP
+
+            
             RET
 
 LOOP:
-            MVI     D, 02h ;delay a little
+            MVI     D, 30h ;delay a little
 LOOP2:      NOP
             NOP
             NOP
