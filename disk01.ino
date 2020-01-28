@@ -149,6 +149,13 @@ byte disk[diskSize] = {
 
 void getData()
 {
+  
+  if (kostyil)
+  {
+    kostyil = false;
+    return;
+  }
+  
   Serial.print("*");
   DDRB = B00000000;
   DDRD = B00000000;
@@ -226,6 +233,8 @@ void putData(byte dataSend, byte commandSend)
   PORTD = PD;                // 0,1 bits
   PORTB = PB;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
+  
+  kostyil = true;
 }
 
 //****************************************************************************************
@@ -284,22 +293,7 @@ void READ()
   for (byte q = 0; q < sectorSize; q++)
   {
     sector[q] = disk[startByte + q];
-    /*
-    if (sector[q] < 0x10)
-    {
-      Serial.print("0");
-    }
-
-    Serial.print(sector[q], HEX);
-    Serial.print(" ");
-    sixteen++;
-
-        if (sixteen == 16)
-    {
-      sixteen = 0;
-      Serial.println("");
-    }
-*/
+  
     putData(sector[q], 000);
   }
   putData(sector[sectorSize - 1], 000);
