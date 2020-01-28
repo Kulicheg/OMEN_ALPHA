@@ -54,6 +54,7 @@ volatile byte state;
 volatile byte command;
 volatile byte data4, data4H, data4L, data8;
 byte wrPend, byteCount;
+bool kostyil;
 
 byte sectorSize = 128;
 byte sectors = 4;
