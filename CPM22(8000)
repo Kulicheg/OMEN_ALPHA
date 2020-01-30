@@ -48,13 +48,16 @@ CNTRLX	EQU	18H	;control-x
 CNTRLZ	EQU	1AH	;control-z (end-of-file mark)
 DEL	EQU	7FH	;rubout
 ;
+        .ORG     8000h
+        JMP     WBOOT
+        
+        DB 00, 00
 
+        .ORG     8005h
+        JMP     BDOS
 
         .ORG     803Ch
-
         JMP     RECINTLOW
-
-
 
 ;   Set origin for CP/M
 ;
