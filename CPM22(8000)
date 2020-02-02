@@ -3869,7 +3869,7 @@ WBOOT:                  ;simplest case is to read the disk until all sectors loa
             CALL    seldsk 
             CALL    home ;go to track 00
 ; 
-            MVI     b,nsects ;b counts * of sectors to load
+            MVI     b, 4 ; nsects ;b counts * of sectors to load !!!!!
             MVI     c,0 ;c has the current track number
             MVI     d,2 ;d has the next sector to read
 ;	note that we begin by reading track 0, sector 2 since sector 1
@@ -3936,7 +3936,7 @@ GOCPM:
             POP     B
             CALL    setdma 
 ; 
-            EI       ;enable the interrupt system
+            ;EI       ;enable the interrupt system !!!!!
             LDA     cdisk ;get current disk number
             MOV     c,a ;send to the ccp
             JMP     ccp ;go to cp/m for further processing
@@ -4018,18 +4018,24 @@ HOME:                ;move to the track 00	position of current drive
             
             
             MVI     D, 01H    ; D - комманда HOME               
-            MVI     B, 0ABh   ; B - неиспользуеммые данные
+            MVI     B, 00h   ; B - неиспользуеммые данные
             CALL    SENDCMD    
             
             MVI     A, 0 ;select track 0
             STA     track 
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
             RET      ;we will move to 00 on first read/write
 ; 
 SELDSK:              ;select disk given by register c
 
             MVI     D, 02H    ; D - комманда               
             MOV     B, C      ; CPM wants drive in C and 
-            CALL    SENDCMD    
+            CALL    SENDCMD
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
             RET
 
             LXI     h,0000h ;error return code
@@ -4058,6 +4064,9 @@ SETTRK:              ;set track given by register c
             MVI     D, 04h    ; D - комманда             
             MOV     B, C      ; Пока ограничимся только 256 дорожками, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
             RET      
 ; 
 SETSEC:              ;set sector given by register c
@@ -4067,7 +4076,9 @@ SETSEC:              ;set sector given by register c
             MVI     D, 03h    ; D - комманда
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
             RET      
 ; 
 ; 
@@ -4087,7 +4098,7 @@ SECTRAN:
             
             MOV     H, B
             MOV     L, C
-           RET      ;with value in hl
+            RET      ;with value in hl
 ; 
 SETDMA:              ;set	dma address given by registers b and c
 ; Установка адpеса буфеpа
@@ -4123,9 +4134,10 @@ CYCLE:
 SECTORDONE:            
            
             DI
+            CALL    INITOUT
+            CALL    LOOP
             
             MVI     A, 0  ; NO ERROR
-            OUT     00h   ; AND LOW PORT
             INX     SP
             INX     SP
             RET        
@@ -4250,11 +4262,11 @@ SENDBYTE:                    ; BC содержит половинки, код к
             CALL    LOOP    ; даже комманды без данных передаем в 2 такта
             MVI     A,00h  
             OUT     00h     ; обнуляем порт
-            CALL    LOOP
+            ;CALL    LOOP
             RET
 
 LOOP:
-            MVI     D, 50h ;delay a little
+            MVI     D, 050h ;delay a little
 LOOP2:      NOP
             NOP
             NOP
@@ -4263,6 +4275,8 @@ LOOP2:      NOP
             NOP
             NOP
             NOP
+            NOP
+            
             DCR     D ;decrement counter
             JNZ     LOOP2 
             RET
