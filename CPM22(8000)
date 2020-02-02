@@ -30,6 +30,7 @@ ENTRY	EQU	8005h	;entry point for the cp/m bdos.
 TFCB	EQU	805Ch	;default file control block.
 TBUFF	EQU	8080H	;i/o buffer and command line storage.
 TBASE	EQU	8100H	;transiant program storage area.
+DEFSTCK EQU 8080h
 ;
 ;   Set control character equates.
 ;
@@ -3852,16 +3853,18 @@ DPBLK:               ;disk parameter block, common to all disks
 ; 
 ;	individual subroutines to perform each function
 BOOT:                ;simplest case is to just perform parameter initialization
+            DI
             XRA     a ;zero in the accum
             STA     iobyte ;clear the iobyte
             STA     cdisk ;select disk zero
             JMP     gocpm ;initialize and go to cp/m
 ; 
-WBOOT:               ;simplest case is to read the disk until all sectors loaded
+WBOOT:                  ;simplest case is to read the disk until all sectors loaded
+            DI          ;!!!!!
             LXI     H, TBUFF ;!!!!!
             SHLD    DMAAD
             
-            LXI     sp, 0FD00h ;use space below buffer for stack !!!!!
+            LXI     sp, DEFSTCK ;use space below buffer for stack !!!!!
             MVI     c,0 ;select disk 0
             CALL    seldsk 
             CALL    home ;go to track 00
@@ -4123,6 +4126,8 @@ SECTORDONE:
             
             MVI     A, 0  ; NO ERROR
             OUT     00h   ; AND LOW PORT
+            INX     SP
+            INX     SP
             RET        
 
 
@@ -4207,8 +4212,10 @@ WAITIO:              ;enter	here from read	and write to perform the actual i/o
 
 SENDCMD:            ; B - данные
                     ; D - комманда               
+            
+            CALL INITOUT
+            
             MOV     C,B ; в BC у нас 2 копии данных В-h C-l
-
             MVI     A,0F0h ; 11110000
             ANA     B 
             MOV     B,A
@@ -4228,9 +4235,7 @@ SENDCMD:            ; B - данные
             RLC             ; Сдвигаем комманду на место
             ORA     C       ; Добавляем к половинкам код комманды.
             MOV     C,A
-
 SENDBYTE:                    ; BC содержит половинки, код комманды и 0 в младшем бите
-
             MOV     A,C 
             INR     A       ; Поднимаем младший бит  чтобы диск проснулся
             OUT     00h     ; Выводим  младшую половину в порт
@@ -4246,12 +4251,10 @@ SENDBYTE:                    ; BC содержит половинки, код к
             MVI     A,00h  
             OUT     00h     ; обнуляем порт
             CALL    LOOP
-
-            
             RET
 
 LOOP:
-            MVI     D, 30h ;delay a little
+            MVI     D, 50h ;delay a little
 LOOP2:      NOP
             NOP
             NOP
