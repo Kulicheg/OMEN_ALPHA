@@ -3675,7 +3675,7 @@ WTSPECL	CALL	AUTOSEL	;select proper drive.
 EMPTYFCB:DB	0E5H	;empty directory segment indicator.
 WRTPRT	DW	0	;write protect status for all 16 drives.
 LOGIN	DW	0	;drive active word (1 bit per drive).
-USERDMA	DW	080H	;user's dma address (defaults to 80h).
+USERDMA	DW	TBUFF	;user's dma address (defaults to 80h).
 ;
 ;   Scratch areas from parameter block.
 ;
@@ -4035,12 +4035,9 @@ SELDSK:              ;select disk given by register c
 
             MVI     D, 02H    ; D - комманда               
             MOV     B, C      ; CPM wants drive in C and 
+            PUSH    B
             CALL    SENDCMD
-            CALL    LOOP
-            CALL    LOOP
-            CALL    LOOP
-            RET
-
+            POP     B
             LXI     h,0000h ;error return code
             MOV     a,c 
             STA     diskno 
@@ -4325,7 +4322,7 @@ ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
 
 MEGALOOP:      
             PUSH    D
-            MVI     E, 020h ; 50   
+            MVI     E, 010h ;30 50   
 MEGALOOP2:      
             CALL    LOOP
             DCR     E   
