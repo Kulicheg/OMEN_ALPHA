@@ -46,137 +46,7 @@
 */
 
 const long int diskSize = 6912; //sectors * tracks * sectorSize;
-byte disk[128] =
-    {
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-};
+byte disk[128] = {0x00};
 
 const int chipSelect = 10;
 
@@ -204,14 +74,14 @@ void getData()
 
   DDRC = B00000000;
   DDRD = B00000000;
-/*
+
   if (kostyil)
   {
     kostyil = false;
     Serial.println("K");
     return;
   }
-*/
+
   Serial.println("*");
 
   byte portb = PINC;
@@ -241,7 +111,7 @@ void getData()
 
 void putData(byte dataSend, byte commandSend)
 {
-
+  
   byte highPart, lowPart;
 
   highPart = dataSend & B11110000;
@@ -253,7 +123,7 @@ void putData(byte dataSend, byte commandSend)
   byte PD = lowPart << 4;
   byte PC = lowPart >> 2;
 
-  delay(1);
+  delay(2);
 
   PORTD = 0; //очищаем порт
   PORTC = 0;
@@ -265,7 +135,7 @@ void putData(byte dataSend, byte commandSend)
 
   //*******************************************************
 
-  delay(1);
+  delay(2);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -277,6 +147,11 @@ void putData(byte dataSend, byte commandSend)
   PORTD = PD;                // 0,1 bits
   PORTC = PC;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
+
+  delay(2);
+
+  PORTC = 0; // Очищаем порт
+  PORTD = 0;
  }
 
 //****************************************************************************************
@@ -317,6 +192,7 @@ void READ()
 {
   detachInterrupt(1);
 
+  delay (50);
   long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
   myFile = SD.open("DISKA.IMG");
   myFile.seek(startByte);
@@ -428,7 +304,7 @@ void setup()
   DDRC = B00000000;
   DDRD = B00000000;
   Serial.begin(115200);
-  kostyil = true;
+ // kostyil = true;
   attachInterrupt(1, getData, RISING);
 
   if (!SD.begin(10))
