@@ -60,8 +60,8 @@ byte wrPend, byteCount;
 bool kostyil;
 
 byte sectorSize = 128;
-byte sectors = 27;
-byte tracks = 8;
+byte sectors = 26;
+byte tracks = 90;
 
 byte curSector = 0;
 byte curTrack = 0;
@@ -123,7 +123,7 @@ void putData(byte dataSend, byte commandSend)
   byte PD = lowPart << 4;
   byte PC = lowPart >> 2;
 
-  delay(2);
+  delay(1); //2
 
   PORTD = 0; //очищаем порт
   PORTC = 0;
@@ -135,7 +135,7 @@ void putData(byte dataSend, byte commandSend)
 
   //*******************************************************
 
-  delay(2);
+  delay(1); //2
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -148,7 +148,7 @@ void putData(byte dataSend, byte commandSend)
   PORTC = PC;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
-  delay(2);
+  delay(1); //2
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -194,6 +194,7 @@ void READ()
 
   delay (50);
   long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
+
   myFile = SD.open("DISKA.IMG");
   myFile.seek(startByte);
 
@@ -213,8 +214,7 @@ void READ()
   {
     putData(sector[q], 000);
   }
-  // putData(sector[sectorSize - 1], 000);
-
+  
   myFile.close();
 
   DDRC = B00000000;
@@ -223,14 +223,15 @@ void READ()
   kostyil = true;
   attachInterrupt(1, getData, RISING);
 
-  printSector();
+  //printSector();
 }
 
 //*******************************************************************************
 
 void SETSEC()
 {
-  curSector = data8;
+  curSector = data8 - 1;
+
   if (curSector > sectors)
   {
     Serial.println(String(curSector) + " Sector error");
