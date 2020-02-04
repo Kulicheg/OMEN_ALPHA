@@ -3869,7 +3869,7 @@ WBOOT:                  ;simplest case is to read the disk until all sectors loa
             CALL    seldsk 
             CALL    home ;go to track 00
 ; 
-            MVI     b, 4 ; nsects ;b counts * of sectors to load !!!!!
+            MVI     b, nsects ;b counts * of sectors to load !!!!!
             MVI     c,0 ;c has the current track number
             MVI     d,2 ;d has the next sector to read
 ;	note that we begin by reading track 0, sector 2 since sector 1
@@ -3883,7 +3883,6 @@ LOAD1:               ;load	one more sector
             CALL    setsec ;set sector address from register C
             POP     b ;recall dma address to b, C
             PUSH    b ;replace on stack for later recall
-            LXI     B, TBUFF    ;!!!!!
             CALL    setdma ;set dma address from b, C
 ; 
 ;	drive set to 0, track set, sector set, dma address set
@@ -4017,11 +4016,14 @@ READER:              ;reader character into register a from reader device
 HOME:                ;move to the track 00	position of current drive
 ;	translate this call into a settrk call with Parameter 00
             
-            
-            
+    
+            CALL    LOOP
             MVI     D, 01H    ; D - комманда HOME               
             MVI     B, 00h   ; B - неиспользуеммые данные
-            CALL    SENDCMD    
+            CALL    SENDCMD
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
             
             MVI     A, 0 ;select track 0
             STA     track 
@@ -4075,6 +4077,9 @@ SETSEC:              ;set sector given by register c
             MOV     a,c 
             STA     sector 
 
+            CALL    LOOP
+            CALL    LOOP
+
             MVI     D, 03h    ; D - комманда
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
@@ -4116,7 +4121,9 @@ READ:                ;perform read operation (usually this is similar to write
 ;	so we will allow space to set up read command, then use
 ;	common code in write)
             
-            CALL  INITOUT
+            
+            CALL    INITOUT
+            CALL    MEGALOOP
             MVI     B, 00h      ; B - данные которые мы хотим отправить накопителю  перед чтением
             MVI     D, 00h      ; D - комманда  чтения (000)
             CALL    SENDCMD     ; Отправляем накопителю желание считать сектор
@@ -4152,12 +4159,18 @@ RECINTLOW:                            ;  Сюда мы попадаем  есл�
             MOV     A, M
             ANA     A
             JNZ     RECINTHIGH    
+            
+            PUSH    B
+            MVI     C, 76
+            ;CALL    BYTEOUT
+            POP     B
             IN      00
             MOV     M, A
 
             EI                     ; Разрешаем прерывания
             MVI     A,18h          ; 
             SIM                    ; Включаем INT 7.5
+            
             RET
     
 RECINTHIGH:
@@ -4170,7 +4183,6 @@ RECINTHIGH:
             RRC
             RRC
             MOV     C, A
-            
             IN      00
             MOV     B, A
             MVI     A,0F0h ; 11110000
@@ -4186,6 +4198,10 @@ RECINTHIGH:
             EI
             MVI     A,18h
             SIM 
+            PUSH    B
+            MVI     C, 72
+            ;CALL    BYTEOUT
+            POP     B
             RET 
 
 ; 
@@ -4265,11 +4281,10 @@ SENDBYTE:                    ; BC содержит половинки, код к
             CALL    LOOP    ; даже комманды без данных передаем в 2 такта
             MVI     A,00h  
             OUT     00h     ; обнуляем порт
-            CALL    LOOP
             RET
 
-LOOP:
-            MVI     D, 040h ;delay a little
+LOOP:       PUSH    D
+            MVI     D, 0FFh ;delay a little
 LOOP2:      NOP
             NOP
             NOP
@@ -4277,6 +4292,7 @@ LOOP2:      NOP
             NOP
             DCR     D ;decrement counter
             JNZ     LOOP2 
+            POP     D
             RET
 
 
@@ -4309,13 +4325,13 @@ ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
 
 
 MEGALOOP:      
-            MVI   A,0FFh   
+            PUSH    D
+            MVI     E, 0a0h   
 MEGALOOP2:      
-            CALL   LOOP
-            CALL   LOOP
-            CALL   LOOP
-            DCR   A   
-            JNZ   MEGALOOP2   
+            CALL    LOOP
+            DCR     E   
+            JNZ     MEGALOOP2   
+            POP     D
             RET   
 
 
