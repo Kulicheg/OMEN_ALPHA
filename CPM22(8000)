@@ -4326,7 +4326,7 @@ ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
 
 MEGALOOP:      
             PUSH    D
-            MVI     E, 0a0h   
+            MVI     E, 020h ; 50   
 MEGALOOP2:      
             CALL    LOOP
             DCR     E   
