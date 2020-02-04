@@ -3934,6 +3934,7 @@ GOCPM:
             LHLD    DMAAD
             PUSH    H
             POP     B
+            LXI     B, TBUFF
             CALL    setdma 
 ; 
             ;EI       ;enable the interrupt system !!!!!
@@ -4140,6 +4141,7 @@ SECTORDONE:
             MVI     A, 0  ; NO ERROR
             INX     SP
             INX     SP
+            CALL    MEGALOOP
             RET        
 
 
@@ -4262,21 +4264,16 @@ SENDBYTE:                    ; BC содержит половинки, код к
             CALL    LOOP    ; даже комманды без данных передаем в 2 такта
             MVI     A,00h  
             OUT     00h     ; обнуляем порт
-            ;CALL    LOOP
+            CALL    LOOP
             RET
 
 LOOP:
-            MVI     D, 050h ;delay a little
+            MVI     D, 040h ;delay a little
 LOOP2:      NOP
             NOP
             NOP
             NOP
             NOP
-            NOP
-            NOP
-            NOP
-            NOP
-            
             DCR     D ;decrement counter
             JNZ     LOOP2 
             RET
@@ -4310,11 +4307,15 @@ ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
             RET
 
 
-
-
-
-
-
+MEGALOOP:      
+            MVI   A,0FFh   
+MEGALOOP2:      
+            CALL   LOOP
+            CALL   LOOP
+            CALL   LOOP
+            DCR   A   
+            JNZ   MEGALOOP2   
+            RET   
 
 
 
