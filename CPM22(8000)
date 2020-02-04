@@ -3883,10 +3883,11 @@ LOAD1:               ;load	one more sector
             CALL    setsec ;set sector address from register C
             POP     b ;recall dma address to b, C
             PUSH    b ;replace on stack for later recall
+            LXI     B, TBUFF    ;!!!!!
             CALL    setdma ;set dma address from b, C
 ; 
 ;	drive set to 0, track set, sector set, dma address set
-            CALL    read 
+            CALL    READ 
             CPI     00h ;any errors?
             JNZ     wboot ;retry the entire boot if an error occurs
 ; 
