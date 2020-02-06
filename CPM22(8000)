@@ -57,9 +57,6 @@ DEL	EQU	7FH	;rubout
         .ORG     8005h
         JMP     BDOS
 
-        .ORG     803Ch
-        JMP     RECINTLOW
-
                             ;   Set origin for CP/M
 	    .ORG	CCP
 
@@ -3885,7 +3882,7 @@ LOAD1:               ;load	one more sector
             CALL    setdma ;set dma address from b, C
 ; 
 ;	drive set to 0, track set, sector set, dma address set
-            CALL    READ 
+            CALL    READ; JMP GOCPM ;
             CPI     00h ;any errors?
             JNZ     wboot ;retry the entire boot if an error occurs
 ; 
@@ -3906,7 +3903,7 @@ LOAD1:               ;load	one more sector
             JC      load1 ;carry generated if sector<27
 ; 
 ;	end of	current track,	go to next track
-            MVI     d,1 ;begin with first sector of next track
+            MVI     d, 0 ;begin with first sector of next track !!!!!
             INR     c ;track=track+1
 ; 
 ;	save	register state, and change tracks
@@ -3958,18 +3955,15 @@ NOCHAR:     MVI A, 00h
 ; 
 CONIN:               ;console character into register a
 
-            CALL    WAITOUT2 
+            CALL    WAITIN 
             IN      0DFh
             ;ANI     7Fh ;strip parity bit
             RET      
 
-
-WAITOUT2:    
-            IN      0DEh 
+WAITIN:     IN      0DEh 
             ANI     01 
-            JNZ      WAITOUT2 
-            RET
-            
+            JZ      WAITIN 
+            RET              
            
 ; 
 CONOUT:              ;console character output from register c
@@ -4019,33 +4013,33 @@ HOME:                ;move to the track 00	position of current drive
             CALL    LOOP
             MVI     D, 01H    ; D - комманда HOME               
             MVI     B, 00h   ; B - неиспользуеммые данные
-            CALL    SENDCMD
-            CALL    LOOP
-            CALL    LOOP
-            CALL    LOOP
-            
             MVI     A, 0 ;select track 0
             STA     track 
-            CALL    LOOP
-            CALL    LOOP
-            CALL    LOOP
+            CALL    MEGALOOP
             RET      ;we will move to 00 on first read/write
 ; 
 SELDSK:              ;select disk given by register c
 
+            
+            
+            
+            PUSH    B
+            PUSH    D
             MVI     D, 02H    ; D - комманда               
             MOV     B, C      ; CPM wants drive in C and 
-            PUSH    B
             CALL    SENDCMD
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP            
+            POP     D
             POP     B
+
             LXI     h,0000h ;error return code
             MOV     a,c 
             STA     diskno 
             CPI     4 ;must be between 0 and 3
             RNC      ;no carry if 4, 5,...
-;	disk number is in the proper range
-            DS      10 ;space for disk select
-;	compute proper disk Parameter header address
+
             LDA     diskno 
             MOV     l,a ;l=disk number 0, 1, 2, 3
             MVI     h,0 ;high order zero
@@ -4064,9 +4058,7 @@ SETTRK:              ;set track given by register c
             MVI     D, 04h    ; D - комманда             
             MOV     B, C      ; Пока ограничимся только 256 дорожками, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    LOOP
-            CALL    LOOP
-            CALL    LOOP
+            CALL    MEGALOOP
             RET      
 ; 
 SETSEC:              ;set sector given by register c
@@ -4079,9 +4071,7 @@ SETSEC:              ;set sector given by register c
             MVI     D, 03h    ; D - комманда
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    LOOP
-            CALL    LOOP
-            CALL    LOOP
+            CALL    MEGALOOP
             RET      
 ; 
 ; 
@@ -4113,65 +4103,31 @@ SETDMA:              ;set	dma address given by registers b and c
             SHLD    dmaad ;save the address
             RET      
 ; 
-READ:                ;perform read operation (usually this is similar to write
-;	so we will allow space to set up read command, then use
-;	common code in write)
+
+
+READ: 
             
             
-            CALL    INITOUT
-            CALL    MEGALOOP
+            PUSH    B
+            PUSH    D
             MVI     B, 00h      ; B - данные которые мы хотим отправить накопителю  перед чтением
             MVI     D, 00h      ; D - комманда  чтения (000)
             CALL    SENDCMD     ; Отправляем накопителю желание считать сектор
 
-
+            CALL    INIT8255IN
+            
             LHLD    DMAAD
-            MVI     M, 00h
-            MVI     D, 80h            
-
-            EI                     ; Разрешаем прерывания
-            MVI     A,18h          ; 
-            SIM                    ; Разрешаем прерывания
-CYCLE:
-          
-            JMP     CYCLE
-            
-SECTORDONE:            
-           
-            DI
-            CALL    INITOUT
-            CALL    LOOP
-            
-            MVI     A, 0  ; NO ERROR
-            INX     SP
-            INX     SP
-            CALL    MEGALOOP
-            RET        
-
-
-RECINTLOW:                            ;  Сюда мы попадаем  если сработало прерывание
-           
-            CALL    INITIN
-            MOV     A, M
-            ANA     A
-            JNZ     RECINTHIGH    
-            
-            PUSH    B
-            MVI     C, 76
-            ;CALL    BYTEOUT
-            POP     B
+            MVI     D, 80h   
+READSECTOR:
+            CALL    WAITZERRO         
+            CALL    WAITSYNC
             IN      00
-            MOV     M, A
+            MOV     C, A
+            CALL    WAITZERRO
+            CALL    WAITSYNC
+            IN      00
+            MOV     B, A
 
-            EI                     ; Разрешаем прерывания
-            MVI     A,18h          ; 
-            SIM                    ; Включаем INT 7.5
-            
-            RET
-    
-RECINTHIGH:
-            CALL    INITIN
-            MOV     C, M
             MVI     A,0F0h ; 11110000
             ANA     C
             RRC
@@ -4179,69 +4135,47 @@ RECINTHIGH:
             RRC
             RRC
             MOV     C, A
-            IN      00
-            MOV     B, A
+            
             MVI     A,0F0h ; 11110000
             ANA     B 
             MOV     B, A
+           
             ORA     C
             MOV     M, A
-            
-            INX     H
-            MVI     M, 00h
             DCR     D
-            JZ      SECTORDONE 
-            EI
-            MVI     A,18h
-            SIM 
-            PUSH    B
-            MVI     C, 72
-            ;CALL    BYTEOUT
+            JZ      RSEXIT
+            INX     H
+            JMP     READSECTOR
+RSEXIT:
+            CALL    LOOP
+            CALL    LOOP
             POP     B
-            RET 
+            POP     D
+            RET
 
-; 
-WRITE:               ;perform a write operation
+
+WAITZERRO:
+
+            IN      00h
+            CPI     00h
+            RZ
+            JMP     WAITZERRO
+
+WAITSYNC:
+            IN      00h
+            CPI     00h
+            RNZ
+            JMP     WAITSYNC
+            
   
-; Адрес начала сектора в DMA
-; Попробуем весь сектор передать как  128 SENDCMD.
-; B - данные
-; D - комманда 
-
-            CALL    INITOUT
-            LHLD    DMAAD      ; Старт DMA
-            MVI     D, 07h      ; Комманда записи
-            MVI     E, 80h      ; размер сектора
-NEXTBYTE:
-            MVI     D, 07h      ; Комманда записи
-            MOV     B, M        ; Берем из памяти байт
-            CALL    SENDCMD     ; Отправляем байт
-            INX     H           ; Увеличиваем адрес
-            DCR     E           ; Уменьшаем счетчик байт
-            JNZ     NEXTBYTE    ; Если не последний шлем далее
-            RET  
-  
-            MVI     A, 0 ;error condition 
-; 
-WAITIO:              ;enter	here from read	and write to perform the actual i/o
-;	operation. return a 00h in register a if the operation completes
-;	properly, and 0lh if an error occurs during the read or write
-; 
-;	in this case, we have saved the disk number in "diskno" (0, 1)
-;			the track number in "track" (0-76)
-;			the sector number in "sector" (1-26)
-;			the dma address in "dmaad" (0-65535)
-
-            RET      ;replaced when filled-in
-; 
-
 
 
 SENDCMD:            ; B - данные
                     ; D - комманда               
             
-            CALL INITOUT
-            
+            CALL INIT8255OUT
+ 
+           
             MOV     C,B ; в BC у нас 2 копии данных В-h C-l
             MVI     A,0F0h ; 11110000
             ANA     B 
@@ -4270,14 +4204,71 @@ SENDBYTE:                    ; BC содержит половинки, код к
             MVI     A,00h 
             OUT     00h ; обнуляем порт 
             CALL    LOOP
-           
             MOV     A,B 
             INR     A       ; Поднимаем младший бит
             OUT     00h     ; Выводим  старшую половину в порт для для совместимости 
             CALL    LOOP    ; даже комманды без данных передаем в 2 такта
             MVI     A,00h  
             OUT     00h     ; обнуляем порт
+            CALL    LOOP
             RET
+
+
+
+
+
+INIT8255OUT:                
+            MVI     A, 80h
+            OUT     07H 
+            MVI     A, 0h 
+            OUT     00h 
+            RET      
+            
+INIT8255IN:                
+            MVI     A,90h 
+            OUT     07h 
+            MVI     A,0h 
+            OUT     00h 
+            RET  
+
+
+
+
+; 
+WRITE:               ;perform a write operation
+  
+; Адрес начала сектора в DMA
+; Попробуем весь сектор передать как  128 SENDCMD.
+; B - данные
+; D - комманда 
+
+            CALL    INIT8255OUT
+            LHLD    DMAAD      ; Старт DMA
+            MVI     D, 07h      ; Комманда записи
+            MVI     E, 80h      ; размер сектора
+NEXTBYTE:
+            MVI     D, 07h      ; Комманда записи
+            MOV     B, M        ; Берем из памяти байт
+            CALL    SENDCMD     ; Отправляем байт
+            INX     H           ; Увеличиваем адрес
+            DCR     E           ; Уменьшаем счетчик байт
+            JNZ     NEXTBYTE    ; Если не последний шлем далее
+            RET  
+  
+            MVI     A, 0 ;error condition 
+; 
+WAITIO:              ;enter	here from read	and write to perform the actual i/o
+;	operation. return a 00h in register a if the operation completes
+;	properly, and 0lh if an error occurs during the read or write
+; 
+;	in this case, we have saved the disk number in "diskno" (0, 1)
+;			the track number in "track" (0-76)
+;			the sector number in "sector" (1-26)
+;			the dma address in "dmaad" (0-65535)
+
+            RET      ;replaced when filled-in
+; 
+
 
 LOOP:       PUSH    D
             MVI     D, 0FFh ;delay a little
@@ -4292,21 +4283,7 @@ LOOP2:      NOP
             RET
 
 
-INITOUT:                
-            MVI     A, 80h
-            OUT     07H 
-            MVI     A, 0h 
-            OUT     00h 
-            RET      
-            
-INITIN:                
-            MVI     A,90h 
-            OUT     07h 
-            MVI     A,0h 
-            OUT     00h 
-            RET  
-            
-            
+
 BYTEOUT:    
                             ; ВХОД C  - Байт для вывода
             CALL    WAITOUT ; Выход A - Отправленный байт
@@ -4322,7 +4299,7 @@ ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
 
 MEGALOOP:      
             PUSH    D
-            MVI     E, 010h ;30 50   
+            MVI     E, 10h ;10 30 50   
 MEGALOOP2:      
             CALL    LOOP
             DCR     E   
