@@ -3922,6 +3922,7 @@ LOAD1:               ;load	one more sector
 GOCPM:               
             MVI     a,0c3h ;c3 is a jmp instruction
             STA     8000h ;for jmp to wboot
+            STA     8005h ;for jmp to wboot
             LXI     h,wboote ;wboot entry point
             SHLD    8001h ;set address field for jmp at 0
 
@@ -3929,7 +3930,7 @@ GOCPM:
             STA     8003h
             STA     8004h
             LXI     h,bdos ;bdos entry point
-            SHLD    8005h ;address field of Jump at 5 to bdos
+            SHLD    8006h ;address field of Jump at 5 to bdos
 ; 
             LHLD    DMAAD
             PUSH    H
@@ -3947,22 +3948,20 @@ GOCPM:
 ;	in each case, the entry point is provided, with space reserved
 ;	to insert your own code
 ; 
-CONST:               ;console status, return 0ffh if character ready, 00h if not
-  	        IN      0DEh 
-            ANI     02 
-            JZ      NOCHAR 
-            MVI A, 0FFh
-            RET      
-NOCHAR:     MVI A, 00h
-            RET
+CONST:	    IN      0DEh	;READ CONSOLE STATUS.
+	        ANI     01h	    ;LOOK AT KB READY BIT.
+	        MVI     A,  0	;SET A=0 FOR RETURN.
+	        RZ		        ;NOT READY WHEN NOT 0.
+	        CMA		        ;IF READY A=FF.
+	        RET		        ;RETURN FROM CONST
 
 ; 
-CONIN:               ;console character into register a
-
-            CALL    WAITIN 
-            IN      0DFh
-            ;ANI     7Fh ;strip parity bit
-            RET      
+CONIN:	    IN   0DEh	;READ CONSOLE STATUS.
+	        ANI  01h	;IF NOT READY,
+	        JZ   CONIN	;LOOP UNTIL LOW
+	        IN   0DFh	;READ A CHARACTER.
+	        ANI  7Fh	;MAKE MOST SIG. BIT = 0.
+	        RET		;RETURN FROM CONIN.
 
 WAITIN:     IN      0DEh 
             ANI     01 
@@ -3970,13 +3969,12 @@ WAITIN:     IN      0DEh
             RET              
            
 ; 
-CONOUT:              ;console character output from register c
-            CALL    WAITOUT 
-            MOV     A, C
-             
-        ;    ANI     7Fh ;drop 8th bit
-            OUT     0DFh 
-            RET
+CONOUT:	    IN      0DEh	;READ CONSOLE STATUS.
+	        ANI     002 	;IF NOT READY,
+	        JZ      CONOUT	;LOOP UNTIL LOW.
+	        MOV     A, C	;GET CHARACTER.
+	        OUT     0DFh	;PRINT IT.
+	        RET		        ;RETURN.
             
 WAITOUT:    IN      0DEh 
             ANI     02h
