@@ -94,7 +94,7 @@ void getData()
 
   command = (databits & B00001110) >> 1;
   data4 = (databits & B11110000) >> 4;
-  
+
   if (state == 1)
   {
     data4H = data4;
@@ -111,7 +111,7 @@ void getData()
 
 void putData(byte dataSend, byte commandSend)
 {
-  
+
   byte highPart, lowPart;
 
   highPart = dataSend & B11110000;
@@ -123,7 +123,8 @@ void putData(byte dataSend, byte commandSend)
   byte PD = lowPart << 4;
   byte PC = lowPart >> 2;
 
-  delay(1); //2
+  delay(2); //2
+  //delayMicroseconds(500);
 
   PORTD = 0; //очищаем порт
   PORTC = 0;
@@ -135,7 +136,8 @@ void putData(byte dataSend, byte commandSend)
 
   //*******************************************************
 
-  delay(1); //2
+  delay(5); //2
+  //delayMicroseconds(500);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -148,11 +150,82 @@ void putData(byte dataSend, byte commandSend)
   PORTC = PC;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
-  delay(1); //2
+  delay(2); //2
+  //delayMicroseconds(500);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
- }
+  delay(2);
+}
+
+
+
+
+
+
+void putData2 (byte dataSend, byte commandSend)
+{
+
+  byte highPart, lowPart;
+
+  highPart = dataSend & B11110000;
+  lowPart = (dataSend & B00001111) << 4;
+  commandSend = commandSend << 1;
+  highPart = highPart | commandSend;
+  lowPart = lowPart | commandSend;
+
+  byte PD = lowPart << 4;
+  byte PC = lowPart >> 2;
+
+  PORTD = 0; //очищаем порт
+  PORTC = 0;
+  
+  //delay(10);
+  delayMicroseconds(500);
+
+  //******************* RIGHT *****************************
+  PORTD = PD;                // 0,1 bits
+  PORTC = PC;                // 2-7 bits
+  PORTD = PORTD | B00001000; // Синхрофлаг подняли
+
+  //*******************************************************
+//delay(10);
+delayMicroseconds(500);
+
+  PORTC = 0; // Очищаем порт
+  PORTD = 0;
+
+  //********************** LEFT ***************************
+  PD = highPart << 4;
+  PC = highPart >> 2;
+//delay(10);
+  delayMicroseconds(500);
+
+  PORTD = PD;                // 0,1 bits
+  PORTC = PC;                // 2-7 bits
+  PORTD = PORTD | B00001000; // Синхрофлаг подняли
+//delay(10);
+  delayMicroseconds(100);
+
+  PORTC = 0; // Очищаем порт
+  PORTD = 0;
+  //delay(10);
+  delayMicroseconds(500);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //****************************************************************************************
 
@@ -183,7 +256,7 @@ void HOME()
 {
   Serial.println("");
   Serial.println("Going home.");
-  curSector = 0;
+  //curSector = 0;
   curTrack = 0;
 }
 //****************************************************************************************
@@ -192,7 +265,7 @@ void READ()
 {
   detachInterrupt(1);
 
-  delay (50);
+  
   long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
 
   myFile = SD.open("DISKA.IMG");
@@ -212,9 +285,11 @@ void READ()
 
   for (byte q = 0; q < sectorSize; q++)
   {
-    putData(sector[q], 000);
+    putData2 (sector[q], 000);
+    // Serial.print(sector[q]);
+    // Serial.print("_");
   }
-  
+  Serial.println("");
   myFile.close();
 
   DDRC = B00000000;
@@ -230,7 +305,7 @@ void READ()
 
 void SETSEC()
 {
-  curSector = data8 - 1;
+  curSector = data8; // убран -1
 
   if (curSector > sectors)
   {
@@ -268,15 +343,16 @@ void WRITE()
 
   if (wrPend == false)
   {
-    Serial.print("Writting sector:");
+    Serial.print("Writting:");
     Serial.print(curSector);
     Serial.print(" sector / Track:");
     Serial.println(curTrack);
+    Serial.print("startByte = ");
+    Serial.println(startByte);
 
-    disk[startByte] = data8; //!!!!
+    byteCount = 0;
     sector[byteCount] = data8;
     wrPend = true;
-    byteCount = 0;
     return;
   }
 
@@ -284,13 +360,17 @@ void WRITE()
 
   if (byteCount < sectorSize)
   {
-    disk[startByte + byteCount] = data8; //!!!!
     sector[byteCount] = data8;
 
     if (byteCount == sectorSize - 1)
     {
       wrPend = false;
     }
+    myFile = SD.open("DISKA.IMG, FILE_WRITE");
+    myFile.seek(startByte);
+
+    myFile.write(sector, 128);
+    myFile.close();
     return;
   }
 }
@@ -305,7 +385,7 @@ void setup()
   DDRC = B00000000;
   DDRD = B00000000;
   Serial.begin(115200);
- // kostyil = true;
+  // kostyil = true;
   attachInterrupt(1, getData, RISING);
 
   if (!SD.begin(10))
