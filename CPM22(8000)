@@ -4010,27 +4010,25 @@ HOME:                ;move to the track 00	position of current drive
 ;	translate this call into a settrk call with Parameter 00
             
     
-            CALL    LOOP
+            PUSH    B
+            PUSH    D
             MVI     D, 01H    ; D - комманда HOME               
             MVI     B, 00h   ; B - неиспользуеммые данные
+            CALL    SENDCMD
             MVI     A, 0 ;select track 0
             STA     track 
             CALL    MEGALOOP
+            POP     D
+            POP     B
             RET      ;we will move to 00 on first read/write
 ; 
 SELDSK:              ;select disk given by register c
-
-            
-            
-            
             PUSH    B
             PUSH    D
             MVI     D, 02H    ; D - комманда               
             MOV     B, C      ; CPM wants drive in C and 
             CALL    SENDCMD
-            CALL    LOOP
-            CALL    LOOP
-            CALL    LOOP            
+            CALL    MEGALOOP            
             POP     D
             POP     B
 
@@ -4049,6 +4047,7 @@ SELDSK:              ;select disk given by register c
             DAD     h ;*16 (size of each header)
             LXI     d,dpbase 
             DAD     d ;hl=,dpbase (diskno*16)
+            CALL    MEGALOOP
             RET      
 ; 
 SETTRK:              ;set track given by register c
@@ -4062,16 +4061,19 @@ SETTRK:              ;set track given by register c
             RET      
 ; 
 SETSEC:              ;set sector given by register c
+            
+            PUSH    B
+            PUSH    D
             MOV     a,c 
             STA     sector 
-
-            CALL    LOOP
-            CALL    LOOP
-
             MVI     D, 03h    ; D - комманда
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
             CALL    MEGALOOP
+            
+            POP     D
+            POP     B
+            
             RET      
 ; 
 ; 
@@ -4149,8 +4151,9 @@ READSECTOR:
 RSEXIT:
             CALL    LOOP
             CALL    LOOP
-            POP     B
             POP     D
+            POP     B
+            MVI     A, 0h; Placeholder for error
             RET
 
 
@@ -4175,6 +4178,7 @@ SENDCMD:            ; B - данные
             
             CALL INIT8255OUT
  
+            PUSH    D
            
             MOV     C,B ; в BC у нас 2 копии данных В-h C-l
             MVI     A,0F0h ; 11110000
@@ -4211,6 +4215,7 @@ SENDBYTE:                    ; BC содержит половинки, код к
             MVI     A,00h  
             OUT     00h     ; обнуляем порт
             CALL    LOOP
+            POP     D
             RET
 
 
@@ -4299,7 +4304,7 @@ ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
 
 MEGALOOP:      
             PUSH    D
-            MVI     E, 10h ;10 30 50   
+            MVI     E, 20h ;10 30 50   
 MEGALOOP2:      
             CALL    LOOP
             DCR     E   
@@ -4309,13 +4314,17 @@ MEGALOOP2:
 
 
 
+TXTOUT:     CALL    WAITOUT 
+            MOV     A,M 
+            ANI     7Fh ;drop 8th bit
+            OUT     223 
+            MOV     A,M 
+            ANI     80h 
+            RNZ      
+            INX     H 
+            JMP     TXTOUT 
 
-
-
-
-
-
-
+ERROR0:     .ISTR   "ERROR(0):BOOTING ERROR..."             
 
 
 ;	the remainder of the cbios is reserved uninitialized
