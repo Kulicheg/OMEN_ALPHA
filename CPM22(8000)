@@ -3924,10 +3924,12 @@ GOCPM:
             STA     8000h ;for jmp to wboot
             LXI     h,wboote ;wboot entry point
             SHLD    8001h ;set address field for jmp at 0
-; 
-            STA     8005h ;for jmp to bdos
+
+            MVI     A, 00
+            STA     8003h
+            STA     8004h
             LXI     h,bdos ;bdos entry point
-            SHLD    8006h ;address field of Jump at 5 to bdos
+            SHLD    8005h ;address field of Jump at 5 to bdos
 ; 
             LHLD    DMAAD
             PUSH    H
