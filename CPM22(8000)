@@ -49,6 +49,8 @@ CNTRLX	EQU	18H	;control-x
 CNTRLZ	EQU	1AH	;control-z (end-of-file mark)
 DEL	EQU	7FH	;rubout
 ;
+NSECTS      EQU 31h ;warm start sector count
+
         .ORG     8000h
         JMP     WBOOT
         
@@ -3778,7 +3780,7 @@ BIAS        EQU     (msize-20)*1024
             .ORG    BIOS ;origin of this program
             
             
-NSECTS      EQU     ($-ccp)/128 ;warm start sector count
+
 ; 
 ;	jump vector for individual subroutines
 ; 
@@ -3919,13 +3921,13 @@ LOAD1:               ;load	one more sector
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
             MVI     a,0c3h ;c3 is a jmp instruction
-            STA     0 ;for jmp to wboot
+            STA     8000h ;for jmp to wboot
             LXI     h,wboote ;wboot entry point
-            SHLD    1 ;set address field for jmp at 0
+            SHLD    8001h ;set address field for jmp at 0
 ; 
-            STA     5 ;for jmp to bdos
+            STA     8005h ;for jmp to bdos
             LXI     h,bdos ;bdos entry point
-            SHLD    6 ;address field of Jump at 5 to bdos
+            SHLD    8006h ;address field of Jump at 5 to bdos
 ; 
             LHLD    DMAAD
             PUSH    H
