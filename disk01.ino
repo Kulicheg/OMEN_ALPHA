@@ -255,7 +255,7 @@ void printSector()
 void HOME()
 {
   Serial.println("");
-  Serial.println("Going home.");
+  Serial.println("HOME.");
   //curSector = 0;
   curTrack = 0;
 }
@@ -266,7 +266,7 @@ void READ()
   detachInterrupt(1);
 
   
-  long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
+  long int startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
 
   myFile = SD.open("DISKA.IMG");
   myFile.seek(startByte);
