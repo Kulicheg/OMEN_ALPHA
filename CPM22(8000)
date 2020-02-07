@@ -4030,7 +4030,7 @@ SELDSK:              ;select disk given by register c
             MVI     D, 02H    ; D - комманда               
             MOV     B, C      ; CPM wants drive in C and 
             CALL    SENDCMD
-            CALL    MEGALOOP            
+            ;CALL    MEGALOOP            
             POP     D
             POP     B
 
@@ -4152,7 +4152,7 @@ READSECTOR:
             JMP     READSECTOR
 RSEXIT:
             CALL    LOOP
-            CALL    LOOP
+           ;CALL    LOOP
             POP     D
             POP     B
             MVI     A, 0h; Placeholder for error
@@ -4251,17 +4251,16 @@ WRITE:               ;perform a write operation
 
             CALL    INIT8255OUT
             LHLD    DMAAD      ; Старт DMA
-            MVI     D, 07h      ; Комманда записи
             MVI     E, 80h      ; размер сектора
 NEXTBYTE:
             MVI     D, 07h      ; Комманда записи
             MOV     B, M        ; Берем из памяти байт
             CALL    SENDCMD     ; Отправляем байт
+            CALL    LOOP
             INX     H           ; Увеличиваем адрес
             DCR     E           ; Уменьшаем счетчик байт
             JNZ     NEXTBYTE    ; Если не последний шлем далее
-            RET  
-  
+            CALL    MEGALOOP
             MVI     A, 0 ;error condition 
 ; 
 WAITIO:              ;enter	here from read	and write to perform the actual i/o
@@ -4278,7 +4277,7 @@ WAITIO:              ;enter	here from read	and write to perform the actual i/o
 
 
 LOOP:       PUSH    D
-            MVI     D, 0FFh ;delay a little
+            MVI     D, 0AAh ;delay a little FF!
 LOOP2:      NOP
             NOP
             NOP
@@ -4306,7 +4305,7 @@ ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
 
 MEGALOOP:      
             PUSH    D
-            MVI     E, 20h ;10 30 50   
+            MVI     E, 10h ;10 30 50   
 MEGALOOP2:      
             CALL    LOOP
             DCR     E   
