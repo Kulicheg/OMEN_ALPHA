@@ -4276,7 +4276,7 @@ WAITIO:              ;enter	here from read	and write to perform the actual i/o
 
 
 LOOP:       PUSH    D
-            MVI     D, 0AAh ;delay a little FF!
+            MVI     D, 0FFh ;delay a little FF!
 LOOP2:      NOP
             NOP
             NOP
@@ -4352,4 +4352,3 @@ CHK03:      DS      16 ;check vector 3
 ENDDAT      EQU     $ ;end of data area
 DATSIZ      EQU     $-begdat ;	;size of data area
             END      
-
