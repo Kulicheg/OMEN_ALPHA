@@ -2240,7 +2240,7 @@ CHECKDIR:LHLD	CKSUMTBL
 	RZ		;return if they are the same.
 	CALL	MOREFLS	;not the same, do we care?
 	RNC
-	CALL	WRTPRTD	;yes, mark this as write protected.
+	;CALL	WRTPRTD	;yes, mark this as write protected.!!!!!
 	RET
 CHKDIR1	MOV	M,A	;just set the byte.
 	RET
@@ -3859,15 +3859,15 @@ BOOT:                ;simplest case is to just perform parameter initialization
 ; 
 WBOOT:                  ;simplest case is to read the disk until all sectors loaded
             DI          ;!!!!!
-            LXI     H, TBUFF ;!!!!!
+            LXI     H, TBUFF 
             SHLD    DMAAD
             
-            LXI     sp, DEFSTCK ;use space below buffer for stack !!!!!
+            LXI     sp, DEFSTCK ;use space below buffer for stack
             MVI     c,0 ;select disk 0
             CALL    seldsk 
             CALL    home ;go to track 00
 ; 
-            MVI     b, nsects ;b counts * of sectors to load !!!!!
+            MVI     b, nsects ;b counts * of sectors to load
             MVI     c,0 ;c has the current track number
             MVI     d,2 ;d has the next sector to read
 ;	note that we begin by reading track 0, sector 2 since sector 1
@@ -4049,7 +4049,7 @@ SELDSK:              ;select disk given by register c
             DAD     h ;*16 (size of each header)
             LXI     d,dpbase 
             DAD     d ;hl=,dpbase (diskno*16)
-            CALL    MEGALOOP
+            CALL    LOOP
             RET      
 ; 
 SETTRK:              ;set track given by register c
@@ -4059,7 +4059,7 @@ SETTRK:              ;set track given by register c
             MVI     D, 04h    ; D - комманда             
             MOV     B, C      ; Пока ограничимся только 256 дорожками, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    MEGALOOP
+            CALL    LOOP
             RET      
 ; 
 SETSEC:              ;set sector given by register c
@@ -4071,7 +4071,7 @@ SETSEC:              ;set sector given by register c
             MVI     D, 03h    ; D - комманда
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    MEGALOOP
+            CALL    LOOP
             
             POP     D
             POP     B
@@ -4152,7 +4152,6 @@ READSECTOR:
             JMP     READSECTOR
 RSEXIT:
             CALL    LOOP
-           ;CALL    LOOP
             POP     D
             POP     B
             MVI     A, 0h; Placeholder for error
@@ -4260,7 +4259,7 @@ NEXTBYTE:
             INX     H           ; Увеличиваем адрес
             DCR     E           ; Уменьшаем счетчик байт
             JNZ     NEXTBYTE    ; Если не последний шлем далее
-            CALL    MEGALOOP
+
             MVI     A, 0 ;error condition 
 ; 
 WAITIO:              ;enter	here from read	and write to perform the actual i/o
