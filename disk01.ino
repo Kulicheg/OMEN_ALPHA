@@ -14,13 +14,6 @@
 
 */
 
-/*
-  Тестовая геометрия
-  размер сектора  128 байт
-  секторов        2
-  дорожек         4
-  итого 1024 байта
-*/
 
 /*
   Пакет содержит 8 бит
@@ -61,7 +54,7 @@ bool kostyil;
 
 byte sectorSize = 128;
 byte sectors = 26;
-byte tracks = 90;
+byte tracks = 77;
 
 byte curSector = 0;
 byte curTrack = 0;
@@ -78,11 +71,11 @@ void getData()
   if (kostyil)
   {
     kostyil = false;
-    Serial.println("K");
+    //Serial.println("K");
     return;
   }
 
-  Serial.println("*");
+  Serial.print("*");
 
   byte portb = PINC;
   portb = portb << 2;
@@ -108,62 +101,7 @@ void getData()
 }
 
 //**********************************************************************************************
-
-void putData(byte dataSend, byte commandSend)
-{
-
-  byte highPart, lowPart;
-
-  highPart = dataSend & B11110000;
-  lowPart = (dataSend & B00001111) << 4;
-  commandSend = commandSend << 1;
-  highPart = highPart | commandSend;
-  lowPart = lowPart | commandSend;
-
-  byte PD = lowPart << 4;
-  byte PC = lowPart >> 2;
-
-  delay(2); //2
-  //delayMicroseconds(500);
-
-  PORTD = 0; //очищаем порт
-  PORTC = 0;
-
-  //******************* RIGHT *****************************
-  PORTD = PD;                // 0,1 bits
-  PORTC = PC;                // 2-7 bits
-  PORTD = PORTD | B00001000; // Синхрофлаг подняли
-
-  //*******************************************************
-
-  delay(5); //2
-  //delayMicroseconds(500);
-
-  PORTC = 0; // Очищаем порт
-  PORTD = 0;
-
-  //********************** LEFT ***************************
-  PD = highPart << 4;
-  PC = highPart >> 2;
-
-  PORTD = PD;                // 0,1 bits
-  PORTC = PC;                // 2-7 bits
-  PORTD = PORTD | B00001000; // Синхрофлаг подняли
-
-  delay(2); //2
-  //delayMicroseconds(500);
-
-  PORTC = 0; // Очищаем порт
-  PORTD = 0;
-  delay(2);
-}
-
-
-
-
-
-
-void putData2 (byte dataSend, byte commandSend)
+void putData2(byte dataSend, byte commandSend)
 {
 
   byte highPart, lowPart;
@@ -179,8 +117,7 @@ void putData2 (byte dataSend, byte commandSend)
 
   PORTD = 0; //очищаем порт
   PORTC = 0;
-  
-  //delay(10);
+
   delayMicroseconds(500);
 
   //******************* RIGHT *****************************
@@ -189,8 +126,7 @@ void putData2 (byte dataSend, byte commandSend)
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
   //*******************************************************
-//delay(10);
-delayMicroseconds(500);
+  delayMicroseconds(500);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -198,34 +134,20 @@ delayMicroseconds(500);
   //********************** LEFT ***************************
   PD = highPart << 4;
   PC = highPart >> 2;
-//delay(10);
+
   delayMicroseconds(500);
 
   PORTD = PD;                // 0,1 bits
   PORTC = PC;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
-//delay(10);
-  delayMicroseconds(100);
+
+  delayMicroseconds(500);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
-  //delay(10);
+
   delayMicroseconds(500);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //****************************************************************************************
 
@@ -265,7 +187,6 @@ void READ()
 {
   detachInterrupt(1);
 
-  
   long int startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
 
   myFile = SD.open("DISKA.IMG");
@@ -285,9 +206,8 @@ void READ()
 
   for (byte q = 0; q < sectorSize; q++)
   {
-    putData2 (sector[q], 000);
-    // Serial.print(sector[q]);
-    // Serial.print("_");
+    putData2(sector[q], 000);
+
   }
   Serial.println("");
   myFile.close();
@@ -298,21 +218,21 @@ void READ()
   kostyil = true;
   attachInterrupt(1, getData, RISING);
 
-  //printSector();
+  printSector();
 }
 
 //*******************************************************************************
 
 void SETSEC()
 {
-  curSector = data8; // убран -1
+  curSector = data8;
 
   if (curSector > sectors)
   {
     Serial.println(String(curSector) + " Sector error");
     curSector = 0;
   }
-  Serial.print("curSector:");
+  Serial.print("SETSEC: ");
   Serial.println(curSector);
 }
 
@@ -325,29 +245,29 @@ void SETTRK()
     curTrack = 0;
   }
 
-  Serial.print("SETTRK curTrack:");
+  Serial.print("SETTRK: ");
   Serial.println(curTrack);
 }
 
 void SELDSK()
 {
   curDrive = data8;
-  Serial.print("Drive selected:");
+  Serial.print("SELDSK: ");
   Serial.println(curDrive);
 }
 
 void WRITE()
 {
 
-  long int startByte = curTrack * sectors * sectorSize + sectorSize * curSector;
+  long int startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
 
   if (wrPend == false)
   {
     Serial.print("Writting:");
     Serial.print(curSector);
-    Serial.print(" sector / Track:");
-    Serial.println(curTrack);
-    Serial.print("startByte = ");
+    Serial.print(" / ");
+    Serial.print(curTrack);
+    Serial.print(" / startByte = ");
     Serial.println(startByte);
 
     byteCount = 0;
@@ -361,23 +281,35 @@ void WRITE()
   if (byteCount < sectorSize)
   {
     sector[byteCount] = data8;
+    /*
+      Serial.print(byteCount);
+      Serial.print(":");
+      Serial.println(data8, HEX);
+    */
 
     if (byteCount == sectorSize - 1)
     {
+      myFile = SD.open("DISKA.IMG", O_WRITE);
+      if (myFile)
+      {
+        startByte = (curTrack * (sectors + 1) * sectorSize + sectorSize * curSector);
+        myFile.seek(startByte);
+        myFile.write(sector, 128);
+        myFile.close();
+      }
+      else
+      {
+        // if the file didn't open, print an error:
+        Serial.println("error opening DISKA.IMG");
+      }
+
       wrPend = false;
     }
-    myFile = SD.open("DISKA.IMG, FILE_WRITE");
-    myFile.seek(startByte);
-
-    myFile.write(sector, 128);
-    myFile.close();
-    return;
   }
+
+  return;
 }
 
-void cardInfo()
-{
-}
 
 //*****************************************************************************
 void setup()
@@ -391,8 +323,7 @@ void setup()
   if (!SD.begin(10))
   {
     Serial.println("SD initialization failed!");
-    while (1)
-      ;
+    while (1);
   }
 
   Serial.println("SD initialization done.");
@@ -419,29 +350,29 @@ void loop()
 
       switch (command)
       {
-      case 00: //Read a sector
-        READ();
-        break;
-      case 01: //Move disc head to track 0
-        HOME();
-        break;
-      case 02: //Select disc drive
-        SELDSK();
-        break;
-      case 03: //Set sector number
-        SETSEC();
-        break;
+        case 00: //Read a sector
+          READ();
+          break;
+        case 01: //Move disc head to track 0
+          HOME();
+          break;
+        case 02: //Select disc drive
+          SELDSK();
+          break;
+        case 03: //Set sector number
+          SETSEC();
+          break;
 
-      case 04: //Set track number
-        SETTRK();
-        break;
-      case 05:
-        break;
-      case 06:
-        break;
-      case 07: //Write a sector
-        WRITE();
-        break;
+        case 04: //Set track number
+          SETTRK();
+          break;
+        case 05:
+          break;
+        case 06:
+          break;
+        case 07: //Write a sector
+          WRITE();
+          break;
       }
     }
   }
