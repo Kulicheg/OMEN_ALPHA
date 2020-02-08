@@ -3858,17 +3858,7 @@ BOOT:                ;simplest case is to just perform parameter initialization
 ; 
 WBOOT:                  ;simplest case is to read the disk until all sectors loaded
             DI          ;!!!!!
-            ;OUT     20h
-            LXI     sp, DEFSTCK ;use space below buffer for stack !!!!!
-            
-            LXI     H, TBUFF ;!!!!!
-            SHLD    DMAAD
-            
-            
-      
-   
-   
-   
+
 STARTADR        EQU     06700h
 TARGTADR        EQU     0DC00h
 ENDADR			EQU		07FFFh
@@ -3893,6 +3883,17 @@ LOADER:
             JNZ     LOADER
             CMP     C
             JNZ     LOADER
+            
+            
+            
+            
+            LXI     sp, DEFSTCK ;use space below buffer for stack !!!!!
+            
+            LXI     H, TBUFF ;!!!!!
+            SHLD    DMAAD
+            
+            CALL    HOME
+            
  
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
