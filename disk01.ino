@@ -37,10 +37,6 @@
   06  110
   07  111 Запись  WRITE   ;39: Write a sector
 */
-
-const long int diskSize = 6912; //sectors * tracks * sectorSize;
-byte disk[128] = {0x00};
-
 const int chipSelect = 10;
 
 File myFile;
@@ -51,6 +47,7 @@ volatile byte command;
 volatile byte data4, data4H, data4L, data8;
 byte wrPend, byteCount;
 bool kostyil;
+unsigned long startByte;
 
 byte sectorSize = 128;
 byte sectors = 26;
@@ -75,7 +72,7 @@ void getData()
     return;
   }
 
-  Serial.print("*");
+  //Serial.print(".");
 
   byte portb = PINC;
   portb = portb << 2;
@@ -118,7 +115,7 @@ void putData2(byte dataSend, byte commandSend)
   PORTD = 0; //очищаем порт
   PORTC = 0;
 
-  delayMicroseconds(500);
+  delayMicroseconds(100);
 
   //******************* RIGHT *****************************
   PORTD = PD;                // 0,1 bits
@@ -126,7 +123,7 @@ void putData2(byte dataSend, byte commandSend)
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
   //*******************************************************
-  delayMicroseconds(500);
+  delayMicroseconds(100);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -135,18 +132,18 @@ void putData2(byte dataSend, byte commandSend)
   PD = highPart << 4;
   PC = highPart >> 2;
 
-  delayMicroseconds(500);
+  delayMicroseconds(100);
 
   PORTD = PD;                // 0,1 bits
   PORTC = PC;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
-  delayMicroseconds(500);
+  delayMicroseconds(100);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
 
-  delayMicroseconds(500);
+  delayMicroseconds(100);
 }
 
 //****************************************************************************************
@@ -187,7 +184,8 @@ void READ()
 {
   detachInterrupt(1);
 
-  long int startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
+  startByte = curTrack * (sectors + 1);
+  startByte = startByte * sectorSize + sectorSize * curSector;
 
   myFile = SD.open("DISKA.IMG");
   myFile.seek(startByte);
@@ -259,7 +257,9 @@ void SELDSK()
 void WRITE()
 {
 
-  long int startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
+  //startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
+  startByte = curTrack * (sectors + 1);
+  startByte = startByte * sectorSize + sectorSize * curSector;
 
   if (wrPend == false)
   {
