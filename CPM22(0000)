@@ -3886,7 +3886,8 @@ LOADER:
             MVI     A, 00
             CMP     B
             JNZ     LOADER
-            CMP     C
+            MVI     A, 00
+	    CMP     C
             JNZ     LOADER
             
             OUT 20h
