@@ -50,13 +50,13 @@ DEL	EQU	7FH	;rubout
 ;
 NSECTS      EQU 31h ;warm start sector count
 
-            .ORG     0000h
-            JMP     WBOOT
+            ;.ORG     0000h
+            ;JMP     WBOOT
         
-            DB 00, 00
+            ;DB 00, 00
 
-            .ORG     0005h
-            JMP     BDOS
+            ;.ORG     0005h
+            ;JMP     BDOS
 
                             ;   Set origin for CP/M
 	    .ORG	CCP
@@ -2239,7 +2239,7 @@ CHECKDIR:LHLD	CKSUMTBL
 	RZ		;return if they are the same.
 	CALL	MOREFLS	;not the same, do we care?
 	RNC
-	CALL	WRTPRTD	;yes, mark this as write protected.
+	;CALL	WRTPRTD	;yes, mark this as write protected.
 	RET
 CHKDIR1	MOV	M,A	;just set the byte.
 	RET
@@ -3859,15 +3859,22 @@ BOOT:                ;simplest case is to just perform parameter initialization
 WBOOT:                  ;simplest case is to read the disk until all sectors loaded
             DI          ;!!!!!
 
+
+           
+
 STARTADR        EQU     06700h
 TARGTADR        EQU     0DC00h
 ENDADR			EQU		07FFFh
-LNG             EQU     018D0h
+LNG             EQU     01900h
 
+
+
+            LXI     SP, 0DC00h ;use space below buffer for stack !!!!!
             LXI     H, STARTADR
             LXI     D, TARGTADR
             LXI     B, LNG
-            
+
+            OUT     20h            
 LOADER:
             MOV     A, M
             INX     H
@@ -3876,25 +3883,14 @@ LOADER:
             INX     H
             XCHG
             DCX     B
-                 
             MVI     A, 00
-            
             CMP     B
             JNZ     LOADER
             CMP     C
             JNZ     LOADER
             
+            OUT 20h
             
-            
-            
-            LXI     sp, DEFSTCK ;use space below buffer for stack !!!!!
-            
-            LXI     H, TBUFF ;!!!!!
-            SHLD    DMAAD
-            
-            CALL    HOME
-            
- 
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
             
@@ -3907,9 +3903,7 @@ GOCPM:
             LXI     h,bdos ;bdos entry point
             SHLD    0006h ;address field of Jump at 5 to bdos
 ; 
-            LHLD    DMAAD
-            PUSH    H
-            POP     B
+            
             LXI     B, TBUFF
             CALL    setdma 
 ; 
@@ -3995,7 +3989,7 @@ HOME:                ;move to the track 00	position of current drive
             CALL    SENDCMD
             MVI     A, 0 ;select track 0
             STA     track 
-            CALL    MEGALOOP
+            CALL    LOOP
             POP     D
             POP     B
             RET      ;we will move to 00 on first read/write
@@ -4024,7 +4018,7 @@ SELDSK:              ;select disk given by register c
             DAD     h ;*16 (size of each header)
             LXI     d,dpbase 
             DAD     d ;hl=,dpbase (diskno*16)
-            CALL    MEGALOOP
+            CALL    LOOP
             RET      
 ; 
 SETTRK:              ;set track given by register c
@@ -4034,7 +4028,7 @@ SETTRK:              ;set track given by register c
             MVI     D, 04h    ; D - комманда             
             MOV     B, C      ; Пока ограничимся только 256 дорожками, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    MEGALOOP
+            CALL    LOOP
             RET      
 ; 
 SETSEC:              ;set sector given by register c
@@ -4235,7 +4229,6 @@ NEXTBYTE:
             INX     H           ; Увеличиваем адрес
             DCR     E           ; Уменьшаем счетчик байт
             JNZ     NEXTBYTE    ; Если не последний шлем далее
-            CALL    LOOP
             MVI     A, 0 ;error condition 
 ; 
 WAITIO:              ;enter	here from read	and write to perform the actual i/o
@@ -4300,7 +4293,13 @@ TXTOUT:     CALL    WAITOUT
             INX     H 
             JMP     TXTOUT 
 
-ERROR0:     .ISTR   "ERROR(0):BOOTING ERROR..."             
+ERROR0:     .ISTR   "ERR(0):BOOT ERROR..."             
+
+MEMINIT:
+            NOP
+            OUT     20h
+            CALL    BOOT
+            END
 
 
 ;	the remainder of the cbios is reserved uninitialized
@@ -4327,5 +4326,6 @@ CHK03:      DS      16 ;check vector 3
 ; 
 ENDDAT      EQU     $ ;end of data area
 DATSIZ      EQU     $-begdat ;	;size of data area
-            END      
+            
+      
 
