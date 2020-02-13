@@ -4249,7 +4249,7 @@ WAITIO:              ;enter	here from read	and write to perform the actual i/o
 
 
 LOOP:       PUSH    D
-            MVI     D, 0AAh ;delay a little FF!
+            MVI     D, 030h ;delay a little FF!
 LOOP2:      NOP
             NOP
             NOP
