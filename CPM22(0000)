@@ -4335,6 +4335,3 @@ CHK03:      DS      16 ;check vector 3
 ; 
 ENDDAT      EQU     $ ;end of data area
 DATSIZ      EQU     $-begdat ;	;size of data area
-            
-      
-
