@@ -3869,13 +3869,15 @@ LNG             EQU     01900h
 
 
 
-            LXI     SP, 0DC00h ;use space below buffer for stack !!!!!
+            LXI     SP, 0DEFFh ;use space below buffer for stack !!!!!
             LXI     H, STARTADR
             LXI     D, TARGTADR
             LXI     B, LNG
 
             OUT     20h            
 LOADER:
+
+            JMP     GOCPM
             MOV     A, M
             INX     H
             XCHG
@@ -3895,6 +3897,10 @@ LOADER:
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
             
+            XRA     a ;zero in the accum !!!!! DEBUG 1 DRIVE
+            STA     iobyte ;clear the iobyte
+            STA     cdisk ;select disk zero
+
             MVI     a,0c3h ;c3 is a jmp instruction
             STA     0000h ;for jmp to wboot
             STA     0005h ;for jmp to wboot
@@ -3991,7 +3997,6 @@ HOME:                ;move to the track 00	position of current drive
             MVI     A, 0 ;select track 0
             STA     track 
             CALL    LOOP
-            CALL    LOOP
             POP     D
             POP     B
             RET      ;we will move to 00 on first read/write
@@ -4045,7 +4050,7 @@ SETSEC:              ;set sector given by register c
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
             CALL    LOOP
-            CALL    LOOP
+            CALL    LOOP          
             POP     D
             POP     B
             
@@ -4249,7 +4254,7 @@ WAITIO:              ;enter	here from read	and write to perform the actual i/o
 
 
 LOOP:       PUSH    D
-            MVI     D, 030h ;delay a little FF!
+            MVI     D, 0FFh ;delay a little FF!
 LOOP2:      NOP
             NOP
             NOP
