@@ -4304,6 +4304,7 @@ TXTOUT:     CALL    WAITOUT
 
 ERROR0:     .ISTR   "ERR(0):BOOT ERROR..."             
 
+            .ORG 0F4A0h
 MEMINIT:
             NOP
             OUT     20h
