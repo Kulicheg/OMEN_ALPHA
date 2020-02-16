@@ -50,7 +50,7 @@ bool kostyil;
 unsigned long startByte;
 
 byte sectorSize = 128;
-byte sectors = 26;
+byte sectors = 128;
 byte tracks = 255;
 
 byte curSector = 0;
@@ -257,7 +257,7 @@ void SELDSK()
 void WRITE()
 {
 
-  //startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
+  //startByte = curTrack * (sectors) * sectorSize + sectorSize * curSector;
   startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
 
