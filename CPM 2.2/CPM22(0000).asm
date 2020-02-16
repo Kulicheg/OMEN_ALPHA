@@ -3845,11 +3845,37 @@ DPBLK:               ;disk parameter block, common to all disks
             DB      0 ;alloc 1
             DW      16 ;check size
             DW      2 ;track offset
+            
+            
+            
+            
+;
+;        .DW 128 ;SPT - 128 bytes sectors per track (= 32 sectors of 512 bytes)
+;        .DB 5   ;BSH - block shift factor
+;        .DB 31  ;BLM - block mask
+;        .DB 1   ;EXM - Extent mask
+;        .DW 2047 ;DSM - Storage size (blocks - 1)
+;        .DW 511 ;DRM - Number of directory entries - 1
+;        .DB 240 ;AL0 - 1 bit set per directory block
+;        .DB 0   ;AL1 -            "
+;        .DW 0   ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
+;        .DW 0   ;OFF - Reserved tracks            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 ; 
 ;	end of fixed tables
 ; 
 ;	individual subroutines to perform each function
 BOOT:                ;simplest case is to just perform parameter initialization
+            OUT 20h
             DI
             XRA     a ;zero in the accum
             STA     iobyte ;clear the iobyte
@@ -3874,9 +3900,10 @@ LNG             EQU     01900h
             LXI     D, TARGTADR
             LXI     B, LNG
 
-            OUT     20h            
+       
 LOADER:
 
+            OUT 20h
             MOV     A, M
             INX     H
             XCHG
@@ -3891,18 +3918,18 @@ LOADER:
             CMP     C
             JNZ     LOADER
             
-            OUT 20h
-            
+            OUT     20h
+
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
-            
+           
             XRA     a ;zero in the accum !!!!! DEBUG 1 DRIVE
             STA     iobyte ;clear the iobyte
             STA     cdisk ;select disk zero
 
-            MVI     a,0c3h ;c3 is a jmp instruction
+            MVI     a,0C3h ;c3 is a jmp instruction
             STA     0000h ;for jmp to wboot
-            STA     0005h ;for jmp to wboot
+            STA     0005h ;for jmp to bdos
             LXI     h,wboote ;wboot entry point
             SHLD    0001h ;set address field for jmp at 0
 
@@ -4303,10 +4330,10 @@ TXTOUT:     CALL    WAITOUT
 
 ERROR0:     .ISTR   "ERR(0):BOOT ERROR..."             
 
+
             .ORG 0F4A0h
 MEMINIT:
-            NOP
-            OUT     20h
+            
             CALL    BOOT
             END
 
