@@ -3877,7 +3877,6 @@ LNG             EQU     01900h
             OUT     20h            
 LOADER:
 
-            JMP     GOCPM
             MOV     A, M
             INX     H
             XCHG
