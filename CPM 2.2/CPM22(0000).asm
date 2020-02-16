@@ -3834,43 +3834,33 @@ TRANS:      DB      1,7,13,19 ;sectors  1,  2,  3,  4
             DB      18,24,4,10 ;sectors 21, 22, 23, 24
             DB      16,22 ;sectors 25, 26
 ; 
+
 DPBLK:               ;disk parameter block, common to all disks
-            DW      26 ;sectors per track
-            DB      3 ;block shift factor
-            DB      7 ;block mask
-            DB      0 ;null mask
-            DW      242 ;disk size-1
-            DW      63 ;directory max
-            DB      192 ;alloc 0
-            DB      0 ;alloc 1
-            DW      16 ;check size
-            DW      2 ;track offset
+;            DW      26 ;sectors per track
+;            DB      3 ;block shift factor
+;            DB      7 ;block mask
+;            DB      0 ;null mask
+;            DW      242 ;disk size-1
+;            DW      63 ;directory max
+;            DB      192 ;alloc 0
+;            DB      0 ;alloc 1
+;            DW      16 ;check size
+;            DW      2 ;track offset            
             
             
             
+        .DW 128 ;SPT - 128 bytes sectors per track (= 32 sectors of 512 bytes)
+        .DB 5   ;BSH - block shift factor
+        .DB 31  ;BLM - block mask
+        .DB 1   ;EXM - Extent mask
+        .DW 2047 ;DSM - Storage size (blocks - 1)
+        .DW 511 ;DRM - Number of directory entries - 1
+        .DB 240 ;AL0 - 1 bit set per directory block
+        .DB 0   ;AL1 -            "
+        .DW 0   ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
+        .DW 0   ;OFF - Reserved tracks            
             
-;
-;        .DW 128 ;SPT - 128 bytes sectors per track (= 32 sectors of 512 bytes)
-;        .DB 5   ;BSH - block shift factor
-;        .DB 31  ;BLM - block mask
-;        .DB 1   ;EXM - Extent mask
-;        .DW 2047 ;DSM - Storage size (blocks - 1)
-;        .DW 511 ;DRM - Number of directory entries - 1
-;        .DB 240 ;AL0 - 1 bit set per directory block
-;        .DB 0   ;AL1 -            "
-;        .DW 0   ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
-;        .DW 0   ;OFF - Reserved tracks            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-; 
+ 
 ;	end of fixed tables
 ; 
 ;	individual subroutines to perform each function
