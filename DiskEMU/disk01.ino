@@ -51,7 +51,7 @@ unsigned long startByte;
 
 byte sectorSize = 128;
 byte sectors = 26;
-byte tracks = 77;
+byte tracks = 255;
 
 byte curSector = 0;
 byte curTrack = 0;
@@ -184,7 +184,7 @@ void READ()
 {
   detachInterrupt(1);
 
-  startByte = curTrack * (sectors + 1);
+  startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
 
   myFile = SD.open("DISKA.IMG");
@@ -258,7 +258,7 @@ void WRITE()
 {
 
   //startByte = curTrack * (sectors + 1) * sectorSize + sectorSize * curSector;
-  startByte = curTrack * (sectors + 1);
+  startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
 
   if (wrPend == false)
@@ -292,7 +292,6 @@ void WRITE()
       myFile = SD.open("DISKA.IMG", O_WRITE);
       if (myFile)
       {
-        startByte = (curTrack * (sectors + 1) * sectorSize + sectorSize * curSector);
         myFile.seek(startByte);
         myFile.write(sector, 128);
         myFile.close();
