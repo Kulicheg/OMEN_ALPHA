@@ -173,8 +173,7 @@ void printSector()
 
 void HOME()
 {
-  Serial.println("");
-  Serial.println("HOME.");
+ Serial.println("HOME.");
   //curSector = 0;
   curTrack = 0;
 }
@@ -192,12 +191,11 @@ void READ()
 
   myFile.read(sector, 128);
 
-  Serial.print("TRACK:");
+  Serial.print(" READ TRACK:");
   Serial.print(curTrack);
   Serial.print("  SECTOR:");
-  Serial.print(curSector);
-  Serial.print("  Startbyte:");
-  Serial.println(startByte);
+  Serial.println(curSector);
+
 
   DDRC = B11111111;
   DDRD = DDRD | B11111100;
@@ -207,7 +205,6 @@ void READ()
     putData2(sector[q], 000);
 
   }
-  Serial.println("");
   myFile.close();
 
   DDRC = B00000000;
@@ -215,8 +212,6 @@ void READ()
 
   kostyil = true;
   attachInterrupt(1, getData, RISING);
-
-  printSector();
 }
 
 //*******************************************************************************
@@ -230,8 +225,8 @@ void SETSEC()
     Serial.println(String(curSector) + " Sector error");
     curSector = 0;
   }
-  Serial.print("SETSEC: ");
-  Serial.println(curSector);
+//  Serial.print("SETSEC: ");
+//  Serial.println(curSector);
 }
 
 void SETTRK()
@@ -243,21 +238,21 @@ void SETTRK()
     curTrack = 0;
   }
 
-  Serial.print("SETTRK: ");
-  Serial.println(curTrack);
+//  Serial.print("SETTRK: ");
+//  Serial.println(curTrack);
 }
 
 void SELDSK()
 {
   curDrive = data8;
-  Serial.print("SELDSK: ");
-  Serial.println(curDrive);
+//  Serial.print("SELDSK: ");
+//  Serial.println(curDrive);
 }
 
 void WRITE()
 {
 
-  //startByte = curTrack * (sectors) * sectorSize + sectorSize * curSector;
+
   startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
 
@@ -266,9 +261,7 @@ void WRITE()
     Serial.print("Writting:");
     Serial.print(curSector);
     Serial.print(" / ");
-    Serial.print(curTrack);
-    Serial.print(" / startByte = ");
-    Serial.println(startByte);
+    Serial.println(curTrack);
 
     byteCount = 0;
     sector[byteCount] = data8;
@@ -281,11 +274,6 @@ void WRITE()
   if (byteCount < sectorSize)
   {
     sector[byteCount] = data8;
-    /*
-      Serial.print(byteCount);
-      Serial.print(":");
-      Serial.println(data8, HEX);
-    */
 
     if (byteCount == sectorSize - 1)
     {
