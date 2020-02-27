@@ -2,19 +2,6 @@
 #include <SPI.h>
 #include <SD.h>
 
-/*DDRD = B11111110;  // sets Arduino pins 1 to 7 as outputs, pin 0 as input
-  DDRD = DDRD | B11111100;  // this is safer as it sets pins 2 to 7 as outputs without changing the value of pins 0 & 1, which are RX & TX
-  PORTD = B10101000; // sets digital pins 7,5,3 HIGH
-  DDRD - The Port D Data Direction Register - read/write
-  PORTD - The Port D Data Register - read/write
-  PIND - The Port D Input Pins Register - read only
-  Большинство контроллеров Arduino умеют обрабатывать до двух внешних прерываний, пронумерованных так: 0 (на цифровом порту 2) и 1 (на цифровом порту 3).
-  Arduino Mega обрабатывает дополнительно еще четыра прерывания: 2 (порт 21), 3 (порт 20), 4 (порт 19) и 5 (порт 18).
-
-
-*/
-
-
 /*
   Пакет содержит 8 бит
   0 Синхро, каждое изменение на 1 это новый пакет на шине
@@ -38,6 +25,12 @@
   07  111 Запись  WRITE   ;39: Write a sector
 */
 const int chipSelect = 10;
+String diskName = "disk";
+String diskLtr = "a";
+String diskExt  = ".img";
+
+
+String curDiskName = diskName + diskLtr + diskExt;
 
 File myFile;
 
@@ -68,11 +61,8 @@ void getData()
   if (kostyil)
   {
     kostyil = false;
-    //Serial.println("K");
     return;
   }
-
-  //Serial.print(".");
 
   byte portb = PINC;
   portb = portb << 2;
@@ -173,7 +163,7 @@ void printSector()
 
 void HOME()
 {
- Serial.println("HOME.");
+  Serial.println("HOME");
   //curSector = 0;
   curTrack = 0;
 }
@@ -186,15 +176,32 @@ void READ()
   startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
 
-  myFile = SD.open("DISKA.IMG");
-  myFile.seek(startByte);
 
-  myFile.read(sector, 128);
 
-  Serial.print(" READ TRACK:");
-  Serial.print(curTrack);
-  Serial.print("  SECTOR:");
-  Serial.println(curSector);
+
+
+  myFile = SD.open(curDiskName);
+  if (myFile)
+  {
+    myFile.seek(startByte);
+    myFile.read(sector, 128);
+    Serial.print("READ T:");
+    Serial.print(curTrack);
+    Serial.print(" S:");
+    Serial.println(curSector);
+  }
+  else
+  {
+    Serial.println("error opening " + curDiskName);
+  }
+
+
+
+
+
+
+
+
 
 
   DDRC = B11111111;
@@ -225,8 +232,6 @@ void SETSEC()
     Serial.println(String(curSector) + " Sector error");
     curSector = 0;
   }
-//  Serial.print("SETSEC: ");
-//  Serial.println(curSector);
 }
 
 void SETTRK()
@@ -238,15 +243,17 @@ void SETTRK()
     curTrack = 0;
   }
 
-//  Serial.print("SETTRK: ");
-//  Serial.println(curTrack);
+
 }
 
 void SELDSK()
 {
   curDrive = data8;
-//  Serial.print("SELDSK: ");
-//  Serial.println(curDrive);
+  diskLtr = char (97 + curDrive);
+  curDiskName = diskName + diskLtr + diskExt;
+  Serial.print("SELDSK: ");
+  Serial.println(curDrive);
+  Serial.println(curDiskName);
 }
 
 void WRITE()
@@ -277,7 +284,7 @@ void WRITE()
 
     if (byteCount == sectorSize - 1)
     {
-      myFile = SD.open("DISKA.IMG", O_WRITE);
+      myFile = SD.open(curDiskName, O_WRITE);
       if (myFile)
       {
         myFile.seek(startByte);
@@ -287,7 +294,7 @@ void WRITE()
       else
       {
         // if the file didn't open, print an error:
-        Serial.println("error opening DISKA.IMG");
+        Serial.println("error opening " + curDiskName);
       }
 
       wrPend = false;
@@ -315,13 +322,13 @@ void setup()
 
   Serial.println("SD initialization done.");
 
-  if (SD.exists("DISKA.IMG"))
+  if (SD.exists(curDiskName))
   {
-    Serial.println("DISKA.IMG used");
+    Serial.println(curDiskName + " used");
   }
   else
   {
-    Serial.println("DISKA.IMG doesn't exist.");
+    Serial.println(curDiskName + "doesn't exist.");
   }
 }
 
