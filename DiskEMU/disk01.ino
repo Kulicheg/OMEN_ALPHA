@@ -141,29 +141,29 @@ void putData2(byte dataSend, byte commandSend)
 void printSector()
 {
   int sixteen = 0;
-  Serial.println("");
+  ////Serial.println("");
   for (byte q = 0; q < sectorSize; q++)
   {
     if (sector[q] < 0x10)
     {
-      Serial.print("0");
+      ////Serial.print("0");
     }
 
-    Serial.print(sector[q], HEX);
-    Serial.print(" ");
+    //Serial.print(sector[q], HEX);
+    //Serial.print(" ");
     sixteen++;
 
     if (sixteen == 16)
     {
       sixteen = 0;
-      Serial.println("");
+      //Serial.println("");
     }
   }
 }
 
 void HOME()
 {
-  Serial.println("HOME");
+  //Serial.println("HOME");
   //curSector = 0;
   curTrack = 0;
 }
@@ -185,24 +185,15 @@ void READ()
   {
     myFile.seek(startByte);
     myFile.read(sector, 128);
-    Serial.print("READ T:");
-    Serial.print(curTrack);
-    Serial.print(" S:");
-    Serial.println(curSector);
+    //Serial.print("READ T:");
+    //Serial.print(curTrack);
+    //Serial.print(" S:");
+    //Serial.println(curSector);
   }
   else
   {
-    Serial.println("error opening " + curDiskName);
+    //Serial.println("error opening " + curDiskName);
   }
-
-
-
-
-
-
-
-
-
 
   DDRC = B11111111;
   DDRD = DDRD | B11111100;
@@ -229,7 +220,7 @@ void SETSEC()
 
   if (curSector > sectors)
   {
-    Serial.println(String(curSector) + " Sector error");
+    //Serial.println(String(curSector) + " Sector error");
     curSector = 0;
   }
 }
@@ -239,7 +230,7 @@ void SETTRK()
   curTrack = data8;
   if (curTrack > tracks)
   {
-    Serial.println(String(curTrack) + " Track error");
+    //Serial.println(String(curTrack) + " Track error");
     curTrack = 0;
   }
 
@@ -251,9 +242,9 @@ void SELDSK()
   curDrive = data8;
   diskLtr = char (97 + curDrive);
   curDiskName = diskName + diskLtr + diskExt;
-  Serial.print("SELDSK: ");
-  Serial.println(curDrive);
-  Serial.println(curDiskName);
+  //Serial.print("SELDSK: ");
+  //Serial.println(curDrive);
+  //Serial.println(curDiskName);
 }
 
 void WRITE()
@@ -265,10 +256,10 @@ void WRITE()
 
   if (wrPend == false)
   {
-    Serial.print("Writting:");
-    Serial.print(curSector);
-    Serial.print(" / ");
-    Serial.println(curTrack);
+    //Serial.print("Writting:");
+    //Serial.print(curSector);
+    //Serial.print(" / ");
+    //Serial.println(curTrack);
 
     byteCount = 0;
     sector[byteCount] = data8;
@@ -294,7 +285,7 @@ void WRITE()
       else
       {
         // if the file didn't open, print an error:
-        Serial.println("error opening " + curDiskName);
+        //Serial.println("error opening " + curDiskName);
       }
 
       wrPend = false;
@@ -310,25 +301,25 @@ void setup()
 {
   DDRC = B00000000;
   DDRD = B00000000;
-  Serial.begin(115200);
+  //Serial.begin(115200);
   // kostyil = true;
   attachInterrupt(1, getData, RISING);
 
   if (!SD.begin(10))
   {
-    Serial.println("SD initialization failed!");
+    //Serial.println("SD initialization failed!");
     while (1);
   }
 
-  Serial.println("SD initialization done.");
+  //Serial.println("SD initialization done.");
 
   if (SD.exists(curDiskName))
   {
-    Serial.println(curDiskName + " used");
+    //Serial.println(curDiskName + " used");
   }
   else
   {
-    Serial.println(curDiskName + "doesn't exist.");
+    //Serial.println(curDiskName + "doesn't exist.");
   }
 }
 
@@ -340,6 +331,10 @@ void loop()
     if (state == 2)
     {
       data8 = data4L + data4H * 16;
+
+      pinMode(LED_BUILTIN, OUTPUT);
+      digitalWrite(LED_BUILTIN,HIGH);
+
       state = 0;
 
       switch (command)
