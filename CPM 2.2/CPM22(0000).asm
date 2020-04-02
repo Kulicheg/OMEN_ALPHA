@@ -4174,7 +4174,7 @@ SENDCMD:            ; B - данные
             
             CALL INIT8255OUT
  
-            PUSH    D
+SENDCMD2:   PUSH    D
            
             MOV     C,B ; в BC у нас 2 копии данных В-h C-l
             MVI     A,0F0h ; 11110000
@@ -4196,21 +4196,21 @@ SENDCMD:            ; B - данные
             RLC             ; Сдвигаем комманду на место
             ORA     C       ; Добавляем к половинкам код комманды.
             MOV     C,A
-SENDBYTE:                    ; BC содержит половинки, код комманды и 0 в младшем бите
+SENDBYTE:                       ; BC содержит половинки, код комманды и 0 в младшем бите
             MOV     A,C 
-            INR     A       ; Поднимаем младший бит  чтобы диск проснулся
-            OUT     00h     ; Выводим  младшую половину в порт
-            CALL    LOOP
+            INR     A           ; Поднимаем младший бит  чтобы диск проснулся
+            OUT     00h         ; Выводим  младшую половину в порт
+            CALL    MINILOOP    ; app
             MVI     A,00h 
-            OUT     00h ; обнуляем порт 
-            CALL    LOOP
+            OUT     00h         ; обнуляем порт 
+            CALL    MINILOOP
             MOV     A,B 
-            INR     A       ; Поднимаем младший бит
-            OUT     00h     ; Выводим  старшую половину в порт для для совместимости 
-            CALL    LOOP    ; даже комманды без данных передаем в 2 такта
+            INR     A           ; Поднимаем младший бит
+            OUT     00h         ; Выводим  старшую половину в порт для для совместимости 
+            CALL    MINILOOP    ;app даже комманды без данных передаем в 2 такта
             MVI     A,00h  
-            OUT     00h     ; обнуляем порт
-            CALL    LOOP
+            OUT     00h         ; обнуляем порт
+            CALL    MINILOOP
             POP     D
             RET
 
@@ -4221,15 +4221,11 @@ SENDBYTE:                    ; BC содержит половинки, код к
 INIT8255OUT:                
             MVI     A, 80h
             OUT     07H 
-            MVI     A, 0h 
-            OUT     00h 
             RET      
             
 INIT8255IN:                
             MVI     A,90h 
             OUT     07h 
-            MVI     A,0h 
-            OUT     00h 
             RET  
 
 
@@ -4249,8 +4245,8 @@ WRITE:               ;perform a write operation
 NEXTBYTE:
             MVI     D, 07h      ; Комманда записи
             MOV     B, M        ; Берем из памяти байт
-            CALL    SENDCMD     ; Отправляем байт
-            CALL    LOOP
+            CALL    SENDCMD2     ; Отправляем байт
+            ;;CALL    LOOP
             INX     H           ; Увеличиваем адрес
             DCR     E           ; Уменьшаем счетчик байт
             JNZ     NEXTBYTE    ; Если не последний шлем далее
@@ -4281,6 +4277,19 @@ LOOP2:      NOP
             POP     D
             RET
 
+MINILOOP:   PUSH    D
+            MVI     D, 0FFh ;delay a little FF!
+MINILOOP2:  NOP
+            NOP
+            NOP
+            DCR     D ;decrement counter
+            JNZ     MINILOOP2 
+            POP     D
+            RET
+
+
+
+
 
 
 BYTEOUT:    
@@ -4294,18 +4303,6 @@ BYTEOUT:
 ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
             OUT     0DEh 
             RET
-
-
-MEGALOOP:      
-            PUSH    D
-            MVI     E, 10h ;10 30 50   
-MEGALOOP2:      
-            CALL    LOOP
-            DCR     E   
-            JNZ     MEGALOOP2   
-            POP     D
-            RET   
-
 
 
 TXTOUT:     CALL    WAITOUT 
