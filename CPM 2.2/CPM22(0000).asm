@@ -4210,7 +4210,7 @@ SENDBYTE:                       ; BC содержит половинки, код
             CALL    MINILOOP    ;app даже комманды без данных передаем в 2 такта
             MVI     A,00h  
             OUT     00h         ; обнуляем порт
-            CALL    MINILOOP
+            CALL    LOOP
             POP     D
             RET
 
@@ -4278,7 +4278,7 @@ LOOP2:      NOP
             RET
 
 MINILOOP:   PUSH    D
-            MVI     D, 0FFh ;delay a little FF!
+            MVI     D, 0FFh ; delay a little FF!
 MINILOOP2:  NOP
             NOP
             NOP
