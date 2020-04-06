@@ -1,10 +1,10 @@
             .ORG    3230h 
 ; 
 ; 
-STARTADR        EQU     0000h ;32A0H - 428FH
-ENDADR			EQU		00FEFh
-BUFFADR		    EQU		8040H		
-LNG             EQU     END - STARTMOVE
+            STARTADR    EQU         0000h ;32A0H - 428FH
+            ENDADR      EQU         00FEFh
+            BUFFADR     EQU         8040H		
+            LNG         EQU         END - STARTMOVE
 
             LXI     H, STARTMOVE
             LXI     D, BUFFADR
