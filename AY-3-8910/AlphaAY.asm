@@ -29,6 +29,9 @@ PLAY:
         MOV     L, C
         CALL    REGSET
         POP     H
+        CALL    MINILOOP
+        CALL    MINILOOP
+        CALL    MINILOOP
         JMP     PLAY
 
 
@@ -131,6 +134,164 @@ MINILOOP2:
         RET      
 
 
+STARTPOS    EQU MODULE + 06h
+
+PLAYER:
+        LXI     H,HELLOSTR
+        CALL    TXTOUT
+
+        LXI     H, STARTPOS
+PLAYER2:        
+        MOV     A, M
+        
+        CPI     0FDh
+        CZ      ENDSONG
+        
+        CPI     0FFh
+        CZ      WAIT20MS        
+        
+        CPI     0FEh
+        CZ      WAITNX80MS
+        
+        MOV     H, M
+        INX     H
+        MOV     L, M
+        CALL    REGSET
+        INX     H
+        JMP PLAYER2
+        RET
+        
+
+WAITNX80MS:
+                            ;80.01 ms
+        PUSH    D   
+        INX     H
+        MOV     D, M   
+
+WAITNX80MS2:
+        MVI     E, 04h
+WAIT80MS:
+        CALL    WAIT20MS
+        DCR     E
+        JNZ     WAIT80MS
+
+        DCR     D   
+        JNZ     WAITNX80MS2   
+        POP     D   
+        RET
+
+
+
+
+
+
+
+WAIT20MS:
+                            ;20.01 ms
+        PUSH    D   
+        MVI     D, 0FCh   
+WAIT20MS2:
+        
+
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+        
+        NOP
+        NOP
+        NOP
+        
+        DCR   D   
+        JNZ   WAIT20MS2   
+        POP   D   
+        RET
+
+ENDSONG:
+        LXI     H, BYESTR
+        CALL    TXTOUT  
+        JMP     0000h
+
+  
+ERRREG:
+        PUSH    H
+        LXI     H, HELLOSTR
+        CALL    TXTOUT  
+        POP     H
+
+
+  
+TXTOUT:     
+            CALL    WAITOUT 
+            MOV     A, M 
+            ANI     07Fh ;drop 8th bit
+            OUT     0DFh 
+            MOV     A, M 
+            ANI     80h 
+            RNZ      
+            INX     H 
+            JMP     TXTOUT   
+            
+            
+WAITOUT:    
+
+
+            IN      0DEh 
+            ANI     02h 
+            JZ      WAITOUT 
+            RET                  
+        
+HELLOSTR:   .ISTR   "Kulich PSG PLAYER 2020"
+BYESTR:     .ISTR   "END SONG. BYE."
+ERREGSTR:   .ISTR   "BAD REGISTER NUMBER"
+
+;Offset Number of byte Description
+;+0 3   Identifier 'PSG'
+;+3 1   Marker “End of Text” (1Ah)
+;+4 1   Version number
+;+5 1   Player frequency (for versions 10+)
+;+6 10  Data
+
+;Data — последовательности пар байтов записи в регистр.
+;Первый байт — номер регистра (от 0 до 0x0F), второй — значение.
+;Вместо номера регистра могут быть специальные маркеры: 0xFF, 0xFE или 0xFD
+;0xFD — конец композиции.
+;0xFF — ожидание 20 мс.
+;0xFE — следующий байт показывает сколько раз выждать по 80 мс.
+
+
+
+
+
+
 
 MODULE:
-    DB 000h,077h,007h,008h,008h,00Fh,008h,00Eh,000h,05Eh,008h,00Fh,008h,00Eh,000h,04Fh,008h,00Dh,008h,00Ch,000h,03Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,000h,01Dh,008h,00Fh,008h,00Eh,000h,017h,008h,00Fh,008h,00Eh,000h,013h,008h,00Dh,008h,00Ch,000h,00Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,008h,009h,008h,008h,008h,007h,008h,006h,008h,005h,008h,004h,008h,003h,008h,002h,008h,001h,008h,000h,007h,000h
+    DB 000h,077h,007h,008h,008h,00Fh,008h,00Eh,000h,05Eh,008h,00Fh,008h,00Eh,000h,04Fh,008h,00Dh,008h,00Ch,000h,03Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,000h,01Dh,008h,00Fh,008h,00Eh,000h,017h,008h,00Fh,008h,00Eh,000h,013h,008h,00Dh,008h,00Ch,000h,00Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,008h,009h,008h,008h,008h,007h,008h,006h,008h,005h,008h,004h,008h,003h,008h,002h,008h,001h,008h,000h,007h,000h, 0FDh, 0FDh, 0FDh;
