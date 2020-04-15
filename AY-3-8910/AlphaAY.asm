@@ -16,7 +16,12 @@ BC1     EQU 20h
 START:     
         CALL    INIT8255OUT
         CALL    AYRESET
-       
+      
+        MVI     B, 00h
+AAA:
+        CALL    SERIALOUT
+        INR     B
+        JMP AAA
 
         LXI     H, MODULE
 PLAY:
@@ -29,23 +34,22 @@ PLAY:
         MOV     L, C
         CALL    REGSET
         POP     H
-        CALL    MINILOOP
-        CALL    MINILOOP
-        CALL    MINILOOP
+        CALL   WAIT20MS
+        CALL   WAIT20MS
         JMP     PLAY
 
 
 AYRESET:      
         MVI   A,00h   
         OUT   05h   
-        CALL   MINILOOP   
+        CALL   WAIT20MS   
         MVI   A,08h   
         OUT   05h   
         RET      
 SERIALOUT:      
-        PUSH   B        ; регистр B пусть будет с байтом
-        PUSH   D        ; регистр C пусть будет выводиться в порт
-                        ; D будет содержать бит данных в младшем разряде
+        PUSH    B        ; регистр B пусть будет с байтом
+        PUSH    D        ; регистр C пусть будет выводиться в порт
+        MVI     E, 08h                ; D будет содержать бит данных в младшем разряде
 NEXTBIT:      
         MOV     D, B    ; Берем B копируем в D
         MVI     A, 01h  ; Применяем D 00000001  
@@ -53,15 +57,13 @@ NEXTBIT:
         MOV     D, A
         ADD     C       ; в A у нас бит мы просто его прибавляем к C 0 или 1
         ADI     04h     ; Поднимаем в С(A) 2(SHCP)
-        CALL    MINILOOP
         OUT     05h     ; Выводим в порт 
         SUI     04h     ; Опускаем С 2(SHCP)
-        CALL    MINILOOP
         OUT     05h     ; Выводим в порт
         SUB     D       ; Вертаем взад бит чтобы не уехать после второй 1
         MOV     C, A    ; Сохраняем  наше C  
         MOV     A, B    ; берем наш байт
-        RRC             ; Сдвигаем его вправо
+        RLC             ; Сдвигаем его вправо
         MOV     B, A    ; Возвращаем на будущее 
         DCR     E       ; Уменьшаем счетчик
         JNZ   NEXTBIT   ; Цикл пошел
@@ -70,7 +72,6 @@ NEXTBIT:
         ORA     C       ; установить бит 1(STCP) в 1
         OUT     05h     ; Вывести в порт 05
         SUI     02h     ; установить бит 1(STCP) в 0
-        CALL    MINILOOP
         OUT     05h     ; Вывести в порт 05
         POP   D   
         POP   B   
@@ -294,4 +295,4 @@ ERREGSTR:   .ISTR   "BAD REGISTER NUMBER"
 
 
 MODULE:
-    DB 000h,077h,007h,008h,008h,00Fh,008h,00Eh,000h,05Eh,008h,00Fh,008h,00Eh,000h,04Fh,008h,00Dh,008h,00Ch,000h,03Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,000h,01Dh,008h,00Fh,008h,00Eh,000h,017h,008h,00Fh,008h,00Eh,000h,013h,008h,00Dh,008h,00Ch,000h,00Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,008h,009h,008h,008h,008h,007h,008h,006h,008h,005h,008h,004h,008h,003h,008h,002h,008h,001h,008h,000h,007h,000h, 0FDh, 0FDh, 0FDh;
+;    DB 000h,077h,007h,008h,008h,00Fh,008h,00Eh,000h,05Eh,008h,00Fh,008h,00Eh,000h,04Fh,008h,00Dh,008h,00Ch,000h,03Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,000h,01Dh,008h,00Fh,008h,00Eh,000h,017h,008h,00Fh,008h,00Eh,000h,013h,008h,00Dh,008h,00Ch,000h,00Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,008h,009h,008h,008h,008h,007h,008h,006h,008h,005h,008h,004h,008h,003h,008h,002h,008h,001h,008h,000h,007h,000h, 0FDh, 0FDh, 0FDh;
