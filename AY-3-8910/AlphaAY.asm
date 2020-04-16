@@ -63,13 +63,16 @@ PLAY:
 
 
 AYRESET:      
-         
+        PUSH    B
+        PUSH    D
         MVI     B, 00h
         CALL    SERIALOUT
         MVI     A,00h   
         OUT     05h  
         MVI     A,08h   
         OUT     05h   
+        POP     B
+        POP     D
         RET
         
 SERIALOUT:      
@@ -77,11 +80,7 @@ SERIALOUT:
         PUSH    D        ; регистр C пусть будет выводиться в порт
         MVI     E, 08h                ; D будет содержать бит данных в младшем разряде
         
-        MVI     B, 00h
-        CALL    SERIALOUT
-        MVI     A, 00h   
-        OUT     05h
-        
+       
 NEXTBIT:      
         
         MOV     A, B    ; берем наш байт
