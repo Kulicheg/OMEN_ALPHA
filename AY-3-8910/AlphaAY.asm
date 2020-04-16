@@ -18,7 +18,7 @@ START:
         CALL    AYRESET
         MVI    H, 001h
         MVI    L, 0FFh
-        MVI    B, 0AAh
+        MVI    B, 00h
 AAA:
         
 
@@ -26,23 +26,10 @@ AAA:
 
        ; CALL   WAIT20MS      
         
-        MVI    B, 0FFh
         CALL    SERIALOUT 
+        INR     B
+        JNZ     AAA
         
-        MVI    B, 0FFh
-        CALL    SERIALOUT        
- 
-        MVI    B, 0F0h
-        CALL    SERIALOUT
-        
-        MVI    B, 00Fh
-        CALL    SERIALOUT
-
-       ; JMP     AAA
-        
-               MVI    B, 0FFh
-        CALL    SERIALOUT 
-       
         JMP     0000
         
 
