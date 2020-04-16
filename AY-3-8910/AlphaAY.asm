@@ -14,14 +14,29 @@ BC1     EQU 20h
 
         .ORG   9000h   
 START:     
-        CALL    INIT8255OUT
-        CALL    AYRESET
+       ; CALL    INIT8255OUT
+        ;CALL    AYRESET
       
-        MVI     B, 00h
+         MVI    H, 0AAh
+         MVI    L, 000h
 AAA:
-        CALL    SERIALOUT
-        INR     B
-        JMP AAA
+        
+
+        CALL REGSET
+        INR L
+        CALL   WAIT20MS      
+        
+        
+        
+        
+        ;MVI    B, 0AAh
+        ;CALL    SERIALOUT
+       ;CALL   WAIT20MS
+        ;MVI    B, 055h
+        ;CALL    SERIALOUT
+       
+        
+        JMP     AAA
 
         LXI     H, MODULE
 PLAY:
@@ -58,8 +73,10 @@ NEXTBIT:
         ADD     C       ; в A у нас бит мы просто его прибавляем к C 0 или 1
         ADI     04h     ; Поднимаем в С(A) 2(SHCP)
         OUT     05h     ; Выводим в порт 
+        ;NOP
         SUI     04h     ; Опускаем С 2(SHCP)
         OUT     05h     ; Выводим в порт
+        ;NOP
         SUB     D       ; Вертаем взад бит чтобы не уехать после второй 1
         MOV     C, A    ; Сохраняем  наше C  
         MOV     A, B    ; берем наш байт
@@ -71,8 +88,10 @@ NEXTBIT:
         MVI     A, 02h  ; 
         ORA     C       ; установить бит 1(STCP) в 1
         OUT     05h     ; Вывести в порт 05
+        ;NOP
         SUI     02h     ; установить бит 1(STCP) в 0
         OUT     05h     ; Вывести в порт 05
+        ;NOP
         POP   D   
         POP   B   
         RET      
@@ -135,9 +154,11 @@ MINILOOP2:
         RET      
 
 
-STARTPOS    EQU MODULE + 06h
+
 
 PLAYER:
+STARTPOS    EQU MODULE + 06h
+
         LXI     H,HELLOSTR
         CALL    TXTOUT
 
@@ -158,6 +179,8 @@ PLAYER2:
         INX     H
         MOV     L, M
         CALL    REGSET
+        CALL    WAIT20MS
+        CALL    WAIT20MS
         INX     H
         JMP PLAYER2
         RET
@@ -295,4 +318,4 @@ ERREGSTR:   .ISTR   "BAD REGISTER NUMBER"
 
 
 MODULE:
-;    DB 000h,077h,007h,008h,008h,00Fh,008h,00Eh,000h,05Eh,008h,00Fh,008h,00Eh,000h,04Fh,008h,00Dh,008h,00Ch,000h,03Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,000h,01Dh,008h,00Fh,008h,00Eh,000h,017h,008h,00Fh,008h,00Eh,000h,013h,008h,00Dh,008h,00Ch,000h,00Fh,008h,00Bh,008h,00Ah,000h,03Bh,008h,008h,008h,007h,008h,006h,000h,02Fh,008h,007h,008h,006h,000h,027h,008h,008h,008h,007h,008h,006h,000h,01Fh,008h,00Ch,008h,00Bh,008h,00Ah,008h,009h,008h,008h,008h,007h,008h,006h,008h,005h,008h,004h,008h,003h,008h,002h,008h,001h,008h,000h,007h,000h, 0FDh, 0FDh, 0FDh;
+;DB  050h ,053h ,047h ,01Ah ,000h ,000h ,000h ,000h ,000h ,000h ,000h ,000h ,000h ,000h ,000h ,000h ,0FFh ,000h ,0F1h ,001h ,005h ,002h ,091h ,004h ,07Ch ,005h ,001h ,007h ,030h ,008h ,00Fh ,009h ,00Dh ,00Ah ,00Eh ,0FFh ,002h ,094h ,004h ,0BEh ,005h ,000h ,007h ,038h ,009h ,00Eh ,0FFh ,002h ,097h ,0FFh ,008h ,00Eh ,00Ah ,00Dh ,0FFh ,004h ,07Ch ,005h ,001h ,009h ,00Dh ,0FFh ,0FFh ,002h ,098h ,008h ,00Dh ,009h ,00Ch ,00Ah ,00Ch ,0FFh ,004h ,0BEh ,005h ,000h ,0FFh ,002h ,097h ,0FFh ,002h ,096h ,008h ,00Ch ,00Ah ,00Bh ,0FFh ,002h ,095h ,004h ,07Ch ,005h ,001h ,009h ,00Bh ,0FFh ,0FFh ,000h ,073h ,001h ,004h ,002h ,0B8h ,004h ,0FBh ,007h ,030h ,008h ,00Fh ,009h ,00Dh ,00Ah ,00Eh ,0FFh ,002h ,0BBh ,007h ,038h ,008h ,00Eh ,009h ,00Eh ,00Ah ,00Dh ,0FFh ,002h ,0BEh ,004h ,0FEh ,005h ,000h ,0FFh ,0FFh ,008h ,00Dh ,009h ,00Dh ,00Ah ,00Ch ,0FFh ,004h ,0FBh ,005h ,001h ,0FFh ,002h ,0BFh ,009h ,00Ch ,0FFh ,008h ,00Ch ,00Ah ,00Bh ,0FFh ,002h ,0BEh ,004h ,0FEh ,005h ,000h ,0FFh ,002h ,0BDh ,009h ,00Bh ,0FFh ,002h ,0BCh ,008h ,00Bh ,00Ah ,00Ah ,0FFh ,004h ,0FBh ,005h ,001h ,009h ,00Ah ,0FFh ,000h ,0F7h ,001h ,003h ,002h ,0A3h ,004h ,0ABh ,007h ,030h ,008h ,00Fh ,009h ,00Dh ,00Ah ,00Eh ,0FFh ,002h ,0A6h ,007h ,038h ,009h ,00Eh ,0FFh ,002h ,0A9h ,008h ,00Eh ,00Ah ,00Dh ,0FFh ,004h ,0D5h ,005h ,000h ,0FFh ,009h ,00Dh ,0FFh ,008h ,00Dh ,00Ah ,00Ch ,0FFh ,002h ,0AAh ,004h ,0ABh ,005h ,001h ,009h ,00Ch ,0FFh ,0FFh ,002h ,0A9h ,008h ,00Ch ,00Ah ,00Bh ,0FFh ,002h ,0A8h ,004h ,0D5h ,005h ,000h ,0FFh ,002h ,0A7h ,009h ,00Bh ,0FFh ,008h ,00Bh ,00Ah ,00Ah ,0FFh ,000h ,055h ,002h ,0CFh ,004h ,03Ah ,005h ,002h ,007h ,030h ,008h ,00Fh ,009h ,00Dh ,00Ah ,00Eh ,0FFh ,002h ,0D2h ,007h ,038h ,009h ,00Eh ,0FFh ,002h ,0D5h ,0FFh ,008h ,00Eh ,00Ah ,00Dh ,0FFh ,004h ,01Dh ,005h ,001h ,009h ,00Dh ,0FFh ,0FFh ,002h ,0D6h ,008h ,00Dh ,009h ,00Ch ,00Ah ,00Ch ,0FFh ,004h ,03Ah ,005h ,002h ,0FFh ,002h ,0D5h ,0FFh ,002h ,0D4h ,008h ,00Ch ,009h ,00Bh ,00Ah ,00Bh ,0FFh ,002h ,0D3h ,004h ,01Dh ,005h ,001h ,0FFh ,009h ,00Ah ,0FFh ,000h ,0F8h ,001h ,002h ,002h ,0B8h ,004h ,0FBh ,007h ,030h ,008h ,00Fh ,009h ,00Dh ,00Ah ,00Eh ,0FFh ,002h ,0BBh ,004h ,0FEh ,005h ,000h ,007h ,038h ,008h ,00Eh ,009h ,00Eh ,00Ah ,00Dh ,0FFh ,002h ,0BEh ,004h ,0FBh ,005h ,001h ,0FFh ,0FFh ,008h ,00Dh ,009h ,00Dh ,00Ah ,00Ch ,0FFh ,004h ,0FEh ,005h ,000h ,0FFh ,002h ,0BFh ,009h ,00Ch ,0FFh ,008h ,00Ch ,00Ah ,00Bh ,0FFh ,002h ,0BEh ,004h ,0FBh ,005h ,001h ,0FFh ,002h ,0BDh ,0FFh ,002h ,0BCh ,008h ,00Bh ,009h ,00Bh ,00Ah ,00Ah ,0FFh ,004h ,0FEh ,005h ,000h ,0FFh ,000h ,055h ,001h ,003h ,002h ,0CFh ,004h ,03Ah ,005h ,002h ,007h ,030h ,008h ,00Fh ,009h ,00Dh ,00Ah ,00Eh ,0FFh ,002h ,0D2h ,004h ,01Dh ,005h ,001h ,007h ,038h ,009h ,00Eh ,0FFh ,002h ,0D5h ,008h ,00Eh ,00Ah ,00Dh ,0FFh ,004h ,03Ah ,005h ,002h ,0FFh ,009h ,00Dh ,0FFh ,008h ,00Dh ,00Ah ,00Ch ,0FFh ,000h ,0F8h ,001h ,002h ,002h ,0B8h ,004h ,0FBh ,005h ,001h ,007h ,030h ,008h ,00Fh ,00Ah ,00Eh ,0FFh ,002h ,0BBh ,004h ,0FEh ,005h ,000h ,007h ,038h ,009h ,00Eh ,0FFh ,002h ,0BEh ,0FFh ,008h ,00Eh ,009h ,00Dh ,00Ah ,00Dh ,0FFh ,004h ,0FBh ,005h ,001h ,0FFh ,009h ,00Ch ,0FFh ,002h ,0BFh ,008h ,00Dh ,00Ah ,00Ch ,0FFh ,004h ,0FEh ,005h ,000h ,0FFh ,002h ,0BEh ,0FFh ,002h ,0BDh ,008h ,00Ch ,00Ah ,00Bh ,0FFh ,002h ,0BCh ,004h ,0FBh ,005h ,001h ,0FFh ,0FFh ,002h ,0BDh ,008h ,00Bh ,00Ah ,00Ah ,0FFh ,002h ,0BEh ,004h ,0FEh ,005h ,000h ,0FFh ,002h ,0BFh ,0FFh ,008h ,00Ah ,00Ah ,009h ,0FFh ,002h ,0BEh ,004h ,0FBh ,005h ,001h ,0FFh ,002h ,0BDh ,0FFh ,002h ,0BCh ,008h ,009h ,00Ah ,008h ,0FFh ,004h ,0FEh ,005h ,000h ,0FFh ,002h ,0BDh ,0FFh ,002h ,0BEh ,008h ,008h ,009h ,00Bh ,00Ah ,007h ,0FFh ,002h ,0BFh ,004h ,0FBh ,005h ,001h ,0FFh ,009h ,00Ah ,0FFh ,007h ,03Fh,0FDh,0FDh
