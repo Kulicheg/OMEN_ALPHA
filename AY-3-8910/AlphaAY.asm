@@ -181,20 +181,27 @@ PLAYER2:
         CPI     0FEh
         CZ      WAITNX80MS
         
-        PUSH    H
-        MOV     H, M
+        CPI     010h
+        JNC  PLAYER3
+        
+       
+        MOV     D, M
         INX     H
-        MOV     L, M
+        MOV     E, M
+        PUSH    H
+        XCHG
+        
         CALL    REGSET
         CALL    WAIT20MS
         CALL    WAIT20MS
-        POP     H
-        INX     H
-        
         PUSH    B
         MVI     C, 50h
         CALL    BYTEOUT
         POP     B
+        POP     H
+PLAYER3:        
+        
+        INX     H
         
         JMP PLAYER2
         RET
