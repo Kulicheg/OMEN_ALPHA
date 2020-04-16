@@ -26,14 +26,22 @@ AAA:
 
        ; CALL   WAIT20MS      
         
+        MVI    B, 0FFh
+        CALL    SERIALOUT 
         
+        MVI    B, 0FFh
+        CALL    SERIALOUT        
  
-        MVI    B, 081h
+        MVI    B, 0F0h
+        CALL    SERIALOUT
+        
+        MVI    B, 00Fh
         CALL    SERIALOUT
 
-        JMP     AAA
+       ; JMP     AAA
         
-        
+               MVI    B, 0FFh
+        CALL    SERIALOUT 
        
         JMP     0000
         
@@ -68,8 +76,19 @@ SERIALOUT:
         PUSH    B        ; регистр B пусть будет с байтом
         PUSH    D        ; регистр C пусть будет выводиться в порт
         MVI     E, 08h                ; D будет содержать бит данных в младшем разряде
+        
+        MVI     B, 00h
+        CALL    SERIALOUT
+        MVI     A, 00h   
+        OUT     05h
+        
 NEXTBIT:      
+        
+        MOV     A, B    ; берем наш байт
+        RLC             ; Сдвигаем его вправо
+        MOV     B, A    ; Возвращаем на будущее
         MOV     D, B    ; Берем B копируем в D
+        
         MVI     A, 01h  ; Применяем D 00000001  
         ANA     D       ; чтобы получить в нем только один первый бит
         MOV     D, A
@@ -84,7 +103,7 @@ NEXTBIT:
         OUT     05h     ; Выводим в порт
         MOV     C, A    ; Сохраняем  наше C  
         MOV     A, B    ; берем наш байт
-        RLC             ; Сдвигаем его вправо
+        ;RLC             ; Сдвигаем его вправо
         MOV     B, A    ; Возвращаем на будущее 
         DCR     E       ; Уменьшаем счетчик
         JNZ   NEXTBIT   ; Цикл пошел
