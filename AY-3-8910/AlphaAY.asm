@@ -15,28 +15,28 @@ BC1     EQU 20h
         .ORG   9000h   
 START:     
        ; CALL    INIT8255OUT
-        ;CALL    AYRESET
-      
-         MVI    H, 0AAh
-         MVI    L, 000h
+        CALL    AYRESET
+        MVI    H, 001h
+        MVI    L, 0FFh
+        MVI    B, 0AAh
 AAA:
         
 
-        CALL REGSET
-        INR L
-        CALL   WAIT20MS      
+       ; CALL SERIAL
+
+       ; CALL   WAIT20MS      
         
         
-        
-        
-        ;MVI    B, 0AAh
-        ;CALL    SERIALOUT
-       ;CALL   WAIT20MS
-        ;MVI    B, 055h
-        ;CALL    SERIALOUT
-       
-        
+ 
+        MVI    B, 081h
+        CALL    SERIALOUT
+
         JMP     AAA
+        
+        
+       
+        JMP     0000
+        
 
         LXI     H, MODULE
 PLAY:
@@ -55,12 +55,15 @@ PLAY:
 
 
 AYRESET:      
-        MVI   A,00h   
-        OUT   05h   
-        CALL   WAIT20MS   
-        MVI   A,08h   
-        OUT   05h   
-        RET      
+         
+        MVI     B, 00h
+        CALL    SERIALOUT
+        MVI     A,00h   
+        OUT     05h  
+        MVI     A,08h   
+        OUT     05h   
+        RET
+        
 SERIALOUT:      
         PUSH    B        ; регистр B пусть будет с байтом
         PUSH    D        ; регистр C пусть будет выводиться в порт
@@ -78,6 +81,7 @@ NEXTBIT:
         OUT     05h     ; Выводим в порт
         ;NOP
         SUB     D       ; Вертаем взад бит чтобы не уехать после второй 1
+        OUT     05h     ; Выводим в порт
         MOV     C, A    ; Сохраняем  наше C  
         MOV     A, B    ; берем наш байт
         RLC             ; Сдвигаем его вправо
