@@ -23,7 +23,7 @@ AAA:
         
 
        CALL     PLAYER
-      
+
         JMP     0000
         
 
@@ -73,17 +73,16 @@ NEXTBIT:
         ANA     D       ; чтобы получить в нем только один первый бит
         MOV     D, A
         ADD     C       ; в A у нас бит мы просто его прибавляем к C 0 или 1
+        OUT     05h     ; Выводим в порт 
+        NOP
         ADI     04h     ; Поднимаем в С(A) 2(SHCP)
         OUT     05h     ; Выводим в порт 
-        ;NOP
         SUI     04h     ; Опускаем С 2(SHCP)
         OUT     05h     ; Выводим в порт
-        ;NOP
         SUB     D       ; Вертаем взад бит чтобы не уехать после второй 1
         OUT     05h     ; Выводим в порт
         MOV     C, A    ; Сохраняем  наше C  
         MOV     A, B    ; берем наш байт
-        ;RLC             ; Сдвигаем его вправо
         MOV     B, A    ; Возвращаем на будущее 
         DCR     E       ; Уменьшаем счетчик
         JNZ   NEXTBIT   ; Цикл пошел
@@ -91,10 +90,8 @@ NEXTBIT:
         MVI     A, 02h  ; 
         ORA     C       ; установить бит 1(STCP) в 1
         OUT     05h     ; Вывести в порт 05
-        ;NOP
         SUI     02h     ; установить бит 1(STCP) в 0
         OUT     05h     ; Вывести в порт 05
-        ;NOP
         POP   D   
         POP   B   
         RET      
@@ -149,8 +146,6 @@ MINILOOP:
         MVI     D, 0FFh   
 MINILOOP2:
         NOP      
-        NOP      
-        NOP      
         DCR   D   
         JNZ   MINILOOP2   
         POP   D   
@@ -192,8 +187,8 @@ PLAYER2:
         XCHG
         
         CALL    REGSET
-        CALL    WAIT20MS
-        CALL    WAIT20MS
+        ;CALL    WAIT20MS
+        ;CALL    WAIT20MS
         PUSH    B
         MVI     C, 50h
         CALL    BYTEOUT
@@ -331,7 +326,7 @@ WAITOUT:
             JZ      WAITOUT 
             RET                  
         
-HELLOSTR:   .ISTR   "Kulich PSG PLAYER 2020"
+HELLOSTR:   .ISTR   "Kulich PSG PLAYER 2020   "
 BYESTR:     .ISTR   "END SONG. BYE."
 ERREGSTR:   .ISTR   "BAD REGISTER NUMBER"
 
