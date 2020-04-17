@@ -107,8 +107,7 @@ REGSET:
 ;BDIR    EQU 10h
 ;BC1     EQU 20h
 ;HL адрес/данные
-        PUSH    B        
-        ;PUSH    D        
+    
         MVI     C, RESET    ;Сначала мы должны в C установить бит 1(STCP) в 0
                             ;Установить в C бит 3 в 1(AY RESET) (на всякий, по идее мы его не трогаем)
                             ;digitalWrite(BC1, LOW);
@@ -135,8 +134,7 @@ REGSET:
         MVI     A,  RESET               ;digitalWrite(BC1, LOW);
                                         ;digitalWrite(BCDIR, LOW);
                         
-       ; POP   D   
-        POP   B
+
         RET
 
 MINILOOP:
@@ -189,7 +187,6 @@ PLAYER3:
       
 PLAYER4:       
         INX     H
-        
         JMP     PLAYER2    
         RET
         
@@ -270,6 +267,7 @@ WAIT20MS2:
         RET
 
 ENDSONG:
+        CALL    AYRESET
         LXI     H, BYESTR
         CALL    TXTOUT  
         JMP     0000h
