@@ -11,6 +11,7 @@ SHCP    EQU 04h
 RESET   EQU 08h
 BDIR    EQU 10h
 BC1     EQU 20h
+PORT    EQU 05h
 
         .ORG   8100h   
 START:     
@@ -32,9 +33,9 @@ AYRESET:
         MVI     B, 00h
         CALL    SERIALOUT
         MVI     A,00h   
-        OUT     05h  
+        OUT     PORT  
         MVI     A,08h   
-        OUT     05h   
+        OUT     PORT   
         POP     B
         POP     D
         RET
@@ -42,7 +43,7 @@ AYRESET:
 SERIALOUT:      
         PUSH    B        ; регистр B пусть будет с байтом
         PUSH    D        ; регистр C пусть будет выводиться в порт
-        MVI     E, 08h                ; D будет содержать бит данных в младшем разряде
+        MVI     E, 08h   ; D будет содержать бит данных в младшем разряде
         
        
 NEXTBIT:      
@@ -56,23 +57,23 @@ NEXTBIT:
         ANA     D       ; чтобы получить в нем только один первый бит
         MOV     D, A
         ADD     C       ; в A у нас бит мы просто его прибавляем к C 0 или 1
-        OUT     05h     ; Выводим в порт 
-        NOP
+        OUT     PORT    ; Выводим в порт 
+        NOP             ; Нужно подождать перед фиксацией.
         ADI     04h     ; Поднимаем в С(A) 2(SHCP)
-        OUT     05h     ; Выводим в порт 
+        OUT     PORT    ; Выводим в порт 
         SUI     04h     ; Опускаем С 2(SHCP)
-        OUT     05h     ; Выводим в порт
+        OUT     PORT    ; Выводим в порт
         SUB     D       ; Вертаем взад бит чтобы не уехать после второй 1
-        OUT     05h     ; Выводим в порт
+        OUT     PORT    ; Выводим в порт
         MOV     C, A    ; Сохраняем  наше C  
         DCR     E       ; Уменьшаем счетчик
         JNZ   NEXTBIT   ; Цикл пошел
                         ; байт выставлен на 595
         MVI     A, 02h  ; 
         ORA     C       ; установить бит 1(STCP) в 1
-        OUT     05h     ; Вывести в порт 05
+        OUT     PORT    ; Вывести в порт 05
         SUI     02h     ; установить бит 1(STCP) в 0
-        OUT     05h     ; Вывести в порт 05
+        OUT     PORT    ; Вывести в порт 05
         POP   D   
         POP   B   
         RET      
@@ -91,33 +92,30 @@ REGSET:
 ;BC1     EQU 20h
 ;HL адрес/данные
     
-        MVI     C, RESET    ;Сначала мы должны в C установить бит 1(STCP) в 0
-                            ;Установить в C бит 3 в 1(AY RESET) (на всякий, по идее мы его не трогаем)
-                            ;digitalWrite(BC1, LOW);
-                            ;digitalWrite(BCDIR, LOW);
-                            ;//write address
-        MOV     B, H        ;Теперь в B адрес регистра
-        CALL    SERIALOUT   ;SPI.transfer(address);
+        MVI     C, RESET                ; Сначала мы должны в C установить бит 1(STCP) в 0
+                                        ; Установить в C бит 3 в 1(AY RESET)
+                                        ; digitalWrite(BC1, LOW);
+                                        ; digitalWrite(BCDIR, LOW);
+                                        ; //write address
+        MOV     B, H                    ; Теперь в B адрес регистра
+        CALL    SERIALOUT               ; SPI.transfer(address);
 
-        MVI     A,  BC1 + BDIR + RESET  ;digitalWrite(BC1, HIGH);
-        OUT     05h                     ;digitalWrite(BCDIR, HIGH);
+        MVI     A,  BC1 + BDIR + RESET  ; digitalWrite(BC1, HIGH);
+        OUT     PORT                    ; digitalWrite(BCDIR, HIGH);
 
-        MVI     A,  RESET               ;digitalWrite(BC1, LOW);
-        OUT     05h                     ;digitalWrite(BCDIR, LOW);
-
-                                        ;//write data
-        MVI     A, BDIR + RESET        ;digitalWrite(BC1, LOW);
-        OUT     05h                     ;digitalWrite(BCDIR, HIGH);
+        MVI     A,  RESET               ; digitalWrite(BC1, LOW);
+        OUT     PORT                    ; digitalWrite(BCDIR, LOW);
+                                        ; //write data
+        MVI     A, BDIR + RESET         ; digitalWrite(BC1, LOW);
+        OUT     PORT                    ; digitalWrite(BCDIR, HIGH);
         
         MVI     C, BDIR + RESET
-        MOV     B, L                    ;Теперь в B данные регистра               
-        CALL    SERIALOUT               ;SPI.transfer(data);
-        OUT     05h                
 
-        MVI     A,  RESET               ;digitalWrite(BC1, LOW);
-                                        ;digitalWrite(BCDIR, LOW);
-                        
-
+        MOV     B, L                    ; Теперь в B данные регистра               
+        CALL    SERIALOUT               ; SPI.transfer(data);
+        OUT     PORT                
+                                        ; digitalWrite(BC1, LOW);
+                                        ; digitalWrite(BCDIR, LOW);
         RET
 
 MINILOOP:
@@ -140,8 +138,8 @@ STARTPOS    EQU MODULE + 06h
         CALL    TXTOUT
 
         LXI     H, STARTPOS
+
 PLAYER2:        
-        
         MOV     A, M
         
         CPI     010h
@@ -167,8 +165,6 @@ PLAYER3:
         CPI     0FDh
         CZ      ENDSONG
 
-
-      
 PLAYER4:       
         INX     H
         JMP     PLAYER2    
@@ -202,47 +198,15 @@ WAIT80MS:
 WAIT20MS:
                             ;20.01 ms
         PUSH    D   
-        MVI     D, 0C5h;FC A0  
+        MVI     D, 0F0h  
 WAIT20MS2:
-        
+        XTHL
+        XTHL 
+        XTHL 
+        XTHL 
+        XTHL 
+        XTHL 
 
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        
-        NOP
-        NOP
-        NOP
-        
         DCR   D   
         JNZ   WAIT20MS2   
         POP   D   
@@ -255,15 +219,6 @@ ENDSONG:
         CALL    TXTOUT  
         JMP     0000h
 
-  
-ERRREG:
-        PUSH    H
-        LXI     H, HELLOSTR
-        CALL    TXTOUT  
-        POP     H
-
-
-  
 TXTOUT:     
             CALL    WAITOUT 
             MOV     A, M 
@@ -275,8 +230,6 @@ TXTOUT:
             INX     H 
             JMP     TXTOUT   
             
-            
-
 
 BYTEOUT:    
                             ; ВХОД C  - Байт для вывода
@@ -284,7 +237,6 @@ BYTEOUT:
             MOV     A, C
             OUT     0DFh 
             RET
-
 
 WAITOUT:    
 
