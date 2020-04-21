@@ -8,8 +8,9 @@ Memory Map
 8080H-80DFFH	Strings for ROM Extension
 
 80E0H-80EFH	System variables
-	80E0H	RAMSTART
-	80E2H	RAMEND
+	80E0h	RAMSTART
+	80E2h	RAMEND
+	80E4h	PSGADR
 80F0H-80FFH Area for Draw procedures
 XPOS        EQU     80F0H 
 YPOS        EQU     80F1H
