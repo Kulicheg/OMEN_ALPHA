@@ -3876,8 +3876,6 @@ WBOOT:                  ;simplest case is to read the disk until all sectors loa
             DI          ;!!!!!
 
 
-           
-
 STARTADR        EQU     06700h
 TARGTADR        EQU     0DC00h
 ENDADR			EQU		07FFFh
@@ -3891,9 +3889,8 @@ LNG             EQU     01900h
             LXI     B, LNG
 
        
-LOADER:
-
             OUT 20h
+LOADER:
             MOV     A, M
             INX     H
             XCHG
