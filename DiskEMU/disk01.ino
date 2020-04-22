@@ -113,7 +113,7 @@ void putData2(byte dataSend, byte commandSend)
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
   //*******************************************************
-  delayMicroseconds(40);
+  delayMicroseconds(30);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -122,18 +122,18 @@ void putData2(byte dataSend, byte commandSend)
   PD = highPart << 4;
   PC = highPart >> 2;
 
-  delayMicroseconds(40);
+  delayMicroseconds(20);
 
   PORTD = PD;                // 0,1 bits
   PORTC = PC;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
-  delayMicroseconds(40);
+  delayMicroseconds(30);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
 
-  delayMicroseconds(40);
+  delayMicroseconds(20);
 }
 
 //****************************************************************************************
