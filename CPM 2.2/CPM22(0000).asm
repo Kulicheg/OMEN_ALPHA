@@ -4115,12 +4115,30 @@ READ:
             LHLD    DMAAD
             MVI     D, 80h   
 READSECTOR:
-            CALL    WAITZERRO         
-            CALL    WAITSYNC
+            
+
+WAITZERRO:
+            IN      00h
+            CPI     00h
+            JNZ     WAITZERRO
+WAITSYNC:
+            IN      00h
+            CPI     00h
+            JZ     WAITSYNC
+            
             IN      00
             MOV     C, A
-            CALL    WAITZERRO
-            CALL    WAITSYNC
+
+WAITZERRO2:
+            IN      00h
+            CPI     00h
+            JNZ     WAITZERRO2
+WAITSYNC2:
+            IN      00h
+            CPI     00h
+            JZ     WAITSYNC2
+            
+    
             IN      00
             MOV     B, A
 
@@ -4150,21 +4168,6 @@ RSEXIT:
             MVI     A, 0h; Placeholder for error
             RET
 
-
-WAITZERRO:
-
-            IN      00h
-            CPI     00h
-            RZ
-            JMP     WAITZERRO
-
-WAITSYNC:
-            IN      00h
-            CPI     00h
-            RNZ
-            JMP     WAITSYNC
-            
-  
 
 
 SENDCMD:            ; B - данные
