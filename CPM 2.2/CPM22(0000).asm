@@ -3874,7 +3874,8 @@ BOOT:                ;simplest case is to just perform parameter initialization
 ; 
 WBOOT:                  ;simplest case is to read the disk until all sectors loaded
             DI          ;!!!!!
-
+            OUT     20h
+            JMP     7FE0h
 
 STARTADR        EQU     06700h
 TARGTADR        EQU     0DC00h
