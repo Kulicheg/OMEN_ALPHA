@@ -105,7 +105,7 @@ void putData2(byte dataSend, byte commandSend)
   PORTD = 0; //очищаем порт
   PORTC = 0;
 
-  delayMicroseconds(100);
+  delayMicroseconds(40);
 
   //******************* RIGHT *****************************
   PORTD = PD;                // 0,1 bits
@@ -113,7 +113,7 @@ void putData2(byte dataSend, byte commandSend)
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
   //*******************************************************
-  delayMicroseconds(100);
+  delayMicroseconds(40);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
@@ -122,18 +122,18 @@ void putData2(byte dataSend, byte commandSend)
   PD = highPart << 4;
   PC = highPart >> 2;
 
-  delayMicroseconds(100);
+  delayMicroseconds(40);
 
   PORTD = PD;                // 0,1 bits
   PORTC = PC;                // 2-7 bits
   PORTD = PORTD | B00001000; // Синхрофлаг подняли
 
-  delayMicroseconds(100);
+  delayMicroseconds(40);
 
   PORTC = 0; // Очищаем порт
   PORTD = 0;
 
-  delayMicroseconds(100);
+  delayMicroseconds(40);
 }
 
 //****************************************************************************************
@@ -141,12 +141,12 @@ void putData2(byte dataSend, byte commandSend)
 void printSector()
 {
   int sixteen = 0;
-  ////Serial.println("");
+  //Serial.println("");
   for (byte q = 0; q < sectorSize; q++)
   {
     if (sector[q] < 0x10)
     {
-      ////Serial.print("0");
+      //Serial.print("0");
     }
 
     //Serial.print(sector[q], HEX);
@@ -333,7 +333,7 @@ void loop()
       data8 = data4L + data4H * 16;
 
       pinMode(LED_BUILTIN, OUTPUT);
-      digitalWrite(LED_BUILTIN,HIGH);
+      digitalWrite(LED_BUILTIN, HIGH);
 
       state = 0;
 
