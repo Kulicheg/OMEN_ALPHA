@@ -133,7 +133,7 @@ void putData2(byte dataSend, byte commandSend)
   PORTC = 0; // Очищаем порт
   PORTD = 0;
 
-  delayMicroseconds(20);
+  delayMicroseconds(15);
 }
 
 //****************************************************************************************
