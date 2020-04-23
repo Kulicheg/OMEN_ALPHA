@@ -4040,7 +4040,6 @@ SELDSK:              ;select disk given by register c
             LXI     d,dpbase 
             DAD     d ;hl=,dpbase (diskno*16)
             CALL    LOOP
-            CALL    LOOP
             RET      
 ; 
 SETTRK:              ;set track given by register c
@@ -4050,7 +4049,6 @@ SETTRK:              ;set track given by register c
             MVI     D, 04h    ; D - комманда             
             MOV     B, C      ; Пока ограничимся только 256 дорожками, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    LOOP
             CALL    LOOP
             RET      
 ; 
@@ -4064,7 +4062,6 @@ SETSEC:              ;set sector given by register c
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
             CALL    LOOP
-            CALL    LOOP          
             POP     D
             POP     B
             
