@@ -4010,7 +4010,7 @@ HOME:                ;move to the track 00	position of current drive
             CALL    SENDCMD
             MVI     A, 0 ;select track 0
             STA     track 
-            CALL    LOOP
+            CALL    MINILOOP
             POP     D
             POP     B
             RET      ;we will move to 00 on first read/write
@@ -4039,7 +4039,7 @@ SELDSK:              ;select disk given by register c
             DAD     h ;*16 (size of each header)
             LXI     d,dpbase 
             DAD     d ;hl=,dpbase (diskno*16)
-            CALL    LOOP
+            CALL    MINILOOP
             RET      
 ; 
 SETTRK:              ;set track given by register c
@@ -4049,7 +4049,7 @@ SETTRK:              ;set track given by register c
             MVI     D, 04h    ; D - комманда             
             MOV     B, C      ; Пока ограничимся только 256 дорожками, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    LOOP
+            CALL    MINILOOP
             RET      
 ; 
 SETSEC:              ;set sector given by register c
@@ -4061,7 +4061,7 @@ SETSEC:              ;set sector given by register c
             MVI     D, 03h    ; D - комманда
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    LOOP
+            CALL    MINILOOP
             POP     D
             POP     B
             
@@ -4158,8 +4158,7 @@ WAITSYNC2:
             INX     H
             JMP     READSECTOR
 RSEXIT:
-            CALL    LOOP
-           ;CALL    LOOP
+            CALL    MINILOOP
             POP     D
             POP     B
             MVI     A, 0h; Placeholder for error
@@ -4244,7 +4243,6 @@ NEXTBYTE:
             MVI     D, 07h      ; Комманда записи
             MOV     B, M        ; Берем из памяти байт
             CALL    SENDCMD2     ; Отправляем байт
-            ;;CALL    LOOP
             INX     H           ; Увеличиваем адрес
             DCR     E           ; Уменьшаем счетчик байт
             JNZ     NEXTBYTE    ; Если не последний шлем далее
