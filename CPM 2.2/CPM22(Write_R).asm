@@ -3870,10 +3870,6 @@ BOOT:                ;simplest case is to just perform parameter initialization
             XRA     a ;zero in the accum
             STA     iobyte ;clear the iobyte
             STA     cdisk ;select disk zero
-            MVI     C, 00h
-            CALL    SETTRK
-            CALL    SETSEC
-
             JMP     gocpm ;initialize and go to cp/m
 ; 
 WBOOT:                  ;simplest case is to read the disk until all sectors loaded
@@ -4063,8 +4059,6 @@ SETTRKSKIP:
 ; 
 SETSEC:              ;set sector given by register c
             
-            PUSH    B
-            PUSH    D
             LDA     SECTOR
             CMP     C
             JZ      SETSECSKIP
@@ -4075,9 +4069,8 @@ SETSEC:              ;set sector given by register c
             CALL    SENDCMD   ; только младший байт С
             CALL    MINILOOP
 SETSECSKIP:
-            POP     D
-            POP     B
-            RET      
+
+            RET
 ; 
 ; 
 SECTRAN:             
@@ -4127,28 +4120,28 @@ READSECTOR:
             
 
 WAITZERRO:
-            IN      04h
+            IN      00h
             CPI     00h
             JNZ     WAITZERRO
 WAITSYNC:
-            IN      04h
+            IN      00h
             CPI     00h
             JZ     WAITSYNC
             
-            IN      04h
+            IN      00
             MOV     C, A
 
 WAITZERRO2:
-            IN      04h
+            IN      00h
             CPI     00h
             JNZ     WAITZERRO2
 WAITSYNC2:
-            IN      04h
+            IN      00h
             CPI     00h
             JZ     WAITSYNC2
             
     
-            IN      04h
+            IN      00
             MOV     B, A
 
             MVI     A,0F0h ; 11110000
@@ -4210,19 +4203,22 @@ SENDBYTE:                       ; BC содержит половинки, код
             INR     A           ; Поднимаем младший бит  чтобы диск проснулся
             OUT     04h         ; Выводим  младшую половину в порт
             CALL    MINILOOP    ; app
-            MVI     A, 00h 
+            MVI     A,00h 
             OUT     04h         ; обнуляем порт 
             CALL    MINILOOP
             MOV     A,B 
             INR     A           ; Поднимаем младший бит
             OUT     04h         ; Выводим  старшую половину в порт для для совместимости 
             CALL    MINILOOP    ;app даже комманды без данных передаем в 2 такта
-            MVI     A, 00h  
+            MVI     A,00h  
             OUT     04h         ; обнуляем порт
             CALL    LOOP
-
             POP     D
             RET
+
+
+
+
 
 INIT8255OUT:                
             MVI     A, 80h
@@ -4235,72 +4231,101 @@ INIT8255IN:
             RET  
 
 
-WRITE:               ;perform a write operation
-  
-; Адрес начала сектора в DMA
 
+
+; 
+WRITE:                          ;perform a write operation
+                                ; Адрес начала сектора в DMA
+
+            PUSH    B
+            PUSH    D
             MVI     D, 07h      ; Команда записи
             MVI     B, 0AAh     ; Просто шахматк
-            CALL    SENDCMD     ; Отправляем команду WRITR
-            CALL    LOOP
-
+            CALL    SENDCMD     ; Отправляем команду WRITE
 
             LHLD    DMAAD       ; Старт DMA
-            MVI     E, 80h      ; размер сектора
-
+            MVI     D, 80h      ; размер сектора
 
 WRITESECTOR:
             MVI     A, 00h      ; WRITEZERRO:
             OUT     04h         ; Устанавливаем 0 в порт для синхронизации
-            CALL    MINILOOP
+            CALL    WRITELOOP    ; Ждем немного
 
 
             MOV     C, M        ; Загружаем в С данные для передачи
             MVI     A, 0Fh      ; 00001111
             ANA     C           ; Отбрасываем старшую часть для получения 4L
-            RLC                 ; Сдвигаем  4L вправо
-            RLC
-            RLC
-            RLC
+            RLC                 ; Сдвигаем  4L влево
+            RLC                 ; Сдвигаем  4L влево
+            RLC                 ; Сдвигаем  4L влево
+            RLC                 ; Сдвигаем  4L влево
             INR     A           ; Прибавляем 1 к А чтобы синхронизировать даже 00h
             OUT     04h         ; Выводим в порт 04
+            CALL    WRITELOOP        ; Ждем немного
+            
+            MVI     A, 00h      ; WRITEZERRO
+            OUT     04h         ; Устанавливаем 0 в порт для синхронизации
+            CALL    WRITELOOP    ; Ждем немного
             
             
+            MOV     C, M        ; Загружаем в С данные для передачи
+            MVI     A, 0F0h     ; 11110000
+            ANA     C           ; Отбрасываем младшую часть для получения 4H
+         
+            INR     A           ; Прибавляем 1 к А чтобы синхронизировать даже 00h
+            OUT     04h         ; Выводим в порт 04
+            CALL    WRITELOOP    ; Ждем немного
             
-            MVI     A,0F0h ; 11110000
-            ANA     B 
-            MOV     B, A
-           
-            ORA     C
-            MOV     M, A
-            DCR     D
-            JZ      wSEXIT
-            INX     H
-            JMP     WRITESECTOR
+  
+            DCR     D           ; Уменьшаем счетчик
+            JZ      wSEXIT      ; Сектор кончился, выходим.
+            INX     H           ; Нет, берем следующий адрес
+            JMP     WRITESECTOR ; Прыгаем в начало отправки байта
 WSEXIT:
-            CALL    MINILOOP
+            CALL    WRITELOOP
             POP     D
             POP     B
-            MVI     A, 0h; Placeholder for error
+            MVI     A, 0h       ; Placeholder for error
             RET
+
+WRITELOOP:  PUSH    D
+            MVI     D, 0A0h ; delay a little FF!
+WRITELOOP2: 
+            NOP
+            DCR     D ;decrement counter
+            JNZ     WRITELOOP2 
+            POP     D
+            RET            
+
 
             .ORG 0F4A0h
 MEMINIT:
             
-            CALL    BOOT
-           
-            .ORG 0F4B0h           
-TXTOUT:
-            CALL    WAITOUT 
-            MOV     A,M 
-            ANI     7Fh ;drop 8th bit
-            OUT     223 
-            MOV     A,M 
-            ANI     80h 
-            RNZ      
-            INX     H 
-            JMP     TXTOUT            
-           
+            JMP    BOOT
+
+LOOP:       PUSH    D
+            MVI     D, 0FFh ;delay a little FF!
+LOOP2:      NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            DCR     D ;decrement counter
+            JNZ     LOOP2 
+            POP     D
+            RET
+
+MINILOOP:   PUSH    D
+            MVI     D, 0FFh ; delay a little FF!
+MINILOOP2:  NOP
+            NOP
+            NOP
+            DCR     D ;decrement counter
+            JNZ     MINILOOP2 
+            POP     D
+            RET
+            
+
 BYTEOUT:    
                             ; ВХОД C  - Байт для вывода
             CALL    WAITOUT ; Выход A - Отправленный байт
@@ -4311,29 +4336,21 @@ BYTEOUT:
 
 ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
             OUT     0DEh 
-            RET           
-           
-LOOP:       PUSH    D
-            MVI     D, 0FFh ;delay a little FF!
-LOOP2:      XTHL
-            XTHL
-            DCR     D ;decrement counter
-            JNZ     LOOP2 
-            POP     D
             RET
 
-MINILOOP:   PUSH    D
-            MVI     D, 30h ; delay a little FF!
-MINILOOP2:  
-            XTHL
-            XTHL
-            DCR     D ;decrement counter
-            JNZ     MINILOOP2 
-            POP     D
-            RET           
+
+TXTOUT:     CALL    WAITOUT 
+            MOV     A,M 
+            ANI     7Fh ;drop 8th bit
+            OUT     223 
+            MOV     A,M 
+            ANI     80h 
+            RNZ      
+            INX     H 
+            JMP     TXTOUT 
+
            
             END
-
 
 ;	the remainder of the cbios is reserved uninitialized
 ;	data area, and does not need to be a Part of the
