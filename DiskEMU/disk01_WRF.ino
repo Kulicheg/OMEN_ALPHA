@@ -35,7 +35,7 @@ String curDiskName = diskName + diskLtr + diskExt;
 File myFile;
 
 volatile byte databits;
-volatile byte state;
+volatile byte cstate;
 volatile byte command;
 volatile byte data4, data4H, data4L, data8;
 byte wrPend, byteCount;
@@ -61,6 +61,7 @@ void getData()
   if (kostyil)
   {
     kostyil = false;
+    //Serial.print(" * ");
     return;
   }
 
@@ -75,15 +76,15 @@ void getData()
   command = (databits & B00001110) >> 1;
   data4 = (databits & B11110000) >> 4;
 
-  if (state == 1)
+  if (cstate == 1)
   {
     data4H = data4;
-    state = 2;
+    cstate = 2;
   }
-  if (state == 0)
+  if (cstate == 0)
   {
     data4L = data4;
-    state = 1;
+    cstate = 1;
   }
 }
 
@@ -166,12 +167,17 @@ void HOME()
   //Serial.println("HOME");
   //curSector = 0;
   curTrack = 0;
+
+  cstate = 0;
+  command = 0xFF;
 }
 //****************************************************************************************
 
 void READ()
 {
   detachInterrupt(1);
+
+  Serial.println("Reading(T/S): " + String(curTrack) + " / " + String(curSector));
 
   startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
@@ -209,6 +215,8 @@ void READ()
   DDRD = B00000000;
 
   kostyil = true;
+  cstate = 0;
+  command = 0xFF;
   attachInterrupt(1, getData, RISING);
 }
 
@@ -218,23 +226,28 @@ void SETSEC()
 {
   curSector = data8;
 
+  Serial.println("SETSEC:\t" + String (curSector));
+
   if (curSector > sectors)
   {
     //Serial.println(String(curSector) + " Sector error");
     curSector = 0;
   }
+  cstate = 0;
+  command = 0xFF;
 }
 
 void SETTRK()
 {
   curTrack = data8;
+  Serial.println("SETTRK:\t" + String (curTrack));
   if (curTrack > tracks)
   {
     //Serial.println(String(curTrack) + " Track error");
     curTrack = 0;
   }
-
-
+  cstate = 0;
+  command = 0xFF;
 }
 
 void SELDSK()
@@ -242,9 +255,9 @@ void SELDSK()
   curDrive = data8;
   diskLtr = char (97 + curDrive);
   curDiskName = diskName + diskLtr + diskExt;
-  Serial.print("SELDSK: ");
-  //Serial.println(curDrive);
-  Serial.println(curDiskName);
+  Serial.println("SELDSK:\t" + String (curDiskName));
+  cstate = 0;
+  command = 0xFF;
 }
 
 void WRITE()
@@ -254,7 +267,6 @@ void WRITE()
   startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
   databits = 0;
-  state = 0;
   Serial.println("Writting(T/S): " + String(curTrack) + " / " + String(curSector));
 
   DDRC = B00000000;
@@ -309,7 +321,7 @@ void WRITE()
         H4 = (databits - 1);
       }
     }
-    //H4 = H4 >> 4;
+
     L4 = L4 >> 4;
     sector[byteCount] = L4 | H4;
     //Serial.print (L4, HEX);
@@ -336,6 +348,8 @@ void WRITE()
   }
 
   kostyil = true;
+  cstate = 0;
+  command = 0xFF;
   attachInterrupt(1, getData, RISING);
 }
 
@@ -369,19 +383,21 @@ void setup()
 void loop()
 {
 
-  if (state != 0)
+  if (cstate != 0)
   {
-    if (state == 2)
+    if (cstate == 2)
     {
       data8 = data4L + data4H * 16;
 
       pinMode(LED_BUILTIN, OUTPUT);
       digitalWrite(LED_BUILTIN, HIGH);
 
-      state = 0;
+      cstate = 0;
 
       switch (command)
       {
+        case 0xFF: //DUMB CYCLE
+          break;
         case 00: //Read a sector
           READ();
           break;
