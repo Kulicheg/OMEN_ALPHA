@@ -52,6 +52,74 @@ byte curDrive = 0;
 
 byte sector[128];
 
+
+byte getByte ()
+{
+  byte portc, portd, L4, H4, result;
+  databits = 0;
+
+  DDRC = B00000000;
+  DDRD = B00000000;
+
+  while (databits == 0)
+  {
+    portc = PINC;
+    portc = portc << 2;
+    portd = PIND;
+    portd = (portd & B11111100) >> 2;
+    databits = portc | portd;
+
+  }
+
+  while (databits != 0)
+  {
+    delayMicroseconds (10);
+    L4 = databits & B11110000;
+    L4 = L4 >> 4;
+    portc = PINC;
+    portc = portc & B00111111;         // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
+    portc = portc << 2;
+    portd = PIND;
+    portd = portd & B00001100;         // Двигаем данные с порта на 2 влево чтобы получить все слово
+    portd = portd >> 2;
+    databits = portc + portd;               // Объединяем данные с обоих порторв
+
+
+  }
+
+  while (databits == 0)
+  {
+    portc = PINC;
+    portc = portc << 2;
+    portd = PIND;
+    portd = (portd & B11111100) >> 2;
+    databits = portc | portd;
+  }
+
+  while (databits != 0)
+  {
+
+    delayMicroseconds (10);
+    H4 = databits & B11110000;
+    H4 = H4 >> 4;
+    portc = PINC;
+    portc = portc & B00111111;         // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
+    portc = portc << 2;
+    portd = PIND;
+    portd = portd & B00001100;         // Двигаем данные с порта на 2 влево чтобы получить все слово
+    portd = portd >> 2;
+    databits = portc + portd;               // Объединяем данные с обоих порторв
+  }
+
+
+  H4 = H4 << 4;
+  result = L4 | H4;
+
+  //Serial.println("HL:\t" + String(H4, HEX) + "&" + String(L4, HEX) + "\t getByte:\t" + String(result, HEX) + "\t" + String(char(result)));
+
+  return  result;
+}
+
 void getData()
 {
 
@@ -65,13 +133,13 @@ void getData()
     return;
   }
 
-  byte portb = PINC;
-  portb = portb << 2;
+  byte portc = PINC;
+  portc = portc << 2;
 
   byte portd = PIND;
   portd = portd >> 3;
 
-  databits = portb | portd;
+  databits = portc | portd;
 
   command = (databits & B00001110) >> 1;
   data4 = (databits & B11110000) >> 4;
@@ -198,7 +266,7 @@ void READ()
   }
   else
   {
-    //Serial.println("error opening " + curDiskName);
+    Serial.println("error opening " + curDiskName);
   }
 
   DDRC = B11111111;
@@ -217,6 +285,7 @@ void READ()
   kostyil = true;
   cstate = 0;
   command = 0xFF;
+
   attachInterrupt(1, getData, RISING);
 }
 
@@ -267,7 +336,7 @@ void WRITE()
   startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
   databits = 0;
-  Serial.println("Writting(T/S): " + String(curTrack) + " / " + String(curSector));
+  //Serial.println("Writting(T/S): " + String(curTrack) + " / " + String(curSector));
 
   DDRC = B00000000;
   DDRD = B00000000;
@@ -276,62 +345,7 @@ void WRITE()
 
   for (int byteCount = 0; byteCount < 128; byteCount++)
   {
-    while (databits == 0)
-    {
-      portc = PINC;
-      portc = portc << 2;
-      portd = PIND;
-      portd = (portd & B11111100) >> 3;
-      databits = portc | portd;
-    }
-
-    while (databits != 0)
-    {
-
-      portc = PINC;
-      portc = portc << 2;
-
-      portd = PIND;
-      portd = (portd & B11111100) >> 3;
-      databits = portc | portd;
-      if (databits != 0)
-      {
-        L4 = (databits - 1);
-      }
-    }
-
-    while (databits == 0)
-    {
-      portc = PINC;
-      portc = portc << 2;
-      portd = PIND;
-      portd = (portd & B11111100) >> 3;
-      databits = portc | portd;
-    }
-
-    while (databits != 0)
-    {
-      portc = PINC;
-      portc = portc << 2;
-      portd = PIND;
-      portd = (portd & B11111100) >> 3;
-      databits = portc | portd;
-      if (databits != 0)
-      {
-        H4 = (databits - 1);
-      }
-    }
-
-    L4 = L4 >> 4;
-    sector[byteCount] = L4 | H4;
-    //Serial.print (L4, HEX);
-    //Serial.print ("+");
-    //Serial.println (H4 , HEX);
-    //Serial.print ("=");
-    //Serial.println (sector[byteCount], HEX);
-    //Serial.print ("\t");
-    //Serial.println (char(sector[byteCount]));
-    //Serial.println ("");
+    sector [byteCount] = getByte();
   }
 
   myFile = SD.open(curDiskName, O_WRITE);
