@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <SPI.h>
 #include <SD.h>
 
@@ -34,12 +33,10 @@ String curDiskName = diskName + diskLtr + diskExt;
 
 File myFile;
 
-volatile byte databits;
-volatile byte cstate;
-volatile byte command;
-volatile byte data4, data4H, data4L, data8;
+byte databits;
+
+byte command;
 byte wrPend, byteCount;
-bool kostyil;
 unsigned long startByte;
 
 byte sectorSize = 128;
@@ -63,55 +60,72 @@ byte getByte ()
 
   while (databits == 0)
   {
+ 
     portc = PINC;
+    portc = portc & B00111111;              // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
     portc = portc << 2;
     portd = PIND;
-    portd = (portd & B11111100) >> 2;
-    databits = portc | portd;
-
+    portd = portd & B00011000;              // Двигаем данные с порта на 2 влево чтобы получить все слово
+    portd = portd >> 3;
+    databits = portc + portd;               // Объединяем данные с обоих порторв
   }
 
   while (databits != 0)
   {
     delayMicroseconds (10);
-    L4 = databits & B11110000;
-    L4 = L4 >> 4;
+ 
     portc = PINC;
-    portc = portc & B00111111;         // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
+    portc = portc & B00111111;              // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
     portc = portc << 2;
     portd = PIND;
-    portd = portd & B00001100;         // Двигаем данные с порта на 2 влево чтобы получить все слово
-    portd = portd >> 2;
+    portd = portd & B00011000;              // Двигаем данные с порта на 2 влево чтобы получить все слово
+    portd = portd >> 3;
     databits = portc + portd;               // Объединяем данные с обоих порторв
 
+    if (databits != 0)
+    {
+      L4 = databits & B11110000;
+      L4 = L4 >> 4;
+      command = databits & B00001110;
+      command = command >> 1;
+    }
 
   }
+
 
   while (databits == 0)
   {
+   // delayMicroseconds (30);
+
     portc = PINC;
+    portc = portc & B00111111;              // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
     portc = portc << 2;
     portd = PIND;
-    portd = (portd & B11111100) >> 2;
-    databits = portc | portd;
+    portd = portd & B00011000;              // Двигаем данные с порта на 2 влево чтобы получить все слово
+    portd = portd >> 3;
+    databits = portc + portd;               // Объединяем данные с обоих порторв
   }
 
   while (databits != 0)
   {
-
     delayMicroseconds (10);
-    H4 = databits & B11110000;
-    H4 = H4 >> 4;
+
     portc = PINC;
-    portc = portc & B00111111;         // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
+    portc = portc & B00111111;              // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
     portc = portc << 2;
     portd = PIND;
-    portd = portd & B00001100;         // Двигаем данные с порта на 2 влево чтобы получить все слово
-    portd = portd >> 2;
+    portd = portd & B00011000;              // Двигаем данные с порта на 2 влево чтобы получить все слово
+    portd = portd >> 3;
     databits = portc + portd;               // Объединяем данные с обоих порторв
+
+    if (databits != 0)
+    {
+      H4 = databits & B11110000;
+      H4 = H4 >> 4;
+
+    }
+
   }
-
-
   H4 = H4 << 4;
   result = L4 | H4;
 
@@ -120,41 +134,6 @@ byte getByte ()
   return  result;
 }
 
-void getData()
-{
-
-  DDRC = B00000000;
-  DDRD = B00000000;
-
-  if (kostyil)
-  {
-    kostyil = false;
-    //Serial.print(" * ");
-    return;
-  }
-
-  byte portc = PINC;
-  portc = portc << 2;
-
-  byte portd = PIND;
-  portd = portd >> 3;
-
-  databits = portc | portd;
-
-  command = (databits & B00001110) >> 1;
-  data4 = (databits & B11110000) >> 4;
-
-  if (cstate == 1)
-  {
-    data4H = data4;
-    cstate = 2;
-  }
-  if (cstate == 0)
-  {
-    data4L = data4;
-    cstate = 1;
-  }
-}
 
 //**********************************************************************************************
 void putData2(byte dataSend, byte commandSend)
@@ -230,20 +209,11 @@ void printSector()
   }
 }
 
-void HOME()
-{
-  //Serial.println("HOME");
-  //curSector = 0;
-  curTrack = 0;
 
-  cstate = 0;
-  command = 0xFF;
-}
 //****************************************************************************************
 
 void READ()
 {
-  detachInterrupt(1);
 
   Serial.println("Reading(T/S): " + String(curTrack) + " / " + String(curSector));
 
@@ -282,19 +252,25 @@ void READ()
   DDRC = B00000000;
   DDRD = B00000000;
 
-  kostyil = true;
-  cstate = 0;
+
   command = 0xFF;
 
-  attachInterrupt(1, getData, RISING);
 }
 
 //*******************************************************************************
 
+void HOME()
+{
+  Serial.println("HOME:");
+  //curSector = 0;
+  curTrack = 0;
+
+  command = 0xFF;
+}
+
+
 void SETSEC()
 {
-  curSector = data8;
-
   Serial.println("SETSEC:\t" + String (curSector));
 
   if (curSector > sectors)
@@ -302,41 +278,36 @@ void SETSEC()
     //Serial.println(String(curSector) + " Sector error");
     curSector = 0;
   }
-  cstate = 0;
+
   command = 0xFF;
 }
 
 void SETTRK()
 {
-  curTrack = data8;
   Serial.println("SETTRK:\t" + String (curTrack));
   if (curTrack > tracks)
   {
     //Serial.println(String(curTrack) + " Track error");
     curTrack = 0;
   }
-  cstate = 0;
+
   command = 0xFF;
 }
 
 void SELDSK()
 {
-  curDrive = data8;
   diskLtr = char (97 + curDrive);
   curDiskName = diskName + diskLtr + diskExt;
-  Serial.println("SELDSK:\t" + String (curDiskName));
-  cstate = 0;
   command = 0xFF;
+  Serial.println("SELDSK:\t" + String (curDiskName));
 }
 
 void WRITE()
 {
-  detachInterrupt(1);
-  delay(4);
   startByte = curTrack * (sectors);
   startByte = startByte * sectorSize + sectorSize * curSector;
   databits = 0;
-  //Serial.println("Writting(T/S): " + String(curTrack) + " / " + String(curSector));
+  Serial.println("WRITE(T/S): " + String(curTrack) + " / " + String(curSector));
 
   DDRC = B00000000;
   DDRD = B00000000;
@@ -346,6 +317,7 @@ void WRITE()
   for (int byteCount = 0; byteCount < 128; byteCount++)
   {
     sector [byteCount] = getByte();
+    Serial.println(byteCount);
   }
 
   myFile = SD.open(curDiskName, O_WRITE);
@@ -361,10 +333,8 @@ void WRITE()
     Serial.println("error opening " + curDiskName);
   }
 
-  kostyil = true;
-  cstate = 0;
+
   command = 0xFF;
-  attachInterrupt(1, getData, RISING);
 }
 
 
@@ -374,7 +344,6 @@ void setup()
   DDRC = B00000000;
   DDRD = B00000000;
   Serial.begin(115200);
-  attachInterrupt(1, getData, RISING);
 
   if (!SD.begin(10))
   {
@@ -397,45 +366,43 @@ void setup()
 void loop()
 {
 
-  if (cstate != 0)
+  byte result = getByte();
+
+  Serial.println("Command:\t" + String(command, BIN) + " / " + String(result, HEX));
+
+  switch (command)
   {
-    if (cstate == 2)
-    {
-      data8 = data4L + data4H * 16;
-
-      pinMode(LED_BUILTIN, OUTPUT);
-      digitalWrite(LED_BUILTIN, HIGH);
-
-      cstate = 0;
-
-      switch (command)
-      {
-        case 0xFF: //DUMB CYCLE
-          break;
-        case 00: //Read a sector
-          READ();
-          break;
-        case 01: //Move disc head to track 0
-          HOME();
-          break;
-        case 02: //Select disc drive
-          SELDSK();
-          break;
-        case 03: //Set sector number
-          SETSEC();
-          break;
-
-        case 04: //Set track number
-          SETTRK();
-          break;
-        case 05:
-          break;
-        case 06:
-          break;
-        case 07: //Write a sector
-          WRITE();
-          break;
-      }
-    }
+    case 0xFF: //DUMB CYCLE
+      break;
+    case 00: //Read a sector
+      READ();
+  delay(2);
+      break;
+    case 01: //Move disc head to track 0
+      HOME();
+      break;
+    case 02: //Select disc drive
+      curDrive = result;
+      SELDSK();
+      break;
+    case 03: //Set sector number
+      curSector = result;
+      SETSEC();
+      break;
+    case 04: //Set track number
+      curTrack = result;
+      SETTRK();
+      break;
+    case 05:
+      break;
+    case 06:
+      break;
+    case 07: //Write a sector
+      WRITE();
+      break;
   }
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+
+  command = 0xFF;
 }
