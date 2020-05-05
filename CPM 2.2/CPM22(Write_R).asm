@@ -3836,18 +3836,6 @@ TRANS:      DB      1,7,13,19 ;sectors  1,  2,  3,  4
 ; 
 
 DPBLK:               ;disk parameter block, common to all disks
-;            DW      26 ;sectors per track
-;            DB      3 ;block shift factor
-;            DB      7 ;block mask
-;            DB      0 ;null mask
-;            DW      242 ;disk size-1
-;            DW      63 ;directory max
-;            DB      192 ;alloc 0
-;            DB      0 ;alloc 1
-;            DW      16 ;check size
-;            DW      2 ;track offset            
-            
-            
             
         .DW 128 ;SPT - 128 bytes sectors per track (= 32 sectors of 512 bytes)
         .DB 5   ;BSH - block shift factor
@@ -3860,7 +3848,16 @@ DPBLK:               ;disk parameter block, common to all disks
         .DW 0   ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
         .DW 0   ;OFF - Reserved tracks            
             
- 
+;            DW      26 ;sectors per track
+;            DB      3 ;block shift factor
+;            DB      7 ;block mask
+;            DB      0 ;null mask
+;            DW      242 ;disk size-1
+;            DW      63 ;directory max
+;            DB      192 ;alloc 0
+;            DB      0 ;alloc 1
+;            DW      16 ;check size
+;            DW      2 ;track offset 
 ;	end of fixed tables
 ; 
 ;	individual subroutines to perform each function
@@ -4006,11 +4003,11 @@ HOME:                ;move to the track 00	position of current drive
             PUSH    B
             PUSH    D
             MVI     D, 01H    ; D - комманда HOME               
-            MVI     B, 00h   ; B - неиспользуеммые данные
+            MVI     B, 0C1h   ; B - неиспользуеммые данные
             CALL    SENDCMD
             MVI     A, 0 ;select track 0
             STA     track 
-            CALL    MINILOOP
+            CALL    WRITELOOP
             POP     D
             POP     B
             RET      ;we will move to 00 on first read/write
@@ -4018,7 +4015,7 @@ HOME:                ;move to the track 00	position of current drive
 SELDSK:              ;select disk given by register c
             PUSH    B
             PUSH    D
-            MVI     D, 02H    ; D - комманда               
+            MVI     D, 02h    ; D - комманда               
             MOV     B, C      ; CPM wants drive in C and 
             CALL    SENDCMD
             POP     D
@@ -4039,7 +4036,7 @@ SELDSK:              ;select disk given by register c
             DAD     h ;*16 (size of each header)
             LXI     d,dpbase 
             DAD     d ;hl=,dpbase (diskno*16)
-            CALL    MINILOOP
+            CALL    LOOP
             RET      
 ; 
 SETTRK:              ;set track given by register c
@@ -4047,14 +4044,17 @@ SETTRK:              ;set track given by register c
             CMP     C
             JZ      SETTRKSKIP
            
+            PUSH    B
+            PUSH    D
             MOV     a,c 
             STA     track 
             MVI     D, 04h    ; D - комманда             
             MOV     B, C      ; Пока ограничимся только 256 дорожками, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    MINILOOP
+            POP     D
+            POP     B
 SETTRKSKIP:
-
+            CALL    LOOP
             RET      
 ; 
 SETSEC:              ;set sector given by register c
@@ -4062,14 +4062,20 @@ SETSEC:              ;set sector given by register c
             LDA     SECTOR
             CMP     C
             JZ      SETSECSKIP
+                                ;set sector given by register c
+            
+            PUSH    B
+            PUSH    D
             MOV     a,c 
             STA     sector 
             MVI     D, 03h    ; D - комманда
             MOV     B, C      ; Пока ограничимся только 256 секторами, поэтому передаем 
             CALL    SENDCMD   ; только младший байт С
-            CALL    MINILOOP
-SETSECSKIP:
+            POP     D
+            POP     B
 
+SETSECSKIP:
+            CALL    WRITELOOP
             RET
 ; 
 ; 
@@ -4108,7 +4114,7 @@ READ:
             
             PUSH    B
             PUSH    D
-            MVI     B, 00h      ; B - данные которые мы хотим отправить накопителю  перед чтением
+            MVI     B, 0C0h      ; B - данные которые мы хотим отправить накопителю  перед чтением
             MVI     D, 00h      ; D - комманда  чтения (000)
             CALL    SENDCMD     ; Отправляем накопителю желание считать сектор
 
@@ -4163,7 +4169,9 @@ WAITSYNC2:
             INX     H
             JMP     READSECTOR
 RSEXIT:
-            CALL    MINILOOP
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
             POP     D
             POP     B
             MVI     A, 0h; Placeholder for error
@@ -4202,14 +4210,14 @@ SENDBYTE:                       ; BC содержит половинки, код
             MOV     A,C 
             INR     A           ; Поднимаем младший бит  чтобы диск проснулся
             OUT     04h         ; Выводим  младшую половину в порт
-            CALL    MINILOOP    ; app
+            CALL    WRITELOOP    ; app
             MVI     A,00h 
             OUT     04h         ; обнуляем порт 
-            CALL    MINILOOP
+            CALL    WRITELOOP
             MOV     A,B 
             INR     A           ; Поднимаем младший бит
             OUT     04h         ; Выводим  старшую половину в порт для для совместимости 
-            CALL    MINILOOP    ;app даже комманды без данных передаем в 2 такта
+            CALL    WRITELOOP    ;app даже комманды без данных передаем в 2 такта
             MVI     A,00h  
             OUT     04h         ; обнуляем порт
             CALL    LOOP
@@ -4220,27 +4228,15 @@ SENDBYTE:                       ; BC содержит половинки, код
 
 
 
-INIT8255OUT:                
-            MVI     A, 80h
-            OUT     07H 
-            RET      
-            
-INIT8255IN:                
-            MVI     A,90h 
-            OUT     07h 
-            RET  
-
-
-
-
 ; 
 WRITE:                          ;perform a write operation
                                 ; Адрес начала сектора в DMA
 
             PUSH    B
             PUSH    D
+            PUSH    H
             MVI     D, 07h      ; Команда записи
-            MVI     B, 0AAh     ; Просто шахматк
+            MVI     B, 0C7h     ; Просто шахматка
             CALL    SENDCMD     ; Отправляем команду WRITE
 
             LHLD    DMAAD       ; Старт DMA
@@ -4249,9 +4245,7 @@ WRITE:                          ;perform a write operation
 WRITESECTOR:
             MVI     A, 00h      ; WRITEZERRO:
             OUT     04h         ; Устанавливаем 0 в порт для синхронизации
-            CALL    WRITELOOP    ; Ждем немного
-
-
+            CALL    WRITELOOP        ; Ждем немного
             MOV     C, M        ; Загружаем в С данные для передачи
             MVI     A, 0Fh      ; 00001111
             ANA     C           ; Отбрасываем старшую часть для получения 4L
@@ -4282,14 +4276,25 @@ WRITESECTOR:
             INX     H           ; Нет, берем следующий адрес
             JMP     WRITESECTOR ; Прыгаем в начало отправки байта
 WSEXIT:
-            CALL    WRITELOOP
+            MVI     A, 00h      ; WRITEZERRO
+            OUT     04h         ; Устанавливаем 0 в порт для синхронизации
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
+            CALL    LOOP
+            POP     H    
             POP     D
             POP     B
             MVI     A, 0h       ; Placeholder for error
+WAITIO:
             RET
 
+
 WRITELOOP:  PUSH    D
-            MVI     D, 0A0h ; delay a little FF!
+            MVI     D, 030h ; delay a little FF! C0
 WRITELOOP2: 
             NOP
             DCR     D ;decrement counter
@@ -4305,11 +4310,9 @@ MEMINIT:
 
 LOOP:       PUSH    D
             MVI     D, 0FFh ;delay a little FF!
-LOOP2:      NOP
-            NOP
-            NOP
-            NOP
-            NOP
+LOOP2:      
+            XTHL
+            XTHL
             DCR     D ;decrement counter
             JNZ     LOOP2 
             POP     D
@@ -4349,7 +4352,16 @@ TXTOUT:     CALL    WAITOUT
             INX     H 
             JMP     TXTOUT 
 
-           
+INIT8255IN:                
+            MVI     A,90h 
+            OUT     07h 
+            RET  
+
+INIT8255OUT:                
+            MVI     A, 80h
+            OUT     07H 
+            RET       
+ 
             END
 
 ;	the remainder of the cbios is reserved uninitialized
