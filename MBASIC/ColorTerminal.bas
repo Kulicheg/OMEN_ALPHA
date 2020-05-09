@@ -1,0 +1,7 @@
+10 DEF FN AT$ (X,Y) = CHR$(27) + "[" + MID$(STR$(Y),2) + ";" + MID$(STR$(X),2) + "H"
+20 DEF FN ATR$ (ATR) = CHR$(27) + "[" + MID$(STR$(ATR),2) + "m"
+100 PRINT FN AT$(10,5) + "*"
+110 FOR Q = 1 TO 500
+115 PRINT FN ATR$(INT(RND*7)+30)
+120 PRINT FN AT$(INT(RND*80), INT(RND*24)) + "*"
+130 NEXT Q
