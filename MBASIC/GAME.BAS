@@ -1,10 +1,8 @@
-10 DEF FN AT$(X,Y)      = CHR$(27) + "[" + MID$(STR$(Y),2) + ";" + MID$(STR$(X),
-2) + "H"
+10 DEF FN AT$(X,Y)      = CHR$(27) + "[" + MID$(STR$(Y),2) + ";" + MID$(STR$(X),2) + "H"
 20 DEF FN ATR$ (ATR)    = CHR$(27) + "[" + MID$(STR$(ATR),2) + "m"
 30 DEF FN CLS$ (DUMMY)  = CHR$(27) + "c"
 40 DEF FN HOME$ (DUMMY) = CHR$(27) + "[H"
-50 DEF FN RST$ (DUMMY)  = CHR$(27) + "[2J" + CHR$(27) + "[H" + CHR$(27) + "[40;3
-2;0m"
+50 DEF FN RST$ (DUMMY)  = CHR$(27) + "[2J" + CHR$(27) + "[H" + CHR$(27) + "[40;32;0m"
 80 XCHAR = 40:YCHAR= 12
 90 PRINT FN CLS$(0);
 100 PRINT FN ATR$(1);
