@@ -4015,6 +4015,7 @@ HOME:                ;move to the track 00	position of current drive
 SELDSK:              ;select disk given by register c
             PUSH    B
             PUSH    D
+            CALL    LOOP
             MVI     D, 02h    ; D - комманда               
             MOV     B, C      ; CPM wants drive in C and 
             CALL    SENDCMD
@@ -4036,7 +4037,7 @@ SELDSK:              ;select disk given by register c
             DAD     h ;*16 (size of each header)
             LXI     d,dpbase 
             DAD     d ;hl=,dpbase (diskno*16)
-            CALL    LOOP
+            CALL    WRITELOOP
             RET      
 ; 
 SETTRK:              ;set track given by register c
@@ -4054,7 +4055,7 @@ SETTRK:              ;set track given by register c
             POP     D
             POP     B
 SETTRKSKIP:
-            CALL    LOOP
+            CALL    WRITELOOP
             RET      
 ; 
 SETSEC:              ;set sector given by register c
@@ -4170,8 +4171,7 @@ WAITSYNC2:
             JMP     READSECTOR
 RSEXIT:
             CALL    LOOP
-            CALL    LOOP
-            CALL    LOOP
+
             POP     D
             POP     B
             MVI     A, 0h; Placeholder for error
@@ -4294,7 +4294,7 @@ WAITIO:
 
 
 WRITELOOP:  PUSH    D
-            MVI     D, 030h ; delay a little FF! C0
+            MVI     D, 030h ; delay a little FF! 28
 WRITELOOP2: 
             NOP
             DCR     D ;decrement counter
@@ -4310,7 +4310,8 @@ MEMINIT:
 
 LOOP:       PUSH    D
             MVI     D, 0FFh ;delay a little FF!
-LOOP2:      
+LOOP2:
+            NOP
             XTHL
             XTHL
             DCR     D ;decrement counter
@@ -4318,24 +4319,7 @@ LOOP2:
             POP     D
             RET
 
-MINILOOP:   PUSH    D
-            MVI     D, 0FFh ; delay a little FF!
-MINILOOP2:  NOP
-            NOP
-            NOP
-            DCR     D ;decrement counter
-            JNZ     MINILOOP2 
-            POP     D
-            RET
-            
 
-BYTEOUT:    
-                            ; ВХОД C  - Байт для вывода
-            CALL    WAITOUT ; Выход A - Отправленный байт
-            MOV     A, C
-            OUT     0DFh 
-            RET
-            
 
 ACIAINIT:   MVI     A, 15h ;ACIA init (21) 115200-8-N-1
             OUT     0DEh 
@@ -4361,7 +4345,7 @@ INIT8255OUT:
             MVI     A, 80h
             OUT     07H 
             RET       
- 
+
             END
 
 ;	the remainder of the cbios is reserved uninitialized
