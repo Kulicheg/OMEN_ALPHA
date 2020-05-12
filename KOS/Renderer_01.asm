@@ -2,11 +2,11 @@
 VMSTRT  EQU     0F300h                  ; Video memory
 
 
-            CALL    RENDERBW
-            
-            
-            
-            
+
+            MVI     B, 100
+START:      CALL    RENDERBW
+            DCR     B
+            JNZ     START
             JMP     0000h
 
 
@@ -16,7 +16,7 @@ RENDERBW:                               ; Rener B/W VMEM
             PUSH    D
             PUSH    H
             MVI     B, 050h             ; 80 ширина экрана
-            MVI     D, 019h             ; 25 высота экрана
+            MVI     D, 018h             ; 24 высота экрана
             LXI     H, VMSTRT
 
 WAITOUT1:   IN      0DEh                    ; STATUS Register
@@ -28,22 +28,32 @@ WAITOUT1:   IN      0DEh                    ; STATUS Register
 WAITOUT2:   IN      0DEh                    ; STATUS Register
             ANI     02h 
             JZ      WAITOUT2 
-            MVI     A, "c"
+            MVI     A, "["
             OUT     0DFh 
-RNDR:
-            MOV     C, M
-           
+            
+            
 WAITOUT3:   IN      0DEh                    ; STATUS Register
             ANI     02h 
             JZ      WAITOUT3 
+            MVI     A, "H"
+            OUT     0DFh             
+            
+RNDR:
+            MOV     C, M
+           
+WAITOUT4:   IN      0DEh                    ; STATUS Register
+            ANI     02h 
+            JZ      WAITOUT4
             MOV     A, C
             OUT     0DFh 
             
             INX     H
             DCR     B
             JNZ     RNDR
-            ;DCR     D
-            ;JNZ     RNDR
+            DCR     D
+            MVI     B, 050h             ; 80 ширина экрана
+            JNZ     RNDR
+
 
             POP     H
             POP     D
@@ -112,13 +122,30 @@ TXTOUT2:
 
 
 
-            .ORG    VMSTRT - 2
-DB  1Bh, "c"            
-DB "There are significant differences between the 5.0 release of BASIC-80 and the previous releases (release 4.51 and earlier). If you have programs written under a previous release of BASIC-80, check Appendix A for new features in 5.0 that may affect execution. "
-DB "There are significant differences between the 5.0 release of BASIC-80 and the previous releases (release 4.51 and earlier). If you have programs written under a previous release of BASIC-80, check Appendix A for new features in 5.0 that may affect execution. "
-DB "There are significant differences between the 5.0 release of BASIC-80 and the previous releases (release 4.51 and earlier). If you have programs written under a previous release of BASIC-80, check Appendix A for new features in 5.0 that may affect execution. "
-DB "                                                                                                                                                                                                                                                                   "
-DB "                                                                                                                                                                                                                                                                   "
-DB "                                                                                                                                                                                                                                                                   "
-DB "                                                                                                                                                                                                                                                                   "
-DB "                                                                                                                                                                                                                                                                   "
+            .ORG    VMSTRT
+
+;DB "There are significant differences between the 5.0 release of BASIC-80 and the pr"
+;DB "evious releases (release 4.51 and earlier). If you have programs written under a"
+;DB "previous release of BASIC-80, check Appendix A for new features in 5.0 that may "
+;DB "affect execution.   0 1 2 3 4 5 6 7 8 9 0 A B C D E F G H                      !"
+;DB "There are significant differences between the 5.0 release of BASIC-80 and the pr"
+;DB "evious releases (release 4.51 and earlier). If you have programs written under a"
+;DB "previous release of BASIC-80, check Appendix A for new features in 5.0 that may "
+;DB "affect execution.   0 1 2 3 4 5 6 7 8 9 0 A B C D E F G H                      !"
+;DB "There are significant differences between the 5.0 release of BASIC-80 and the pr"
+;DB "evious releases (release 4.51 and earlier). If you have programs written under a"
+;DB "previous release of BASIC-80, check Appendix A for new features in 5.0 that may "
+;DB "affect execution.   0 1 2 3 4 5 6 7 8 9 0 A B C D E F G H                      !"
+;DB "There are significant differences between the 5.0 release of BASIC-80 and the pr"
+;DB "evious releases (release 4.51 and earlier). If you have programs written under a"
+;DB "previous release of BASIC-80, check Appendix A for new features in 5.0 that may "
+;DB "affect execution.   0 1 2 3 4 5 6 7 8 9 0 A B C D E F G H                      !"
+;DB "There are significant differences between the 5.0 release of BASIC-80 and the pr"
+;DB "evious releases (release 4.51 and earlier). If you have programs written under a"
+;DB "previous release of BASIC-80, check Appendix A for new features in 5.0 that may "
+;DB "affect execution.   0 1 2 3 4 5 6 7 8 9 0 A B C D E F G H                      !"
+;DB "There are significant differences between the 5.0 release of BASIC-80 and the pr"
+;DB "evious releases (release 4.51 and earlier). If you have programs written under a"
+;DB "previous release of BASIC-80, check Appendix A for new features in 5.0 that may "
+;DB "ffect execution.   0 1 2 3 4 5 6 7 8 9 0 A B C D E F G H                       !"
+;DB "11111222223333344444555556666677777888889999900000AAAAABBBBBCCCCCDDDDDEEEEEFFFFF"
