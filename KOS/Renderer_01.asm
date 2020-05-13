@@ -3,7 +3,9 @@ VMSTRT  EQU     0F300h                  ; Video memory
 
 
 
+            CALL    CLEARMEM
             MVI     B, 100
+            
 START:      CALL    RENDERBW
             DCR     B
             JNZ     START
@@ -92,29 +94,29 @@ TXTOUT2:
             POP     H
             RET
 
- ;, 1Bh, "[H"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+CLEARMEM:            ;Clear memory from RAMSTART to RAMEND with 00h
+            PUSH    B
+            PUSH    H
+            
+            LXI     H, VMSTRT 
+            LXI     B, VMSTRT + 1920
+            
+CLEARMEM2:  MVI     M, " " 
+; 
+            MOV     A, B               ;RAMEND(H)
+            INX     H 
+            XRA     H 
+            JNZ     CLEARMEM2 
+            MOV     A, C                 ;RAMEND(L)
+            XRA     L 
+            JNZ     CLEARMEM2 
+            MVI     M, " " 
+            
+            POP     H
+            POP     B
+            
+            RET      
+; 
 
 
 
