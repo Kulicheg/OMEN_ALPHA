@@ -3842,7 +3842,7 @@ DPBLK:               ;disk parameter block, common to all disks
         .DB 31  ;BLM - block mask
         .DB 1   ;EXM - Extent mask
         .DW 2047 ;DSM - Storage size (blocks - 1)
-        .DW 511 ;DRM - Number of directory entries - 1
+        .DW 255 ;DRM - Number of directory entries - 1
         .DB 240 ;AL0 - 1 bit set per directory block
         .DB 0   ;AL1 -            "
         .DW 0   ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
