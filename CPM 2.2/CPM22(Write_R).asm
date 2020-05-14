@@ -15,8 +15,8 @@
 CCP         EQU     0DC00h       ;base of ccp
 BDOS        EQU     0E400h       ;base of bdos
 BIOS        EQU     0F200h       ;base of bios
-CDISK       EQU     00004h ;current disk number 0=a,... l5=p
-IOBYTE      EQU     00003h ;intel i/o byte
+CDRIVE       EQU     00004h ;current disk number 0=a,... l5=p
+IOBYTE      EQU     00003h ;  i/o byte
 
 
 ;   Set memory limit here. This is the amount of contigeous
@@ -50,14 +50,8 @@ DEL	EQU	7FH	;rubout
 ;
 NSECTS      EQU 31h ;warm start sector count
 
-            ;.ORG     0000h
-            ;JMP     WBOOT
-        
-            ;DB 00, 00
 
-            ;.ORG     0005h
-            ;JMP     BDOS
-
+            
                             ;   Set origin for CP/M
 	    .ORG	CCP
 
@@ -3866,28 +3860,23 @@ BOOT:                ;simplest case is to just perform parameter initialization
             DI
             XRA     a ;zero in the accum
             STA     iobyte ;clear the iobyte
-            STA     cdisk ;select disk zero
+            STA     CDRIVE ;select disk zero
             JMP     gocpm ;initialize and go to cp/m
 ; 
 WBOOT:                  ;simplest case is to read the disk until all sectors loaded
             DI          ;!!!!!
             OUT     20h
-            JMP     7FE0h
+            ;JMP     7FE0h
 
 STARTADR        EQU     06700h
 TARGTADR        EQU     0DC00h
 ENDADR			EQU		07FFFh
 LNG             EQU     01900h
 
-
-
-            LXI     SP, 0DEFFh ;use space below buffer for stack !!!!!
             LXI     H, STARTADR
             LXI     D, TARGTADR
             LXI     B, LNG
-
-       
-            OUT 20h
+            
 LOADER:
             MOV     A, M
             INX     H
@@ -3902,16 +3891,13 @@ LOADER:
             MVI     A, 00
             CMP     C
             JNZ     LOADER
+            JMP     0F4A0h 
             
-            OUT     20h
 
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
            
-            XRA     a ;zero in the accum !!!!! DEBUG 1 DRIVE
-            STA     iobyte ;clear the iobyte
-            STA     cdisk ;select disk zero
-
+            
             MVI     a,0C3h ;c3 is a jmp instruction
             STA     0000h ;for jmp to wboot
             STA     0005h ;for jmp to bdos
@@ -3926,8 +3912,8 @@ GOCPM:
             CALL    setdma 
 ; 
             ;EI       ;enable the interrupt system !!!!!
-            LDA     cdisk ;get current disk number
-            MOV     c,a ;send to the ccp
+            LDA     CDRIVE ;get current disk number
+            MOV     c, a ;send to the ccp
             
             JMP     ccp ;go to cp/m for further processing
 
