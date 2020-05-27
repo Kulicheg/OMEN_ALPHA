@@ -43,7 +43,7 @@
 ROM			.EQU	 0x0000
 DRAM		.EQU	 0xEFA0			;start of RAM
 
-TBASIC		.EQU	0x1200			;Starting address of TinyBASiC
+TBASIC		.EQU	0x3900			;Starting address of TinyBASiC
 IBASIC		.EQU	0x1100			;Starting address of IMSAI 9K BASiC
 
 ENBL_PIO	.EQU	1				;"1" to enable i8255 I/O routines
@@ -462,7 +462,7 @@ JUMP:		CALL	CALC8 			;Get BASIC version, A holds #
 JUMP1:		LDA     TBASIC			;Fetch 1st OPcode from ROM
 			CPI     0x31			;1st OPcode is an LXI SP?
 			JNZ     JUMP9			;No match, restart monitor
-			LDA     TBASIC+4		;Fetch 4th OPcode from ROM
+			LDA     TBASIC+3		;Fetch 4th OPcode from ROM
 			CPI     0x3E			;4th OPcode is an MVI?
 			JNZ     JUMP9			;No match, restart monitor
 ;			LXI		H,JUMPM			;Send CAPS lock message
