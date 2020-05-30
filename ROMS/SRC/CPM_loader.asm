@@ -23,4 +23,4 @@ LOADER:
             MVI     A, 00
             CMP     C
             JNZ     LOADER
-            JMP     0F4A0h 
+            JMP     0F200h 
