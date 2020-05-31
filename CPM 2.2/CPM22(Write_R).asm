@@ -15,14 +15,13 @@
 CCP         EQU     0DC00h       ;base of ccp
 BDOS        EQU     0E400h       ;base of bdos
 BIOS        EQU     0F200h       ;base of bios
-CDRIVE       EQU     00004h ;current disk number 0=a,... l5=p
 IOBYTE      EQU     00003h ;  i/o byte
 
 
-;   Set memory limit here. This is the amount of contigeous
+;Set memory limit here. This is the amount of contigeous
 ; ram starting from 0000. CP/M will reside at the end of this space.
 ;
-MEM	EQU	62	;for a 62k system (TS802 TEST - WORKS OK).
+
 ;
 TDRIVE	EQU	0004h	;current drive name and user number.
 ENTRY	EQU	0005h	;entry point for the cp/m bdos.
@@ -48,10 +47,6 @@ CNTRLX	EQU	18H	;control-x
 CNTRLZ	EQU	1AH	;control-z (end-of-file mark)
 DEL	EQU	7FH	;rubout
 ;
-NSECTS      EQU 31h ;warm start sector count
-
-
-            
                             ;   Set origin for CP/M
 	    .ORG	CCP
 
@@ -3762,17 +3757,8 @@ SECTRAN1	JMP	SECTRAN
 
 ;	skeletal cbios for first level of CP/M 2.0 alteration
 ; 
-MSIZE       EQU     62 ;cp/m version memory size in kilobytes
-; 
-;	"bias" is address offset from 3400h for memory systems
-;	than 16k (referred to as"b" throughout the text)
-; 
-BIAS        EQU     (msize-20)*1024 
 
- 
             .ORG    BIOS ;origin of this program
-            
-            
 
 ; 
 ;	jump vector for individual subroutines
@@ -3891,7 +3877,10 @@ LOADER:
             MVI     A, 00
             CMP     C
             JNZ     LOADER
-            JMP     0F4A0h 
+            MVI     A, 0FFh
+            OUT     20h
+            
+            ;JMP     0F4A0h 
             
 
 ;	end of	load operation, set parameters and go to cp/m
@@ -4280,7 +4269,7 @@ WAITIO:
 
 
 WRITELOOP:  PUSH    D
-            MVI     D, 030h ; delay a little FF! 28
+            MVI     D, 060h ; delay a little FF! 28
 WRITELOOP2: 
             NOP
             DCR     D ;decrement counter
@@ -4298,6 +4287,8 @@ LOOP:       PUSH    D
             MVI     D, 0FFh ;delay a little FF!
 LOOP2:
             NOP
+            XTHL
+            XTHL
             XTHL
             XTHL
             DCR     D ;decrement counter
