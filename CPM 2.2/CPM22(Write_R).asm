@@ -11,7 +11,7 @@
 ;
 ;       BIOS EQUES
 
-
+OSSIZE      EQU     TOPSIZE - CCP; 018D0h
 CCP         EQU     0DC00h       ;base of ccp
 BDOS        EQU     0E400h       ;base of bdos
 BIOS        EQU     0F200h       ;base of bios
@@ -3850,14 +3850,12 @@ BOOT:                ;simplest case is to just perform parameter initialization
             JMP     gocpm ;initialize and go to cp/m
 ; 
 WBOOT:                  ;simplest case is to read the disk until all sectors loaded
-            DI          ;!!!!!
             OUT     20h
-            ;JMP     7FE0h
 
 STARTADR        EQU     06700h
 TARGTADR        EQU     0DC00h
 ENDADR			EQU		07FFFh
-LNG             EQU     01900h
+LNG             EQU     OSSIZE
 
             LXI     H, STARTADR
             LXI     D, TARGTADR
@@ -3877,11 +3875,10 @@ LOADER:
             MVI     A, 00
             CMP     C
             JNZ     LOADER
+            JMP     BOOT
             MVI     A, 0FFh
             OUT     20h
-            
-            ;JMP     0F4A0h 
-            
+            JMP     BOOT ; HACK
 
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
@@ -4291,6 +4288,8 @@ LOOP2:
             XTHL
             XTHL
             XTHL
+            XTHL
+            XTHL
             DCR     D ;decrement counter
             JNZ     LOOP2 
             POP     D
@@ -4323,7 +4322,7 @@ INIT8255OUT:
             OUT     07H 
             RET       
 
-            END
+TOPSIZE:    END
 
 ;	the remainder of the cbios is reserved uninitialized
 ;	data area, and does not need to be a Part of the
