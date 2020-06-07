@@ -72,7 +72,7 @@ byte getByte ()
 
   while (databits != 0)
   {
-    delayMicroseconds (10);
+    delayMicroseconds (20);
 
     portc = PINC;
     portc = portc & B00111111;              // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
@@ -108,7 +108,7 @@ byte getByte ()
 
   while (databits != 0)
   {
-    delayMicroseconds (10);
+    delayMicroseconds (20);
 
     portc = PINC;
     portc = portc & B00111111;              // Двигаем данные с порта на 2 позиции влево там биты 01 - 07
@@ -400,8 +400,8 @@ void loop()
       WRITE();
       break;
   }
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+ // pinMode(LED_BUILTIN, OUTPUT);
+ // digitalWrite(LED_BUILTIN, HIGH);
 
   command = 0xFF;
 }
