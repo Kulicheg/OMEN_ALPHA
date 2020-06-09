@@ -3821,7 +3821,7 @@ DPBLK:               ;disk parameter block, common to all disks
         .DB 5   ;BSH - block shift factor
         .DB 31  ;BLM - block mask
         .DB 1   ;EXM - Extent mask
-        .DW 2047 ;DSM - Storage size (blocks - 1)
+        .DW 4096 ;DSM - Storage size (blocks - 1) !!!!!!!!!!!!!!!1 2047
         .DW 255 ;DRM - Number of directory entries - 1
         .DB 240 ;AL0 - 1 bit set per directory block
         .DB 0   ;AL1 -            "
@@ -4217,7 +4217,7 @@ WRITE:                          ;perform a write operation
 WRITESECTOR:
             MVI     A, 00h      ; WRITEZERRO:
             OUT     04h         ; Устанавливаем 0 в порт для синхронизации
-            CALL    WRITELOOP        ; Ждем немного
+            CALL    WRITELOOPA        ; Ждем немного
             MOV     C, M        ; Загружаем в С данные для передачи
             MVI     A, 0Fh      ; 00001111
             ANA     C           ; Отбрасываем старшую часть для получения 4L
@@ -4227,11 +4227,11 @@ WRITESECTOR:
             RLC                 ; Сдвигаем  4L влево
             INR     A           ; Прибавляем 1 к А чтобы синхронизировать даже 00h
             OUT     04h         ; Выводим в порт 04
-            CALL    WRITELOOP        ; Ждем немного
+            CALL    WRITELOOPA        ; Ждем немного
             
             MVI     A, 00h      ; WRITEZERRO
             OUT     04h         ; Устанавливаем 0 в порт для синхронизации
-            CALL    WRITELOOP    ; Ждем немного
+            CALL    WRITELOOPA    ; Ждем немного
             
             
             MOV     C, M        ; Загружаем в С данные для передачи
@@ -4240,11 +4240,11 @@ WRITESECTOR:
          
             INR     A           ; Прибавляем 1 к А чтобы синхронизировать даже 00h
             OUT     04h         ; Выводим в порт 04
-            CALL    WRITELOOP    ; Ждем немного
+            CALL    WRITELOOPA    ; Ждем немного
             
   
             DCR     D           ; Уменьшаем счетчик
-            JZ      wSEXIT      ; Сектор кончился, выходим.
+            JZ      WSEXIT      ; Сектор кончился, выходим.
             INX     H           ; Нет, берем следующий адрес
             JMP     WRITESECTOR ; Прыгаем в начало отправки байта
 WSEXIT:
@@ -4256,7 +4256,7 @@ WSEXIT:
             CALL    LOOP
             CALL    LOOP
             CALL    LOOP
-            CALL    LOOP
+;            CALL    LOOP
             POP     H    
             POP     D
             POP     B
@@ -4265,8 +4265,17 @@ WAITIO:
             RET
 
 
+WRITELOOPA:  PUSH    D
+            MVI     D, 033h ; delay a little FF! 40 20!
+WRITELOOPA2: 
+            NOP
+            DCR     D ;decrement counter
+            JNZ     WRITELOOPA2 
+            POP     D
+            RET            
+
 WRITELOOP:  PUSH    D
-            MVI     D, 060h ; delay a little FF! 28
+            MVI     D, 060h ; delay a little FF! 60
 WRITELOOP2: 
             NOP
             DCR     D ;decrement counter
