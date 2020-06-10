@@ -4283,12 +4283,6 @@ WRITELOOP2:
             POP     D
             RET            
 
-
-            .ORG 0F4A0h
-MEMINIT:
-            
-            JMP    BOOT
-
 LOOP:       PUSH    D
             MVI     D, 0FFh ;delay a little FF!
 LOOP2:
