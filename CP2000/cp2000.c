@@ -103,22 +103,12 @@ char **argv;
   CLS();
   AT(1, 1);
 
-  int i;
-  for (i = 1; i < argc; i++)
-  {
-    printf("Arg[");
-    printf("%u", i);
-    printf("]=");
-    printf(argv[i]);
-    printf("\n");
-  }
-
   if (argc < 2)
   {
     printf("No filename given.\n");
     exit();
   }
- 
+
   if ((fp1 = fopen(argv[1], "w")) == NULL)
   {
     printf("Can't open %s\n", argv[1]);
@@ -127,8 +117,11 @@ char **argv;
   }
   initb(document, '\0');
   ATRIB(7);
-  printf("        COPYPASTER 2000 Ready to PASTE! Press CTRL + C for SAVE and EXIT        \n");
+  printf("              COPYPASTER 2000 Ready to PASTE! Press CTRL + C for SAVE and EXIT \n");
+  AT(1, 1);
+  printf(argv[1]);
   ATRIB(0);
+  AT(1, 2);
   while (1)
   {
     if (curpos == 32000)
