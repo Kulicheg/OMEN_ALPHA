@@ -1,4 +1,3 @@
-
 #include "stdio.h"
 #define CTRL_C 0x03 /* control-C */
 #define CPMEOF 0x1a /* End of File signal (control-Z) */
@@ -6,10 +5,11 @@ char **fname;
 FILE *fp1;
 int cchar;
 char document[32002];
+char window[2000];
 unsigned curpos;
 int cursorX;
 int cursorY;
-
+int winpos;
 AT(X, Y)
 {
   putchar(27);
@@ -107,12 +107,10 @@ getchar1()
   if (c == 23)
   {
     cursorY--;
-   
   }
   if (c == 19)
   {
     cursorY++;
-   
   }
 
   if (c == 01)
@@ -122,6 +120,29 @@ getchar1()
   if (c == 04)
   {
     cursorX++;
+  }
+
+  if (c == 16) /*P*/
+  {
+    int q;
+    int w;
+
+    AT(1, 2);
+    for (q = 0; q < 1920; q++)
+    {
+      w = window[q];
+      if (w > 31)
+      {
+        putchar(w);
+      }
+      else
+      {
+        putchar(' ');
+      }
+    }
+
+    DRAWBAR();
+    AT(1, 2);
   }
 
   if (c == '\r')
@@ -154,15 +175,16 @@ char **argv;
   cursorX = 1;
   cursorY = 2;
 
-  DRAWBAR(0);
-
   if ((fp1 = fopen(argv[1], "w")) == NULL)
   {
     printf("Can't open %s\n", argv[1]);
     printf("\n");
     exit();
   }
+
   initb(document, '\0');
+  initb(window, '\0');
+  DRAWBAR(0);
   AT(1, 2);
 
   while (1)
@@ -183,6 +205,8 @@ char **argv;
       document[curpos] = cchar;
       curpos++;
       cursorX++;
+      winpos = (cursorY - 2) * 80 + cursorX - 2;
+      window[winpos] = cchar;
     }
   }
 }
