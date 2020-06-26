@@ -10,31 +10,8 @@ unsigned curpos;
 int cursorX;
 int cursorY;
 int winpos;
-AT(X, Y)
-{
-  putchar(27);
-  putchar('[');
-  putdec(Y);
-  putchar(';');
-  putdec(X);
-  putchar('H');
-}
-
-CLS()
-{
-  putchar(27);
-  putchar('[');
-  putchar('2');
-  putchar('J');
-}
-
-ATRIB(color)
-{
-  putchar(27);
-  putchar('[');
-  putdec(color);
-  putchar('m');
-}
+int curpage;
+#include "terminal.c"
 
 DRAWBAR(mode)
 {
@@ -44,7 +21,7 @@ DRAWBAR(mode)
   printf("Kulich Edit: ");
 
   int fnlen;
-  fnlen = 15 - strlen(fname);
+  fnlen = 13 - strlen(fname);
   printf(fname);
   int q;
   for (q = 0; q < fnlen; q++)
@@ -53,8 +30,8 @@ DRAWBAR(mode)
   }
 
   printf("Col:%2d", cursorX);
-  printf("  Lin:%2d", cursorY);
-  printf("                                      ");
+  printf(" Lin:%2d", cursorY);
+  printf("                                         ");
   ATRIB(0);
   AT(cursorX, cursorY);
 }
@@ -98,9 +75,59 @@ exit2:
   exit();
 }
 
+mem2file()
+{
+
+  int q;
+  int q2;
+  int positium;
+  int chr;
+  int stroka;
+  AT(1, 2);
+
+  for (stroka = 1; stroka < 25; stroka++)
+  {
+    positium = stroka * 80;
+    chr = window[positium];
+
+    while (chr == 0)
+    {
+      chr = window[positium];
+      positium--;
+    }
+
+    for (q = 0; q < positium - ((stroka - 1) * 80); q++)
+    {
+      int w;
+      w = window[(stroka - 1) * 80 + q];
+      if (w == 0)
+      {
+        w = 32;
+      }
+      document[(stroka - 1) * 80 + q + 2] = w;
+      putchar(w);
+    }
+    if (q < 80)
+    {
+      document[q + 1] = 13;
+      putchar(13);
+    }
+  }
+}
+
+drawmenu()
+{
+}
+
+update()
+{
+}
+
 getchar1()
 {
   char c;
+  int q;
+  int w;
   if ((c = bios(3)) == CTRL_C)
     sysexit();
 
@@ -124,34 +151,47 @@ getchar1()
 
   if (c == 16) /*P*/
   {
-    int q;
-    int w;
-
-    AT(1, 2);
-    for (q = 0; q < 1920; q++)
-    {
-      w = window[q];
-      if (w > 31)
-      {
-        putchar(w);
-      }
-      else
-      {
-        putchar(' ');
-      }
-    }
 
     DRAWBAR();
     AT(1, 2);
+    mem2file();
+  }
+
+  if (c == 9) /*I*/
+  {
+    CLS();
+    AT(1, 1);
+    for (q = 0; q < 1920; q++)
+    {
+      putchar(window[q]);
+    }
+    AT(1, 2);
+  }
+
+  if (c == 15) /*O*/
+  {
+    CLS();
+    AT(1, 1);
+    for (q = 0; q < 1920; q++)
+    {
+      putchar(document[q]);
+    }
+    AT(1, 2);
+  }
+  if (c == 21) /*U*/
+  {
+    CLS();
+    setmem(*document, 32002, 0);
+    setmem(*window, 1920, 46);
+
+    DRAWBAR(0);
+    AT(1, 2);
+    cursorX = 1;
+    cursorY = 2;
   }
 
   if (c == '\r')
   {
-    document[curpos] = '\r';
-    curpos++;
-    document[curpos] = '\n';
-    curpos++;
-
     cursorX = 1;
     cursorY++;
   }
@@ -182,27 +222,17 @@ char **argv;
     exit();
   }
 
-  initb(document, '\0');
-  initb(window, '\0');
   DRAWBAR(0);
   AT(1, 2);
 
   while (1)
   {
-    /*  DRAWBAR(1);*/
-    if (curpos == 32000)
-    {
-      printf(" Memory full. Exiting\n");
-      sysexit();
-    }
-
     cchar = getchar1();
 
     DRAWCUR();
     if (cchar > 31)
     {
       putchar(cchar);
-      document[curpos] = cchar;
       curpos++;
       cursorX++;
       winpos = (cursorY - 2) * 80 + cursorX - 2;
