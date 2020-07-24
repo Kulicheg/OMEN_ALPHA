@@ -14,6 +14,17 @@ unsigned maxPage;
 unsigned winpos;
 #include "terminal.c"
 #include "files.c"
+
+reDRAW(page)
+{
+    int q;
+    AT(1, 2);
+    for (q = 0; q < 1920; q++)
+    {
+        putchar(window[page * 1920 + q]);
+    }
+}
+
 DRAWBAR(mode)
 {
 
@@ -107,12 +118,11 @@ getchar1()
         AT(1, 2);
     }
 
-      if (c == 21) /*U*/
+    if (c == 21) /*U*/
     {
 
         DRAWBAR(0);
         AT(cursorX, cursorY);
-
     }
 
     if (c == 17) /*Q*/
@@ -123,6 +133,7 @@ getchar1()
             curPage = 0;
         }
         DRAWBAR(0);
+        reDRAW(curPage);
     }
 
     if (c == 5) /*E*/
@@ -133,6 +144,7 @@ getchar1()
             curPage = maxPage;
         }
         DRAWBAR(0);
+        reDRAW(curPage);
     }
 
     if (c == '\r')
@@ -140,7 +152,7 @@ getchar1()
         cursorX = 1;
         cursorY++;
     }
-
+    DRAWBAR(0);
     return c;
 }
 
@@ -172,7 +184,6 @@ char **argv;
 
     setmem(&window, WIN_SIZE, 32);
 
-
     window[8192] = 0; /* TEST*/
     DRAWBAR(0);
     AT(1, 2);
@@ -186,7 +197,7 @@ char **argv;
         {
             putchar(cchar);
             cursorX++;
-            winpos = (curPage * 1920 + ( cursorY - 1) * 80 + cursorX - 2) - 80;
+            winpos = (curPage * 1920 + (cursorY - 1) * 80 + cursorX - 2) - 80;
             window[winpos] = cchar;
         }
     }
