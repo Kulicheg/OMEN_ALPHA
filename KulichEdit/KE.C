@@ -10,7 +10,7 @@ char window[WIN_SIZE];
 int cursorX;
 int cursorY;
 int curPage;
-int maxPage;
+unsigned maxPage;
 unsigned winpos;
 #include "terminal.c"
 #include "files.c"
@@ -34,7 +34,8 @@ DRAWBAR(mode)
     printf(" Lin:%2d", cursorY);
     printf(" Page:%2d", curPage);
     printf(" of %2d", maxPage);
-    printf("                           ");
+    printf("  %4d", winpos);
+    printf("                     ");
     ATRIB(0);
     AT(cursorX, cursorY);
 }
@@ -55,9 +56,9 @@ DRAWCUR()
     {
         cursorY = 1;
     }
-    if (cursorY > 24)
+    if (cursorY > 26)
     {
-        cursorY = 24;
+        cursorY = 26;
     }
     AT(cursorX, cursorY);
 }
@@ -106,29 +107,12 @@ getchar1()
         AT(1, 2);
     }
 
-    if (c == 9) /*I*/
+      if (c == 21) /*U*/
     {
-        CLS();
-        AT(1, 1);
-        for (q = 0; q < 1920; q++)
-        {
-            char chr;
-            chr = window[q];
-            putchar(chr);
-        }
-        AT(1, 2);
-    }
-
-    if (c == 21) /*U*/
-    {
-
-        setmem(&window, 1920, 46);
 
         DRAWBAR(0);
-        AT(1, 2);
-        cursorX = 1;
-        cursorY = 2;
-        int a;
+        AT(cursorX, cursorY);
+
     }
 
     if (c == 17) /*Q*/
@@ -177,6 +161,7 @@ char **argv;
     fname = argv[1];
     cursorX = 1;
     cursorY = 2;
+    maxPage = 21;
 
     if ((fp1 = fopen(argv[1], "w")) == NULL)
     {
@@ -187,9 +172,8 @@ char **argv;
 
     setmem(&window, WIN_SIZE, 32);
 
-    maxPage = WIN_SIZE / 1920;
-    window[0] = 0;
-    window[2048] = 0; /* TEST*/
+
+    window[8192] = 0; /* TEST*/
     DRAWBAR(0);
     AT(1, 2);
 
@@ -202,7 +186,7 @@ char **argv;
         {
             putchar(cchar);
             cursorX++;
-            winpos = (cursorY - 2) * 80 + cursorX - 2;
+            winpos = (curPage * 1920 + ( cursorY - 1) * 80 + cursorX - 2) - 80;
             window[winpos] = cchar;
         }
     }
