@@ -12,7 +12,7 @@ int cursorY;
 int curPage;
 unsigned maxPage;
 unsigned winpos;
-#include "terminal.c"
+#include "term2.c"
 #include "files.c"
 
 reDRAW(page)
@@ -23,32 +23,49 @@ reDRAW(page)
     {
         putchar(window[page * 1920 + q]);
     }
+    AT(1, 2);
 }
 
 DRAWBAR(mode)
 {
-
-    AT(1, 1);
-    ATRIB(7);
-    printf("Kulich Edit: ");
-
-    int fnlen;
-    fnlen = 13 - strlen(fname);
-    printf(fname);
-    int q;
-    for (q = 0; q < fnlen; q++)
+    if (mode == 0)
     {
-        putchar(' ');
+        AT(1, 1);
+        ATRIB(7);
+        printf("Kulich Edit: ");
+
+        int fnlen;
+        fnlen = 13 - strlen(fname);
+        printf(fname);
+        int q;
+        for (q = 0; q < fnlen; q++)
+        {
+            putchar(' ');
+        }
+
+        printf("Col:%2d", cursorX);
+        printf(" Lin:%2d", cursorY);
+        printf(" Page:%2d", curPage);
+        printf(" of %2d", maxPage);
+        printf("                           ");
+        ATRIB(0);
+        AT(cursorX, cursorY);
+    }
+if (mode == 1)
+    {
+        AT(27, 1);
+        ATRIB(7);
+        printf("Col:%2d", cursorX);
+        printf(" Lin:%2d", cursorY);
+        printf(" Page:%2d", curPage);
+        printf(" of %2d", maxPage);
+        printf("     ");
+        ATRIB(0);
+        AT(cursorX, cursorY);
     }
 
-    printf("Col:%2d", cursorX);
-    printf(" Lin:%2d", cursorY);
-    printf(" Page:%2d", curPage);
-    printf(" of %2d", maxPage);
-    printf("  %4d", winpos);
-    printf("                     ");
-    ATRIB(0);
-    AT(cursorX, cursorY);
+
+
 }
 
 DRAWCUR()
@@ -63,9 +80,9 @@ DRAWCUR()
         cursorX = 1;
         cursorY++;
     }
-    if (cursorY < 1)
+    if (cursorY < 2)
     {
-        cursorY = 1;
+        cursorY = 2;
     }
     if (cursorY > 26)
     {
@@ -90,6 +107,8 @@ getchar1()
     char c;
     unsigned q;
     int w;
+    DRAWBAR(1);
+
     if ((c = bios(3)) == CTRL_C)
         sysexit();
 
@@ -114,7 +133,7 @@ getchar1()
     if (c == 16) /*P*/
     {
 
-        DRAWBAR();
+        DRAWBAR(1);
         AT(1, 2);
     }
 
@@ -132,7 +151,7 @@ getchar1()
         {
             curPage = 0;
         }
-        DRAWBAR(0);
+        DRAWBAR(1);
         reDRAW(curPage);
     }
 
@@ -143,7 +162,7 @@ getchar1()
         {
             curPage = maxPage;
         }
-        DRAWBAR(0);
+        DRAWBAR(1);
         reDRAW(curPage);
     }
 
@@ -152,7 +171,6 @@ getchar1()
         cursorX = 1;
         cursorY++;
     }
-    DRAWBAR(0);
     return c;
 }
 
@@ -197,7 +215,8 @@ char **argv;
         {
             putchar(cchar);
             cursorX++;
-            winpos = (curPage * 1920 + (cursorY - 1) * 80 + cursorX - 2) - 80;
+            winpos = (curPage * 1920 + (cursorY - 2) * 80 + cursorX - 2) - 80;
+
             window[winpos] = cchar;
         }
     }
