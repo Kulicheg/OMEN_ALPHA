@@ -1,38 +1,50 @@
 SAVING()
 {
-    unsigned q;
     char w;
-
+    unsigned q;
+    int e;
+    unsigned lineN;
+    int chrsav;
     AT(60, 1);
     ATRIB(0);
-    printf("Saving...           ");
+    printf("Saving...      ");
     ATRIB(0);
-
-    w = window[0];
-    q = 0;
-    while (w != 0)
+    CLS();
+    q = 79;
+    lineN = 0;
+    while (q + lineN < WIN_SIZE)
     {
-        fputc(w, fp1);
-        if (w == 13)
+        q = 79;
+        w = window[q + lineN];
+        while (w == 32)
         {
-            q++;
-            fputc(10, fp1);
+            q--;
+            w = window[q];
         }
         q++;
-        w = window[q];
-        if (q == WIN_SIZE)
+        for (e = 0; e < q; e++)
         {
-            w = 0;
-            AT(60, 1);
-            ATRIB(0);
-            printf("EOM reached         ");
-            ATRIB(0);
+            chrsav = window[e + lineN];
+            fputc(chrsav, fp1);
         }
+        if (chrsav == 0)
+        {
+            fclose(fp1);
+            AT(60, 1);
+            ATRIB(7);
+            printf("     0000       ");
+            ATRIB(0);
+            return;
+        }
+
+        fputc(13, fp1);
+        fputc(10, fp1);
+        lineN = lineN + 80;
     }
-    fclose(fp1);
 
     AT(60, 1);
     ATRIB(7);
-    printf("                    ");
+    printf("  EOM REACHED  ");
     ATRIB(0);
+    fclose(fp1);
 }
