@@ -3840,7 +3840,7 @@ DPBLK:               ;disk parameter block, common to all disks
 ;  os 2.2
 ;end
 
-
+;http://www.gaby.de/cpm/manuals/archive/cpm22htm/ch6.htm#Figure_6-2
 
 
 
