@@ -3820,23 +3820,36 @@ DPBLK:               ;disk parameter block, common to all disks
         .DB 05   ;BSH - block shift factor
         .DB 31   ;BLM - block mask
         .DB 1   ;EXM - Extent mask
-        .DW 2048 ;DSM - Storage size (blocks - 1)
+        .DW 1024 ;DSM - Storage size (blocks - 1)
         .DW 127  ;DRM - Number of directory entries - 1
         .DB 255  ;AL0 - 1 bit set per directory block
         .DB 0    ;AL1 -            "
         .DW 0    ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
         .DW 0    ;OFF - Reserved tracks            
             
-;            DW      26 ;sectors per track
-;            DB      3 ;block shift factor
-;            DB      7 ;block mask
-;            DB      0 ;null mask
-;            DW      242 ;disk size-1
-;            DW      63 ;directory max
-;            DB      192 ;alloc 0
-;            DB      0 ;alloc 1
-;            DW      16 ;check size
-;            DW      2 ;track offset 
+
+
+;diskdef default
+;  seclen 128
+;  tracks 255
+;  sectrk 128
+;  blocksize 4096
+;  maxdir 128
+;  skew 0
+;  boottrk 0
+;  os 2.2
+;end
+
+
+
+
+
+
+
+
+
+
+
 ;	end of fixed tables
 ; 
 ;	individual subroutines to perform each function
