@@ -3816,17 +3816,16 @@ TRANS:      DB      1,7,13,19 ;sectors  1,  2,  3,  4
 ; 
 
 DPBLK:               ;disk parameter block, common to all disks
-            
-        .DW 128 ;SPT - 128 bytes sectors per track (= 32 sectors of 512 bytes)
-        .DB 5   ;BSH - block shift factor
-        .DB 31  ;BLM - block mask
+        .DW 128  ;SPT - 128 bytes sectors per track (= 32 sectors of 512 bytes)
+        .DB 05   ;BSH - block shift factor
+        .DB 31   ;BLM - block mask
         .DB 1   ;EXM - Extent mask
-        .DW 4096 ;DSM - Storage size (blocks - 1) !!!!!!!!!!!!!!!1 2047
-        .DW 255 ;DRM - Number of directory entries - 1
-        .DB 240 ;AL0 - 1 bit set per directory block
-        .DB 0   ;AL1 -            "
-        .DW 0   ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
-        .DW 0   ;OFF - Reserved tracks            
+        .DW 2048 ;DSM - Storage size (blocks - 1)
+        .DW 127  ;DRM - Number of directory entries - 1
+        .DB 255  ;AL0 - 1 bit set per directory block
+        .DB 0    ;AL1 -            "
+        .DW 0    ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
+        .DW 0    ;OFF - Reserved tracks            
             
 ;            DW      26 ;sectors per track
 ;            DB      3 ;block shift factor
@@ -4256,7 +4255,7 @@ WSEXIT:
             CALL    LOOP
             CALL    LOOP
             CALL    LOOP
-;            CALL    LOOP
+            CALL    LOOP
             POP     H    
             POP     D
             POP     B
