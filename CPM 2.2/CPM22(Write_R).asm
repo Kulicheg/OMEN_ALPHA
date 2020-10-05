@@ -3822,7 +3822,7 @@ DPBLK:               ;disk parameter block, common to all disks
         .DB 31   ;BLM - block mask
         .DB 1   ;EXM - Extent mask
         .DW 1024 ;DSM - Storage size (blocks - 1)
-        .DW 127  ;DRM - Number of directory entries - 1
+        .DW 255  ;DRM - Number of directory entries - 1
         .DB 255  ;AL0 - 1 bit set per directory block
         .DB 0    ;AL1 -            "
         .DW 0    ;CKS - DIR check vector size (DRM+1)/4 (0=fixed disk)
@@ -4169,7 +4169,7 @@ SENDCMD:            ; B - данные
             
             CALL INIT8255OUT
  
-SENDCMD2:   PUSH    D
+            PUSH    D
            
             MOV     C,B ; в BC у нас 2 копии данных В-h C-l
             MVI     A,0F0h ; 11110000
@@ -4208,11 +4208,6 @@ SENDBYTE:                       ; BC содержит половинки, код
             CALL    LOOP
             POP     D
             RET
-
-
-
-
-
 ; 
 WRITE:                          ;perform a write operation
                                 ; Адрес начала сектора в DMA
@@ -4264,7 +4259,7 @@ WSEXIT:
             MVI     A, 00h      ; WRITEZERRO
             OUT     04h         ; Устанавливаем 0 в порт для синхронизации
             
-            MVI     D, 20h ; delay a little FF! 
+            MVI     D, 30h ; delay a little FF! 
 LOOP2W: 
             CALL    LOOP
     
