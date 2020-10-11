@@ -3720,47 +3720,14 @@ CKSUMTBL:DB	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 ;   Extra space ?
 ;
 	DB	0,0,0,0
-;
-;**************************************************************
-;*
-;*        B I O S   J U M P   T A B L E
-;*
-;**************************************************************
-;
-BOOT1	    JMP	BOOT	;NOTE WE USE FAKE DESTINATIONS
-WBOOT1	    JMP WBOOT
-CONST1	    JMP	CONST
-CONIN1	    JMP	CONIN
-CONOUT1	    JMP	CONOUT
-LIST1	    JMP	LIST
-PUNCH1	    JMP	PUNCH
-READER1	    JMP	READER
-HOME1	    JMP	HOME
-SELDSK1	    JMP	SELDSK
-SETTRK1	    JMP	SETTRK
-SETSEC1	    JMP	SETSEC
-SETDMA1	    JMP	SETDMA
-READ1	    JMP	READ
-WRITE1	    JMP	WRITE
-;PRSTAT1	    JMP	PRSTAT
-SECTRAN1	JMP	SECTRAN
-;
-;*
 ;******************   E N D   O F   C P / M   *****************
-;*
-
-
-
-
 
 
 ;******************** CP/M BIOS*********************************
 
 ;	skeletal cbios for first level of CP/M 2.0 alteration
 ; 
-
             .ORG    BIOS ;origin of this program
-
 ; 
 ;	jump vector for individual subroutines
 ; 
@@ -3835,7 +3802,7 @@ DPBLK:               ;disk parameter block, common to all disks
 ;  tracks 255
 ;  sectrk 128
 ;  blocksize 4096
-;  maxdir 128
+;  maxdir 256
 ;  skew 0
 ;  boottrk 0
 ;  os 2.2
@@ -3888,19 +3855,19 @@ LOADER:
             MVI     A, 00
             CMP     C
             JNZ     LOADER
-            JMP     BOOT
-            MVI     A, 0FFh
             OUT     20h
-            JMP     BOOT ; HACK
+
+
+
 
 ;	end of	load operation, set parameters and go to cp/m
 GOCPM:               
            
-            
+            LXI	SP, CCPSTACK
             MVI     a,0C3h ;c3 is a jmp instruction
             STA     0000h ;for jmp to wboot
             STA     0005h ;for jmp to bdos
-            LXI     h,wboote ;wboot entry point
+            LXI     h, wboote  ;wboot entry point
             SHLD    0001h ;set address field for jmp at 0
 
             LXI     h,bdos ;bdos entry point
@@ -3910,7 +3877,7 @@ GOCPM:
             LXI     B, TBUFF
             CALL    setdma 
 ; 
-            ;EI       ;enable the interrupt system !!!!!
+            EI       ;enable the interrupt system !!!!!
             LDA     CDRIVE ;get current disk number
             MOV     c, a ;send to the ccp
             
