@@ -1,0 +1,37 @@
+diskdef default
+  seclen 128
+  tracks 255
+  sectrk 128
+  blocksize 4096
+  maxdir 256
+  skew 0
+  boottrk 0
+  os 2.2
+end
+
+diskdef omen
+  seclen 128
+  tracks 255
+  sectrk 128
+  blocksize 4096
+  maxdir 256
+  skew 0
+  boottrk 0
+  os 2.2
+end
+
+
+
+
+
+
+diskdef defaultBad
+  seclen 128
+  tracks 512
+  sectrk 128
+  blocksize 4096
+  maxdir 255
+  skew 0
+  boottrk 0
+  os 2.2
+end
