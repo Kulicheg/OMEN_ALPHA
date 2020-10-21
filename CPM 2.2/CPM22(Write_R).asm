@@ -1,5 +1,3 @@
-
-
 ;**************************************************************
 ;*
 ;*             C P / M   version   2 . 2
@@ -12,24 +10,18 @@
 ;
 ;       BIOS EQUES
 
-OSSIZE      EQU     TOPSIZE - CCP; 018D0h
+OSSIZE      EQU     TOPSIZE - CCP;
 CCP         EQU     0DC00h       ;base of ccp
 BDOS        EQU     0E400h       ;base of bdos
 BIOS        EQU     0F200h       ;base of bios
-IOBYTE      EQU     00003h ;  i/o byte
+IOBYTE      EQU     00003h 	 ;  i/o byte
 
-
-;Set memory limit here. This is the amount of contigeous
-; ram starting from 0000. CP/M will reside at the end of this space.
-;
-
-;
 TDRIVE	EQU	0004h	;current drive name and user number.
 ENTRY	EQU	0005h	;entry point for the cp/m bdos.
 TFCB	EQU	005Ch	;default file control block.
 TBUFF	EQU	0080H	;i/o buffer and command line storage.
 TBASE	EQU	0100H	;transiant program storage area.
-DEFSTCK EQU 0080h
+DEFSTCK EQU 	0080h
 ;
 ;   Set control character equates.
 ;
@@ -52,7 +44,7 @@ DEL	EQU	7FH	;rubout
 	    .ORG	CCP
 
 CBASE:	    JMP	COMMAND	    ; execute command processor (ccp).
-	        JMP	CLEARBUF	; entry to empty input buffer before starting ccp.
+	    JMP	CLEARBUF	; entry to empty input buffer before starting ccp.
                             ; Standard cp/m ccp input buffer. Format is (max length),
 ; (actual length), (char #1), (char #2), (char #3), etc.
 ;
