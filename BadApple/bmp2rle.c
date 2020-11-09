@@ -1,6 +1,3 @@
-// BMP2RLE-K.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
-
 #include <iostream>
 #include <stdio.h>
 
@@ -9,6 +6,7 @@ bool bitBuffer[768];
 
 FILE* finput;
 FILE* foutput;
+
 
 void rleCompress()
 {
@@ -44,13 +42,11 @@ void rleCompress()
 		fputc(counter, foutput);
 		counter = 1;
 		pos++;
-	}
+	}	fputc(00, foutput);
+	
 	fclose(foutput);
 
 }
-
-
-
 
 void fillBuffer()
 {
