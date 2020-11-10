@@ -1,23 +1,20 @@
             .ORG 9000h
 
-            
             ;CALL    HOMESCR
             LXI     H, 9500h
             
 START:
+            MVI     B, 32           ; Длинна строки
             MOV     A, M
             ORA     A
             JZ      NEXTFR
-            
-            
-            
-            
             CALL    BYTE2DOTS
+            INX     H
+            JP      START            
             
 NEXTFR:
-            CALL    HOMESCR
-            INX     H
-            JMP     START
+            
+            JMP     NEXTFR
 
 
 
@@ -45,17 +42,23 @@ BYTE2DOTS:
             DCR     D               ;  Если результат  стал 0, рисуем точку
             JZ      DRAWDOT
 DRAWSPC:
-            MVI     C, 020h         ; " "
-            CALL    CONOUT2         ; Печатаем  " "
+            MVI     C, 02Eh         ; ".."
+            CALL    CONOUT2         ; Печатаем  ".."
+            DCR     B
+            CZ      NEWLNSCR
             DCR     E
             JNZ     DRAWSPC
             JMP     DRWEXIT
 DRAWDOT:    
             MVI     C, 02Ah         ; "*"
             CALL    CONOUT2         ; Печатаем  "**"
+            DCR     B
+            CZ      NEWLNSCR
             DCR     E
             JNZ     DRAWDOT
+            
 DRWEXIT:    
+            
             POP     D
             POP     B
             POP     H
@@ -113,6 +116,7 @@ NEWLNSCR:
             MVI     C, 0Dh          ; "LINE FEED"            
             CALL    CONOUT            
             POP     B
+            MVI     B, 32           ; Обнуляем  счетчик длинны
             RET
 
 
@@ -124,11 +128,4 @@ NEWLNSCR:
 
             .ORG 09500h
 DATAHERE:
-            DB      00
-            DB      255
-            DB      02
-            DB      129
-            DB      00h
-            
-
-            
+DB 0B6h, 001h, 09Eh, 003h, 09Dh, 005h, 099h, 008h, 097h, 009h, 097h, 009h, 096h, 00Bh, 095h, 000h
