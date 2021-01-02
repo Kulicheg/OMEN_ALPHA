@@ -1,5 +1,5 @@
             .ORG    0100h
-
+;128 sectors per track, 2 tracks to free.
 boot        EQU     0F200h   ;cold start
 wboot       EQU     0F203h   ;warm start
 const       EQU     0F206h   ;console status
@@ -18,6 +18,9 @@ write       EQU     0F22Ah   ;write disk
 listst      EQU     0F22Dh   ;return list status
 sectran     EQU     0F230h   ;sector translate
 STRT:
+            LXI     D, MSG1
+            MVI     C, 09h
+            CALL    5
             CALL    CLEARMEM
             MVI     C, 03h                  ;Disk D
             CALL    SELDSK
@@ -32,12 +35,14 @@ WRTRK:      MOV     C, B
 WRSECT:     PUSH    B
             CALL    SETSEC
             CALL    WRITE
+            CALL    DOT
             POP     B
             PUSH    B
             DCR     C
             JNZ     WRSECT
             CALL    SETSEC
             CALL    WRITE
+            CALL    DOT
             POP     B
             INR     B
             MOV     A, B
@@ -65,8 +70,16 @@ CLEARMEM2:  MVI     M, 0E5h
             MVI     M, 0E5h 
             POP     H
             POP     B
-            RET      
+            RET     
 
+DOT:
+            MVI     E, "."
+            MVI     C, 02h
+            CALL    5
+            RET
+
+MSG1:
+DB "Formating DISK D: $"
 BUFFER:
 DB            00
 
