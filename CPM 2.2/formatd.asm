@@ -28,9 +28,11 @@ STRT:
             CALL    SELDSK
             LXI     B, BUFFER
             CALL    SETDMA
-            MVI     C, 00h
-            CALL    SETTRK
           
+            MVI     C, 00h
+WRTRK:      MOV     C, B
+            CALL    SETTRK
+            MOV     B, C          
           
           
             MVI     C, 7Fh
@@ -38,12 +40,17 @@ WRSECT:     PUSH    B
             CALL    SETSEC
             CALL    WRITE
             POP     B
+            PUSH    B
             DCR     C
             JNZ     WRSECT
             CALL    SETSEC
             CALL    WRITE
+            POP     B
+            INR     B
+            JNZ     WRTRK
             
             RET                                    
+
 CLEARMEM:                                   ;Clear memory 
             PUSH    B
             PUSH    H
