@@ -17,24 +17,17 @@ read        EQU     0F227h   ;read disk
 write       EQU     0F22Ah   ;write disk
 listst      EQU     0F22Dh   ;return list status
 sectran     EQU     0F230h   ;sector translate
-
-
-
-;FORMAT_D    
 STRT:
-
             CALL    CLEARMEM
             MVI     C, 03h                  ;Disk D
             CALL    SELDSK
             LXI     B, BUFFER
             CALL    SETDMA
-          
             MVI     C, 00h
+            MOV     B, C
 WRTRK:      MOV     C, B
             CALL    SETTRK
             MOV     B, C          
-          
-          
             MVI     C, 7Fh
 WRSECT:     PUSH    B
             CALL    SETSEC
@@ -47,18 +40,21 @@ WRSECT:     PUSH    B
             CALL    WRITE
             POP     B
             INR     B
+            MOV     A, B
+            CPI     02h
             JNZ     WRTRK
             
-            RET                                    
-
+            LXI     D, 0h
+            MVI     C, 0h
+            CALL    5
+            
+                                                
 CLEARMEM:                                   ;Clear memory 
             PUSH    B
             PUSH    H
             LXI     H, BUFFER 
             LXI     B, BUFFER + 128
-
 CLEARMEM2:  MVI     M, 0E5h 
-
             MOV     A, B                    ;RAMEND(H)
             INX     H 
             XRA     H 
